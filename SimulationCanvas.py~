@@ -1,0 +1,20 @@
+###############################
+#
+# Simulation Canvas
+#
+# Won Yong Ha
+#
+#
+###############################
+
+import tkinter as tk
+
+def RootBuilding():
+    root = tk.Tk()
+    root.title("Warehouse Simulation")
+
+    canvas = tk.Canvas(root, width=500, height=500, bg='white')
+    canvas.pack()
+
+def RootLooping():
+    root.mainloop()
