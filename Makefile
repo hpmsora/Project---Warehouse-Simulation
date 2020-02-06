@@ -7,7 +7,7 @@ run:
 
 update: clean
 	$(G) add .
-	$(G) commit -m $cm
+	$(G) commit -m "$cm"
 	$(G) push
 
 clean:
