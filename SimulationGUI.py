@@ -34,4 +34,7 @@ class SimulationBoard(tk.Frame):
         
         self.canvas = tk.Canvas(self, width=canvas_width, height=canvas_height, background=self.background_color)
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
-        
+
+    # Basic grid building function
+    def GridBuilding(self):
+        pass
