@@ -11,7 +11,7 @@ import tkinter as tk
 
 class SimulationBoard(tk.Frame):
 
-    num_aisle = 2
+    num_aisles = 2
     num_rows = 5
     
     background_color = 'grey'
@@ -19,16 +19,16 @@ class SimulationBoard(tk.Frame):
 
     @property
     def canvas_size(self):
-        return (self.num_aisle * self.square_size, self.num_rows * self.square_size)
+        return (self.num_aisles * self.square_size, self.num_rows * self.square_size)
     
-    def __init__(self, _parent, num_aisle=2, num_rows=5, square_size=64):
+    def __init__(self, _parent, num_aisles=2, num_rows=5, square_size=64):
         self.parent = _parent
-        self.num_aisle = num_aisle
+        self.num_aisles = num_aisles
         self.num_rows = num_rows
         self.square_size = square_size
 
-        canvas_width = self.num_aisle * self.square_size
-        canvas_height = self.num_rows * self.square_size
+        canvas_width = 3*self.num_aisles * self.square_size
+        canvas_height = (self.num_rows+2) * self.square_size
 
         tk.Frame.__init__(self, _parent)
         
@@ -37,4 +37,18 @@ class SimulationBoard(tk.Frame):
 
     # Basic grid building function
     def GridBuilding(self):
-        pass
+        list_aisles = range(0, 3*self.num_aisles)
+        list_rows = range(0, self.num_rows+2)
+        for each_index_rows, each_name_rows in enumerate(list_rows):
+            for each_index_aisles, each_name_aisles in enumerate(list_aisles):
+                tag = each_name_aisles + each_name_rows
+                if not(each_index_rows == 0 or each_index_rows == self.num_rows+1) and (each_index_aisles % 3 == 0 or each_index_aisles % 3 == 2):
+                    self.canvas.create_rectangle(
+                        each_index_aisles*self.square_size, each_index_rows*self.square_size,
+                        (each_index_aisles+1)*self.square_size, (each_index_rows+1)*self.square_size,
+                        outline="black", fill="black", tag=tag)
+                else:
+                    self.canvas.create_rectangle(
+                        each_index_aisles*self.square_size, each_index_rows*self.square_size,
+                        (each_index_aisles+1)*self.square_size, (each_index_rows+1)*self.square_size,
+                        outline="black", fill="", tag=tag)
