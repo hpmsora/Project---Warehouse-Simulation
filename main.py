@@ -28,6 +28,7 @@ def Display_SimulationBoard():
     Board = sgui.SimulationBoard(root, num_aisles=NUM_AISLE, num_rows=NUM_ROWS, square_size=SQUARE_SIZE)
     Board.GridBuilding(warehouse_type = 'basic')
     Board.DepotBuilding()
+    Board.AGVDepotBuilding()
     
     Board.pack(side='top', fill='both', expand='true', padx=PADDING_SIZE, pady=PADDING_SIZE)
     

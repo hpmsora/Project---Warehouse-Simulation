@@ -21,6 +21,7 @@ class SimulationBoard(tk.Frame):
     square_size = 64
 
     depot_area = []
+    agv_depot_area = []
 
     @property
     def canvas_size(self):
@@ -51,8 +52,9 @@ class SimulationBoard(tk.Frame):
                     tag = self.CellNaming(each_index_grid_width, each_index_grid_height)
                     self.CellBuilding(tag, each_index_grid_width, each_index_grid_height, color='black')
             else:
-                tag = self.CellNaming(each_index_grid_width, each_index_grid_height)
+                tag = self.CellNaming(0, each_index_grid_height)
                 self.CellBuilding(tag, 0, each_index_grid_height, color='black')
+                tag = self.CellNaming(self.grid_width-1, each_index_grid_width)
                 self.CellBuilding(tag, self.grid_width-1,  each_index_grid_height, color='black')
         
     # Basic grid building function
@@ -98,4 +100,12 @@ class SimulationBoard(tk.Frame):
 
         for each_depot in self.depot_area:
             self.CellColorChanging(each_depot[0], each_depot[1], color='blue')
+
+    # AGV deposit are building function
+    def AGVDepotBuilding(self, depot_type='LeftCorner', custom_depot=[]):
+        if depot_type == 'LeftCorner':
+            self.agv_depot_area.append((0, self.grid_height-2))
+
+        for each_agv_depot in self.agv_depot_area:
+            self.CellColorChanging(each_agv_depot[0], each_agv_depot[1], color='red')
     
