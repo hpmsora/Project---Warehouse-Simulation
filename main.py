@@ -11,9 +11,13 @@ import SimulationGUI as sgui
 import tkinter as tk
 
 # Global Variables
-NUM_AISLE = 8   # Default 2 Aisle
-NUM_ROWS  = 8   # Defualt 5 Rows each aisle
-SQUARE_SIZE = 64 # Defualt 64 per each square
+WAREHOUSE_TYPE = 'Basic' # Defualt warehouse type is basic
+NUM_AISLE = 10           # Default 2 aisle
+NUM_ROWS  = 10           # Defualt 5 rows each aisle
+SQUARE_SIZE = 20         # Defualt 64 per each square
+
+# Fixed Variable
+PADDING_SIZE = 10
 
 # Display simulation
 def Display_SimulationBoard():
@@ -21,8 +25,12 @@ def Display_SimulationBoard():
     root.title("Warehouse Simulation")
     print(root.title)
     
-    Board = sgui.SimulationBoard(root, num_aisle=NUM_AISLE, square_size=SQUARE_SIZE)
-    Board.pack(side='top', fill='both', expand='true', padx=4, pady=4)
+    Board = sgui.SimulationBoard(root, num_aisles=NUM_AISLE, num_rows=NUM_ROWS, square_size=SQUARE_SIZE)
+    Board.GridBuilding(warehouse_type = 'basic')
+    Board.DepotBuilding()
+    Board.AGVDepotBuilding()
+    
+    Board.pack(side='top', fill='both', expand='true', padx=PADDING_SIZE, pady=PADDING_SIZE)
     
     root.mainloop()
 
