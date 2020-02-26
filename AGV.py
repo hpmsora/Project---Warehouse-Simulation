@@ -1,6 +1,6 @@
 ###############################
 #
-# AGV Objects
+# AGV
 #
 # Won Yong Ha
 #
@@ -10,13 +10,16 @@
 class AGV:
 
     ID = None
-    current_pos = (0,0)
+    current_pos = None
     schedule = []
+    AGV_UI = None
 
     
     # Constructor
-    def __init__(self, _ID):
+    def __init__(self, _ID, _pos, _AGV_UI):
         self.ID = _ID
+        self.current_pos = _pos
+        self.AGV_UI = _AGV_UI
 
     # Get current position
     def GetCurrentPos(self):
@@ -37,3 +40,4 @@ class AGV:
     def Move(self):
         if not self.schedule == []:
             self.current_pos = self.schedule.pop(0)
+        return self.current_pos
