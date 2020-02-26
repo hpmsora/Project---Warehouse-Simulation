@@ -11,15 +11,13 @@ class AGV:
 
     ID = None
     current_pos = None
-    schedule = []
-    AGV_UI = None
 
-    
+    schedule = []
+
     # Constructor
-    def __init__(self, _ID, _pos, _AGV_UI):
+    def __init__(self, _ID, _pos):
         self.ID = _ID
         self.current_pos = _pos
-        self.AGV_UI = _AGV_UI
 
     # Get current position
     def GetCurrentPos(self):

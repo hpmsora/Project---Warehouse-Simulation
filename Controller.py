@@ -34,8 +34,9 @@ class Controller():
                 (pos[0]+1)*self.square_size, (pos[1]+1)*self.square_size)
 
     # Updateing time
-    def Update(self):
+    def Update(self, _new_order):
         total_remaining_time = 0
+        print(_new_order)
         for each_AGV in self.AGVs:
             AGV = self.AGVs[each_AGV]
             total_remaining_time += len(AGV.GetSchedule())
