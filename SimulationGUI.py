@@ -85,7 +85,7 @@ class SimulationBoard(tk.Frame):
 
     # Cell building function for grid
     def CellBuilding(self, _tag, _posX, _posY, color=''):
-        item = self.canvas.create_rectangle(
+        self.canvas.create_rectangle(
             _posX*self.square_size, _posY*self.square_size,
             (_posX+1)*self.square_size, (_posY+1)*self.square_size,
             outline="black", fill=color, tag=(_tag))
@@ -115,27 +115,31 @@ class SimulationBoard(tk.Frame):
 
         for each_agv_depot in self.agv_depot_area:
             self.CellColorChanging(each_agv_depot[0], each_agv_depot[1], color='red')
+
     # AGV building function
-    def AGBBuilding(self):
-        pass
-        
+    def AGVBuilding(self, _tag, _posX, _posY, color=''):
+        return self.canvas.create_oval(
+            _posX*self.square_size, _posY*self.square_size,
+            (_posX+1)*self.square_size, (_posY+1)*self.square_size,
+            outline="black", fill=color, tag=(_tag))
+
+
     # AGV building function
     def AddAGV(self, num=1):
         num_AGVs = len(self.AGVs)
-
+        pos = self.agv_depot_area[0]
+        init_posX, init_posY = pos
         for each_newAGV in range(0, num):
-            newAGV_ID = num_AGVs + each_newAGV
-            self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID)
+            newAGV_ID = self.AGVBuilding("AGV", init_posX, init_posY, color='yellow')
+            self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID, pos, newAGV_ID)
         return len(self.AGVs)
 
     # Set controller
     def SetController(self, controller_type='Default'):
-        self.controller = ctr.Controller(self.AGVs)
+        self.controller = ctr.Controller(self.AGVs, self.canvas, self.square_size)
 
     # Update
     def Update(self):
         self.controller.Update()
-        for each_AGV in self.AGVs:
-            print(self.AGVs[each_AGV].GetSchedule())
-        self.canvas.after(500, self.Update)
+        self.canvas.after(200, self.Update)
         
