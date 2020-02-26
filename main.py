@@ -16,6 +16,8 @@ NUM_AISLE = 10           # Default 2 aisle
 NUM_ROWS  = 10           # Defualt 5 rows each aisle
 SQUARE_SIZE = 20         # Defualt 64 per each square
 
+NUM_AGVs = 1            # Default 20 AGVs
+
 # Fixed Variable
 PADDING_SIZE = 10
 
@@ -29,8 +31,12 @@ def Display_SimulationBoard():
     Board.GridBuilding(warehouse_type = 'basic')
     Board.DepotBuilding()
     Board.AGVDepotBuilding()
+
+    Board.AddAGV(NUM_AGVs)
+    Board.SetController()
     
     Board.pack(side='top', fill='both', expand='true', padx=PADDING_SIZE, pady=PADDING_SIZE)
+    Board.Update()
     
     root.mainloop()
 

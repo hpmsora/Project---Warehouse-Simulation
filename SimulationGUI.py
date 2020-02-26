@@ -9,8 +9,12 @@
 
 import tkinter as tk
 
+import Controller as ctr
+import AGV as AGV
+
 class SimulationBoard(tk.Frame):
 
+    # Custom Variables
     num_aisles = 2
     num_rows = 5
 
@@ -20,8 +24,11 @@ class SimulationBoard(tk.Frame):
     background_color = 'grey'
     square_size = 64
 
+    # Internal Variables
     depot_area = []
     agv_depot_area = []
+    AGVs = {}
+    controller = None
 
     @property
     def canvas_size(self):
@@ -108,4 +115,27 @@ class SimulationBoard(tk.Frame):
 
         for each_agv_depot in self.agv_depot_area:
             self.CellColorChanging(each_agv_depot[0], each_agv_depot[1], color='red')
-    
+    # AGV building function
+    def AGBBuilding(self):
+        pass
+        
+    # AGV building function
+    def AddAGV(self, num=1):
+        num_AGVs = len(self.AGVs)
+
+        for each_newAGV in range(0, num):
+            newAGV_ID = num_AGVs + each_newAGV
+            self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID)
+        return len(self.AGVs)
+
+    # Set controller
+    def SetController(self, controller_type='Default'):
+        self.controller = ctr.Controller(self.AGVs)
+
+    # Update
+    def Update(self):
+        self.controller.Update()
+        for each_AGV in self.AGVs:
+            print(self.AGVs[each_AGV].GetSchedule())
+        self.canvas.after(500, self.Update)
+        
