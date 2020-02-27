@@ -12,19 +12,45 @@ class Shelf():
     ID = None
     current_pos = None
 
-    orders = []
+    # Internal Varialbe
+    status = None
+    On_AGV = None
+    orders = None
+    tools = None
     
     # Constructor
-    def __init__(self, _ID, _pos):
+    def __init__(self, _ID, _pos, _tools):
         self.ID = _ID
         self.current_pos = _pos
 
-    # Set order
-    def SetOrder(self, _new_order):
-        orders = _new_order
-
-    # Add order
-    def AddOder(self, _add_order):
-        self.orders += _add_order
-
+        self.status = "nothing"
+        self.On_AGV = None
+        self.tools = _tools
+        self.orders = []
     
+    # Add order
+    def AddOrder(self, _add_order):
+        self.orders.append(_add_order)
+
+    # Set shelf status
+    def UpdateStatus(self, _status):
+        self.status = _status
+
+    # Coloring the shelf
+    def Coloring(self):
+        if self.status == "nothing":
+            self.tools.ChangeColorObject(self.ID, color="gray")
+        elif self.status == "waiting":
+            self.tools.ChangeColorObject(self.ID, color="green")
+        elif self.status == "moving":
+            self.tools.ChangeColorObject(self.ID, color="gold")
+
+    # Update
+    def update(self):
+        if self.On_AGV == None and not len(self.orders) == 0:
+            self.UpdateStatus("waiting")
+        elif not self.On_AGV == None:
+            self.UpdateStatus("moving")
+        else:
+            self.UpdateStatus("nothing")
+        self.Coloring()

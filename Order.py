@@ -19,6 +19,9 @@ class Order():
     num_order = None
     
     shelves = None
+
+    # Internal Variables
+    order_ID_count = None
     
     # Constructor
     def __init__(self, _shelves, order_type="basic", order_per_batch=1, num_order = 100):
@@ -26,6 +29,8 @@ class Order():
         self.order_type = order_type
         self.order_per_batch = order_per_batch
         self.num_order = num_order
+        
+        self.order_ID_count = 0
 
     # Get number of order at once
     def GetNumOrder(self):
@@ -40,6 +45,7 @@ class Order():
         if self.order_type == "basic":
             for _ in range(0, self.num_order):
                 batch_size = math.ceil(abs(gauss(self.order_per_batch, self.order_per_batch/2)))
-                order.append(choices(all_shelves, k=batch_size))
+                order.append((self.order_ID_count, choices(all_shelves, k=batch_size)))
+                self.order_ID_count += 1
         return order
                 

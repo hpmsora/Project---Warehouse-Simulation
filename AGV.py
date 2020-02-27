@@ -11,13 +11,16 @@ class AGV:
 
     ID = None
     current_pos = None
+    canvas = None
 
     schedule = []
+    tools = None
 
     # Constructor
-    def __init__(self, _ID, _pos):
+    def __init__(self, _ID, _pos, _tools):
         self.ID = _ID
         self.current_pos = _pos
+        self.tools = _tools
 
     # Get current position
     def GetCurrentPos(self):
@@ -35,7 +38,9 @@ class AGV:
     def AddSchedule(self, _add_schedule):
         self.schedule += _add_schedule
 
+    
+    # AGV move
     def Move(self):
         if not self.schedule == []:
             self.current_pos = self.schedule.pop(0)
-        return self.current_pos
+            self.tools.MoveObject(self.ID, self.current_pos)

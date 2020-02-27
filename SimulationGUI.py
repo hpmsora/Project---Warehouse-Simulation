@@ -14,6 +14,8 @@ import Order as od
 import AGV as AGV
 import Shelf as shf
 
+import Tools as t
+
 class SimulationBoard(tk.Frame):
 
     # Custom Variables
@@ -35,6 +37,7 @@ class SimulationBoard(tk.Frame):
     order_generator = None
     order_list = []
     new_order = None
+    tools = None
 
     @property
     def canvas_size(self):
@@ -56,19 +59,32 @@ class SimulationBoard(tk.Frame):
 
         tk.Frame.__init__(self, self.parent)
         
-        self.canvas = tk.Canvas(self, width=canvas_width, height=canvas_height, background=self.background_color)
+        self.canvas = tk.Canvas(self,
+                                width=canvas_width,
+                                height=canvas_height,
+                                background=self.background_color)
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
+        self.tools = t.Tools(self.canvas, self.square_size)
 
         for each_index_grid_height in range(0, self.grid_height):
             if each_index_grid_height == 0 or each_index_grid_height == self.grid_height-1:
                 for each_index_grid_width in range(0, self.grid_width + 1):
                     tag = (self.CellNaming(each_index_grid_width, each_index_grid_height), "border")
-                    self.CellBuilding(tag, each_index_grid_width, each_index_grid_height, color='black')
+                    self.CellBuilding(tag,
+                                      each_index_grid_width,
+                                      each_index_grid_height,
+                                      color='black')
             else:
                 tag = (self.CellNaming(0, each_index_grid_height), "border")
-                self.CellBuilding(tag, 0, each_index_grid_height, color='black')
+                self.CellBuilding(tag,
+                                  0,
+                                  each_index_grid_height,
+                                  color='black')
                 tag = (self.CellNaming(self.grid_width-1, each_index_grid_width), "border")
-                self.CellBuilding(tag, self.grid_width-1,  each_index_grid_height, color='black')
+                self.CellBuilding(tag,
+                                  self.grid_width-1,
+                                  each_index_grid_height,
+                                  color='black')
         
     # Basic grid building with shelves function
     def GridBuilding(self, warehouse_type='basic'):
@@ -85,10 +101,18 @@ class SimulationBoard(tk.Frame):
                 for each_index_aisles in list_aisles:
                     tag = (self.CellNaming(each_index_aisles, each_index_rows), "shelf")
                     if not(each_index_rows == 1 or each_index_rows == self.grid_height-2) and (each_index_aisles % 3 == 1 or each_index_aisles % 3 == 0):
-                        shelf_ID = self.CellBuilding(tag, each_index_aisles, each_index_rows, color='gray')
-                        self.shelves[shelf_ID] = shf.Shelf(shelf_ID, (each_index_aisles, each_index_rows))
+                        shelf_ID = self.CellBuilding(tag,
+                                                     each_index_aisles,
+                                                     each_index_rows,
+                                                     color='gray')
+                        self.shelves[shelf_ID] = shf.Shelf(shelf_ID,
+                                                           (each_index_aisles, each_index_rows),
+                                                           self.tools)
                     else:
-                        self.CellBuilding(tag, each_index_aisles, each_index_rows, color='white')
+                        self.CellBuilding(tag,
+                                          each_index_aisles,
+                                          each_index_rows,
+                                          color='white')
 
     # Cell building function for grid
     def CellBuilding(self, _tag, _posX, _posY, color=''):
@@ -100,11 +124,6 @@ class SimulationBoard(tk.Frame):
     # Cell naming function
     def CellNaming(self, posX, posY):
         return str(posX) + ":" + str(posY)
-
-    # Cell color change
-    def CellColorChanging(self, posX, posY, color=''):
-        pos = self.CellNaming(posX, posY)
-        self.canvas.itemconfigure(pos, fill=color)
                         
     # Deposit area building function
     def DepotBuilding(self, depot_type='LeftCorner', custom_depot=[]):
@@ -113,7 +132,8 @@ class SimulationBoard(tk.Frame):
             self.depot_area.append((1, self.grid_height-1))
 
         for each_depot in self.depot_area:
-            self.CellColorChanging(each_depot[0], each_depot[1], color='blue')
+            name = self.CellNaming(each_depot[0], each_depot[1])
+            self.tools.ChangeColorObject(name, color='blue')
 
     # AGV deposit are building function
     def AGVDepotBuilding(self, depot_type='LeftCorner', custom_depot=[]):
@@ -121,7 +141,8 @@ class SimulationBoard(tk.Frame):
             self.agv_depot_area.append((0, self.grid_height-2))
 
         for each_agv_depot in self.agv_depot_area:
-            self.CellColorChanging(each_agv_depot[0], each_agv_depot[1], color='red')
+            name = self.CellNaming(each_agv_depot[0], each_agv_depot[1])
+            self.tools.ChangeColorObject(name, color='red')
 
     # AGV building function
     def AGVBuilding(self, _tag, _posX, _posY, color=''):
@@ -137,18 +158,22 @@ class SimulationBoard(tk.Frame):
         pos = self.agv_depot_area[0]
         init_posX, init_posY = pos
         for each_newAGV in range(0, num):
-            newAGV_ID = self.AGVBuilding("AGV", init_posX, init_posY, color='yellow')
-            self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID, pos)
+            newAGV_ID = self.AGVBuilding("AGV", init_posX,
+                                         init_posY,
+                                         color='yellow')
+            self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID, pos, self.tools)
         return len(self.AGVs)
 
     # Set controller function
     def SetController(self, controller_type='Default'):
-        self.controller = ctr.Controller(self.AGVs, self.shelves, self.canvas, self.square_size)
+        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools)
 
     # Set order generator function
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):
-        self.order_generator = od.Order(self.shelves, order_type=order_type, order_per_batch=order_per_batch, num_order=num_order)
-        print(self.order_generator)
+        self.order_generator = od.Order(self.shelves,
+                                        order_type=order_type,
+                                        order_per_batch=order_per_batch,
+                                        num_order=num_order)
 
     # Add order to list of order function
     def AddOrder(self, _order):
