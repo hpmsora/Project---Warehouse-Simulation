@@ -34,6 +34,7 @@ class SimulationBoard(tk.Frame):
     controller = None
     order_generator = None
     order_list = []
+    new_order = None
 
     @property
     def canvas_size(self):
@@ -142,7 +143,7 @@ class SimulationBoard(tk.Frame):
 
     # Set controller function
     def SetController(self, controller_type='Default'):
-        self.controller = ctr.Controller(self.AGVs, self.canvas, self.square_size)
+        self.controller = ctr.Controller(self.AGVs, self.shelves, self.canvas, self.square_size)
 
     # Set order generator function
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):
@@ -158,6 +159,8 @@ class SimulationBoard(tk.Frame):
         if len(self.order_list) <= len(self.AGVs)*3:
             self.AddOrder(self.order_generator)
 
-        self.controller.Update(self.order_list.pop(1))
+        self.new_order = self.order_list.pop(1)
+        
+        self.controller.Update(self.new_order)
         self.canvas.after(200, self.Update)
         

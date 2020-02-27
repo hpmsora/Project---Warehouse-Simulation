@@ -10,12 +10,14 @@
 class Controller():
 
     AGVs = None
+    shelves = None
     canvas = None
     square_size = 0
 
     # Constructor
-    def __init__(self, _AGVs, _canvas, _square_size):
+    def __init__(self, _AGVs, _shelves, _canvas, _square_size):
         self.AGVs = _AGVs
+        self.shelves = _shelves
         self.canvas = _canvas
         self.square_size = _square_size
 
@@ -33,10 +35,19 @@ class Controller():
         return (pos[0]*self.square_size, pos[1]*self.square_size,
                 (pos[0]+1)*self.square_size, (pos[1]+1)*self.square_size)
 
+    # Shelf update
+    def ShelfUpdate(self, _new_order):
+        for each_new_order in _new_order:
+            self.canvas.itemconfigure(each_new_order, fill='green')
+
     # Updateing time
     def Update(self, _new_order):
         total_remaining_time = 0
         print(_new_order)
+
+        # Shelves update
+        self.ShelfUpdate(_new_order)
+        
         for each_AGV in self.AGVs:
             AGV = self.AGVs[each_AGV]
             total_remaining_time += len(AGV.GetSchedule())
