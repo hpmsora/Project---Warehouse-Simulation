@@ -12,7 +12,7 @@ class Controller():
     AGVs = None
     shelves = None
 
-    # Internal Varialble
+    # Internal Varialbles
     tools = None
 
     # Constructor
@@ -30,15 +30,13 @@ class Controller():
         for each_AGV in _AGVs:
             _AGVs[each_AGV].SetSchedule(route)
 
-    
-
     # Shelf update
     def ShelfUpdate(self, _new_order):
         new_order_ID = _new_order[0]
         new_order_orders = _new_order[1]
         for each_new_order_orders in new_order_orders:
             self.shelves[each_new_order_orders].AddOrder(new_order_ID)
-
+            
     # Updateing time
     def Update(self, _new_order):
         total_remaining_time = 0
