@@ -14,6 +14,9 @@ class Algorithms_Scheduling():
     AGVs = None
     shelves = None
     scheduling_type = ""
+
+    # Fixed Variable
+    MAX_EPOCH = 1000
     
     # Internal Variables
     tools = None
@@ -33,11 +36,16 @@ class Algorithms_Scheduling():
         self.evaluation_algorithm = AlgEval.Algorithms_Evaluation(self.AGVs, self.shelves, self.tools, _evaluation_type)
         
     # Genetic Algorithm
-    def GeneticAlgorithm(self,_MaxEpoch):
-        pass
-
+    def GeneticAlgorithm(self,_max_epoch):
+        
+        eval_value = self.evaluation_algorithm.Update()
+        epoch_count = 0
+        
+        while epoch_count < _max_epoch:
+            epoch_count += 1
+        print("Done")
+            
     # Update
     def Update(self):
         if self.scheduling_type == "Genetic":
-            eval_value = self.evaluation_algorithm.Update()
-            print(eval_value)
+            self.GeneticAlgorithm(self.MAX_EPOCH)
