@@ -4,9 +4,11 @@
 #
 # Won Yong Ha
 #
+# V.1.0
 #
 ###############################
 
+import Algorithms_PathPlanning as AlgPath
 import Algorithms_Evaluation as AlgEval
 
 class Algorithms_Scheduling():
