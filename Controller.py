@@ -19,12 +19,12 @@ class Controller():
     scheduling_algorithm = None
 
     # Constructor
-    def __init__(self, _AGVs, _shelves, _tools, scheduling_type = "Genetic", evaluation_type = "General_n_Balance"):
+    def __init__(self, _AGVs, _shelves, _tools, scheduling_type = "Genetic", path_planning_type = "Q_Learning", evaluation_type = "General_n_Balance"):
         self.AGVs = _AGVs
         self.shelves = _shelves
         self.tools = _tools
 
-        self.SetSchedulingAlgorithm(scheduling_type, evaluation_type)
+        self.SetSchedulingAlgorithm(scheduling_type, path_planning_type, evaluation_type)
         
     # Set schedule
     def SetAGVScheule(self, _AGVs):
@@ -39,8 +39,8 @@ class Controller():
             count += 1
 
     # Set scheduling algorithm
-    def SetSchedulingAlgorithm(self, _scheduling_type, _evaluation_type):
-        self.scheduling_algorithm = AlgSch.Algorithms_Scheduling(self.AGVs, self.shelves, self.tools, _scheduling_type, _evaluation_type)
+    def SetSchedulingAlgorithm(self, _scheduling_type, _path_planning_type, _evaluation_type):
+        self.scheduling_algorithm = AlgSch.Algorithms_Scheduling(self.AGVs, self.shelves, self.tools, _scheduling_type, _path_planning_type, _evaluation_type)
     
     # Shelf update
     def ShelfUpdate(self, _new_order):

@@ -22,16 +22,22 @@ class Algorithms_Scheduling():
     
     # Internal Variables
     tools = None
+    path_planning_algorithm = None
     evaluation_algorithm = None
 
     # Constructor
-    def __init__(self, _AGVs, _shelves, _tools, _scheduling_type, _evaluation_type):
+    def __init__(self, _AGVs, _shelves, _tools, _scheduling_type, _path_planning_type, _evaluation_type):
         self.AGVs = _AGVs
         self.shelves = _shelves
         self.tools = _tools
 
         self.scheduling_type = _scheduling_type
+        self.SetPathPlanningAlgorithm(_path_planning_type)
         self.SetEvaluationAlgorithm(_evaluation_type)
+
+    # Set path planning algorithm
+    def SetPathPlanningAlgorithm(self, _path_planning_type):
+        self.path_planning_algorithm = AlgPath.Algorithms_PlathPlanning(self.AGVs, self.shelves, self.tools, _path_planning_type)
 
     # Set evaluation algorithm
     def SetEvaluationAlgorithm(self, _evaluation_type):
@@ -46,6 +52,7 @@ class Algorithms_Scheduling():
         while epoch_count < _max_epoch:
             epoch_count += 1
         print("Done")
+        new_paths = self.path_planning_algorithm.Update([])
             
     # Update
     def Update(self):
