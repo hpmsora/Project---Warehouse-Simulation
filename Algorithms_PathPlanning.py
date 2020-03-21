@@ -33,14 +33,15 @@ class Algorithms_PlathPlanning():
     # Q Learning
     def Q_Learning(self, _new_schedulings, num_episodes = 1000, discount_factor = 1.0, _alpha = 0.6, epsilon = 0.1):
         print("Q-Learning")
+        
+        Q_table = col.defaultdict(lambda: np.zeros(4))
 
+        # Get grid map to 2d map
+        w_map = np.zeros((self.tools.GetHeight(), self.tools.GetWidth()))
         
         
         for each_episodes in range(num_episodes):
             pass
-        
-        Q_table = col.defaultdict(lambda: np.zeros(4))
-        
         
         return []
     

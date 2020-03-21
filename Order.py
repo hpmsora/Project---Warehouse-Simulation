@@ -46,7 +46,7 @@ class Order():
 
         if self.order_type == "basic":
             for count in range(self.num_order):
-                if count % self.order_gap == 0:
+                if count % self.order_gap == 0 or count == 0:
                     batch_size = math.ceil(abs(gauss(self.order_per_batch, self.order_per_batch/2)))
                     order.append((self.order_ID_count, choices(all_shelves, k=batch_size)))
                 else:

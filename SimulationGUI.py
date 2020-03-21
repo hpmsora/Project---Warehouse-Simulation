@@ -24,6 +24,9 @@ class SimulationBoard(tk.Frame):
 
     grid_width = 0
     grid_height = 0
+
+    grid_active_width = 0
+    grid_active_height = 0
     
     background_color = 'grey'
     square_size = 64
@@ -54,6 +57,10 @@ class SimulationBoard(tk.Frame):
     def GridInit(self):
         self.grid_width += 2
         self.grid_height += 2
+
+        self.grid_active_width = self.grid_width
+        self.grid_active_height = self.grid_height
+        
         canvas_width = (self.grid_width) * self.square_size
         canvas_height = (self.grid_height) * self.square_size
 
@@ -64,7 +71,7 @@ class SimulationBoard(tk.Frame):
                                 height=canvas_height,
                                 background=self.background_color)
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
-        self.tools = t.Tools(self.canvas, self.square_size, self.grid_width, self.grid_height)
+        self.tools = t.Tools(self.canvas, self.square_size, self.grid_active_width, self.grid_active_height)
 
         for each_index_grid_height in range(0, self.grid_height):
             if each_index_grid_height == 0 or each_index_grid_height == self.grid_height-1:
@@ -126,10 +133,14 @@ class SimulationBoard(tk.Frame):
         return str(posX) + ":" + str(posY)
                         
     # Deposit area building function
-    def DepotBuilding(self, depot_type='LeftCorner', custom_depot=[]):
+    def DepotBuilding(self, depot_type='BottomCenter2', custom_depot=[]):
         if depot_type == 'LeftCorner':
-            self.depot_area.append((0, self.grid_height-1))
             self.depot_area.append((1, self.grid_height-1))
+        if depot_type == 'BottomCenter':
+            self.depot_area.append((int(self.grid_width/2), self.grid_height-1))
+        if depot_type == 'BottomCenter2':
+            self.depot_area.append((int(self.grid_width/2), self.grid_height-1))
+            self.depot_area.append((int(self.grid_width/2-1), self.grid_height-1))
 
         for each_depot in self.depot_area:
             name = self.CellNaming(each_depot[0], each_depot[1])
@@ -174,7 +185,7 @@ class SimulationBoard(tk.Frame):
                                         order_type=order_type,
                                         order_per_batch=order_per_batch,
                                         num_order=num_order,
-                                        order_gap = 5)
+                                        order_gap = 30)
 
     # Add order to list of order function
     def AddOrder(self, _order):
@@ -185,7 +196,7 @@ class SimulationBoard(tk.Frame):
         if len(self.order_list) <= len(self.AGVs)*3:
             self.AddOrder(self.order_generator)
 
-        self.new_order = self.order_list.pop(1)
+        self.new_order = self.order_list.pop(0)
         
         self.controller.Update(self.new_order)
         self.canvas.after(200, self.Update)

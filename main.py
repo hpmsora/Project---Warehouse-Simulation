@@ -19,7 +19,7 @@ NUM_ROWS  = 10           # Default 5 rows each aisle
 SQUARE_SIZE = 20         # Default 64 per each square
 
 ORDER_PER_BATCH = 1     # Default average number of batch per order is 10
-NUM_ORDER = 5          # Default number of order at once is 100
+NUM_ORDER = 30          # Default number of order at once is 100
 
 NUM_AGVs = 1             # Default 20 AGVs
 
