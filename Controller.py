@@ -55,7 +55,8 @@ class Controller():
         print(_new_order)
 
         # Add orders
-        self.ShelfUpdate(_new_order)
+        if not len(_new_order[1]) == 0:
+            self.ShelfUpdate(_new_order)
         
         # AGV updates
         for each_AGV_ID, each_AGV_Object in self.AGVs.items():

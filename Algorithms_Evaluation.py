@@ -25,6 +25,8 @@ class Algorithms_Evaluation():
 
         self.EvaluationType = _EvaluationType
 
+    #--------------------------------------------------
+    
     # Balance Include
     def General_n_Balance(self):
         ITC = {}
@@ -59,6 +61,8 @@ class Algorithms_Evaluation():
         BU = min_ITC / max_ITC
 
         return max_order/TT + total_order/TTC + BU
+
+    #--------------------------------------------------
 
     # Update
     def Update(self):

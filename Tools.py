@@ -11,11 +11,17 @@ class Tools():
 
     canvas = None
     square_size = None
+    
+    width = 0
+    height = 0
 
     # Constructor
-    def __init__(self, _canvas, _square_size):
+    def __init__(self, _canvas, _square_size, _width, _height):
         self.canvas = _canvas
         self.square_size = _square_size
+
+        self.width = _width
+        self.height = _height
 
     # Getting canvas object
     def GetCanvas(self):

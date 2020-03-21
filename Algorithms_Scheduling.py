@@ -42,7 +42,9 @@ class Algorithms_Scheduling():
     # Set evaluation algorithm
     def SetEvaluationAlgorithm(self, _evaluation_type):
         self.evaluation_algorithm = AlgEval.Algorithms_Evaluation(self.AGVs, self.shelves, self.tools, _evaluation_type)
-        
+
+    #--------------------------------------------------
+    
     # Genetic Algorithm
     def GeneticAlgorithm(self,_max_epoch):
         
@@ -53,6 +55,8 @@ class Algorithms_Scheduling():
             epoch_count += 1
         print("Done")
         new_paths = self.path_planning_algorithm.Update([])
+        
+    #--------------------------------------------------
             
     # Update
     def Update(self):

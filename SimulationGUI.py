@@ -64,7 +64,7 @@ class SimulationBoard(tk.Frame):
                                 height=canvas_height,
                                 background=self.background_color)
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
-        self.tools = t.Tools(self.canvas, self.square_size)
+        self.tools = t.Tools(self.canvas, self.square_size, self.grid_width, self.grid_height)
 
         for each_index_grid_height in range(0, self.grid_height):
             if each_index_grid_height == 0 or each_index_grid_height == self.grid_height-1:
@@ -173,7 +173,8 @@ class SimulationBoard(tk.Frame):
         self.order_generator = od.Order(self.shelves,
                                         order_type=order_type,
                                         order_per_batch=order_per_batch,
-                                        num_order=num_order)
+                                        num_order=num_order,
+                                        order_gap = 5)
 
     # Add order to list of order function
     def AddOrder(self, _order):
