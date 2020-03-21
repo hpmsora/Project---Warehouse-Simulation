@@ -18,7 +18,7 @@ class Algorithms_Scheduling():
     scheduling_type = ""
 
     # Fixed Variable
-    MAX_EPOCH = 1000
+    MAX_EPOCH = 1
     
     # Internal Variables
     tools = None
@@ -46,19 +46,36 @@ class Algorithms_Scheduling():
     #--------------------------------------------------
     
     # Genetic Algorithm
-    def GeneticAlgorithm(self,_max_epoch):
+    def GeneticAlgorithm(self, _new_orders, _max_epoch):
         
-        eval_value = self.evaluation_algorithm.Update()
+        #eval_value = self.evaluation_algorithm.Update()
         epoch_count = 0
+
+        print("[Scheduling]\t New orders for scheduling is: " + str(_new_orders))
         
         while epoch_count < _max_epoch:
             epoch_count += 1
-        print("Done")
-        new_paths = self.path_planning_algorithm.Update([])
+        print("[Scheduling]\t Genetic algorithm scheduling done.")
+        #---------------------------
+        # Example hard coding
+        new_schedules = []
+        num_AGVs = 0
+        for each_AGV in self.AGVs:
+            new_schedules.append((each_AGV, []))
+            num_AGVs += 1
         
-    #--------------------------------------------------
+        for index, each_new_order in enumerate(_new_orders):
+            AGVs_index = index % num_AGVs
+            new_schedules[AGVs_index][1].append(each_new_order)
+        #---------------------------
+        
+        new_paths = self.path_planning_algorithm.Update(new_schedules)
+        return new_paths
             
     # Update
-    def Update(self):
+    def Update(self, _new_orders):
         if self.scheduling_type == "Genetic":
-            self.GeneticAlgorithm(self.MAX_EPOCH)
+            new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH)
+
+        for each_AGV, each_new_path in new_paths:
+            self.AGVs[each_AGV].SetSchedule(each_new_path)

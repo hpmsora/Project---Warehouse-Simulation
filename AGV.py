@@ -21,12 +21,13 @@ class AGV:
     #
     order = []
     tools = None
-
+    
     # Constructor
     def __init__(self, _ID, _pos, _tools):
         self.ID = _ID
         self.current_pos = _pos
         self.tools = _tools
+        self.previous_schedule = self.current_pos
 
     # Get ID
     def GetID(self):
@@ -50,8 +51,6 @@ class AGV:
             self.schedule.append(each_add_schedule)
             if len(each_add_schedule) == 3:
                 self.order.append(each_add_schedule[-1])
-        print(self.schedule)
-        print(self.order)
 
     # Get Order
     def GetOrder(self):

@@ -135,25 +135,29 @@ class SimulationBoard(tk.Frame):
     # Deposit area building function
     def DepotBuilding(self, depot_type='BottomCenter2', custom_depot=[]):
         if depot_type == 'LeftCorner':
-            self.depot_area.append((1, self.grid_height-1))
+            self.depot_area.append((2, self.grid_active_height-2))
         if depot_type == 'BottomCenter':
-            self.depot_area.append((int(self.grid_width/2), self.grid_height-1))
+            self.depot_area.append((int(self.grid_width/2), self.grid_active_height-2))
         if depot_type == 'BottomCenter2':
-            self.depot_area.append((int(self.grid_width/2), self.grid_height-1))
-            self.depot_area.append((int(self.grid_width/2-1), self.grid_height-1))
+            self.depot_area.append((int(self.grid_width/2), self.grid_active_height-2))
+            self.depot_area.append((int(self.grid_width/2-1), self.grid_active_height-2))
 
         for each_depot in self.depot_area:
             name = self.CellNaming(each_depot[0], each_depot[1])
             self.tools.ChangeColorObject(name, color='blue')
+            self.tools.UpdateAbsWMap('Depot', each_depot)
 
     # AGV deposit are building function
-    def AGVDepotBuilding(self, depot_type='LeftCorner', custom_depot=[]):
+    def AGVDepotBuilding(self, depot_type='TopCenter', custom_depot=[]):
         if depot_type == 'LeftCorner':
-            self.agv_depot_area.append((0, self.grid_height-2))
+            self.agv_depot_area.append((0, self.grid_active_height-2))
+        if depot_type == 'TopCenter':
+            self.agv_depot_area.append((int(self.grid_width/2), 1))
 
         for each_agv_depot in self.agv_depot_area:
             name = self.CellNaming(each_agv_depot[0], each_agv_depot[1])
             self.tools.ChangeColorObject(name, color='red')
+            self.tools.UpdateAbsWMap('AGVDepot', each_agv_depot)
 
     # AGV building function
     def AGVBuilding(self, _tag, _posX, _posY, color=''):

@@ -38,7 +38,6 @@ class Algorithms_Evaluation():
 
         for each_AGV in self.AGVs.values():
             key = each_AGV.GetID()
-            print(key)
             each_AGV_num_orders = len(each_AGV.GetOrder())
             cost = len(each_AGV.GetSchedule()) + each_AGV_num_orders
             ITC[key] = cost

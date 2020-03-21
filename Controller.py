@@ -17,6 +17,7 @@ class Controller():
     # Internal Varialbles
     tools = None
     scheduling_algorithm = None
+    new_orders = []
 
     # Constructor
     def __init__(self, _AGVs, _shelves, _tools, scheduling_type = "Genetic", path_planning_type = "Q_Learning", evaluation_type = "General_n_Balance"):
@@ -52,23 +53,30 @@ class Controller():
     # Updateing time
     def Update(self, _new_order):
         total_remaining_time = 0
-        print(_new_order)
 
         # Add orders
         if not len(_new_order[1]) == 0:
-            self.ShelfUpdate(_new_order)
-        
-        # AGV updates
+            self.new_orders.append(_new_order)
+
+        # Check total remaining time
         for each_AGV_ID, each_AGV_Object in self.AGVs.items():
             total_remaining_time += len(each_AGV_Object.GetSchedule())
+            
+        # Re-Scheduling
+        if total_remaining_time == 0:
+            for each_new_orders in self.new_orders:
+                self.ShelfUpdate(each_new_orders)
+            self.scheduling_algorithm.Update(self.new_orders)
+            #self.SetAGVScheule(self.AGVs)
+
+            self.new_orders = []
+        
+        # Movement --------------------------------------------------
+        # AGV updates
+        for each_AGV_ID, each_AGV_Object in self.AGVs.items():
             each_AGV_Object.Move()
 
         # Shelves update
         for each_shelf_ID, each_shelf_Object in self.shelves.items():
             each_shelf_Object.update()
-
-        # Re-Scheduling
-        if total_remaining_time == 0:
-            self.SetAGVScheule(self.AGVs)
-            self.scheduling_algorithm.Update()
             
