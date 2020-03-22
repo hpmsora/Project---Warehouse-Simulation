@@ -38,6 +38,8 @@ class Algorithms_PlathPlanning():
     # Q Learning
     def Q_Learning(self, _new_schedules, num_episodes = 1000, discount_factor = 1.0, alpha = 0.6, epsilon = 0.1, num_actions = 4):
         print("[Path Planning]\t Q-Learning starting")
+
+        AGVs_paths = []
         
         AGVs_Q_table = {}
         AGVs_Order = []
@@ -76,18 +78,20 @@ class Algorithms_PlathPlanning():
         reset_map = cp.deepcopy(w_map)
         
         # Movements
-        for each_AGVs_Order in AGVs_Order:
-            each_last_pos, each_Q_table = AGVs_Q_table[each_AGVs_Order]
+        for each_AGVs_ID in AGVs_Order:
+            AGV_path = []
+            
+            each_last_pos, each_Q_table = AGVs_Q_table[each_AGVs_ID]
             starting_state = each_last_pos
+            
             for each_target, each_each_policy, each_each_Q_table in each_Q_table:
                 target = []
                 target_order, target_ID = each_target
                 
                 if target_order == "Depot":
-                    target.append(self.tools.GetDepotsByID(target_ID))
+                    target += self.tools.GetDepotsByID(target_ID)
                 else:
-                    target.append(self.tools.GetShelvesDepotsPosByID(target_ID))
-                print(target)
+                    target += self.tools.GetShelvesDepotsPosByID(target_ID)
 
                 stats = plt.EpisodeStats(
                     episode_lengths = np.zeros(num_episodes),
@@ -102,7 +106,7 @@ class Algorithms_PlathPlanning():
                         action_probs = each_each_policy(state)
                         action = np.random.choice(np.arange(len(action_probs)), p =action_probs)
 
-                        next_state, reward, done = self.tools.Step_Action(state, action, w_map, state)
+                        next_state, reward, done = self.tools.Step_Action(state, action, w_map, target)
 
                         stats.episode_rewards[each_episodes] += reward
                         stats.episode_lengths[each_episodes] = t
@@ -115,11 +119,11 @@ class Algorithms_PlathPlanning():
                         if done:
                             break
                         state = next_state
-                        break
-                #plt.plot_episode_stats(stats)   
-                state = None
-        
-        return [(list(self.AGVs.keys())[0], [(2,3), (2,4), (2,5), (2,6), (2,7), (2,8), (2,9), (2,10), (2,11), (2,12)])]
+                path = self.tools.GetPathByQTable(each_each_Q_table, starting_state, target)
+                state = path[-1]
+                AGV_path += path
+            AGVs_paths.append((each_AGVs_ID, AGV_path))
+        return AGVs_paths
 
     def Q_Learning_Epsilon_Greedy_Policy(self, _Q_table, _epsilon, _num_actions):
         def policy_funcion(state):

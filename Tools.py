@@ -7,6 +7,7 @@
 #
 ###############################
 
+import numpy as np
 import copy as cp
 
 class Tools():
@@ -57,7 +58,7 @@ class Tools():
 
     # Get shelves positions tuple by ID
     def GetShelvesDepotsPosByID(self, _shelf_ID):
-        return self.CellNameToPos(self.GetShelvesDepotsByID(_shelf_ID))
+        return [self.CellNameToPos(self.GetShelvesDepotsByID(_shelf_ID))]
         
     # Set shelves positions
     def SetShelvesDepots(self, _shelf_pos, _shelf_ID):
@@ -131,10 +132,8 @@ class Tools():
     #--------------------------------------------------
     # Algorithms Tools
 
-    # Action Movement
-    def Step_Action(self, _pos, _action, _w_map, _target):
-        reward = -1
-        done = False
+    # Get next state by action
+    def Next_Action(self, _pos, _action):
         posX, posY = _pos
 
         if _action == 0:   # Up
@@ -146,7 +145,16 @@ class Tools():
         elif _action == 3: # Left
             posX -= 1
 
-        next_pos = (posX, posY)
+        return (posX, posY)
+
+    # Action Movement
+    def Step_Action(self, _pos, _action, _w_map, _target):
+        reward = -1
+        done = False
+
+        next_pos = self.Next_Action(_pos, _action)
+        posX, posY = _pos
+        
         if _w_map[posX][posY] == self.ABS_NO_ACC:
             reward = self.ABS_NO_ACC
             done = True
@@ -155,4 +163,19 @@ class Tools():
             done = True
 
         return next_pos, reward, done
-        
+
+    # Get path by q-table
+    def GetPathByQTable(self, _q_table, _start_point, _end_point):
+        path = []
+
+        state = _start_point
+
+        while not state in _end_point:
+            action = np.argmax(_q_table[state])
+            state = self.Next_Action(state, action)
+            path.append(state)
+            print("A")
+            
+        path.append(state)
+
+        return path
