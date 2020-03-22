@@ -87,6 +87,7 @@ class Algorithms_PlathPlanning():
                     target.append(self.tools.GetDepotsByID(target_ID))
                 else:
                     target.append(self.tools.GetShelvesDepotsPosByID(target_ID))
+                print(target)
 
                 stats = plt.EpisodeStats(
                     episode_lengths = np.zeros(num_episodes),
@@ -115,7 +116,7 @@ class Algorithms_PlathPlanning():
                             break
                         state = next_state
                         break
-                plt.plot_episode_stats(stats)   
+                #plt.plot_episode_stats(stats)   
                 state = None
         
         return [(list(self.AGVs.keys())[0], [(2,3), (2,4), (2,5), (2,6), (2,7), (2,8), (2,9), (2,10), (2,11), (2,12)])]
