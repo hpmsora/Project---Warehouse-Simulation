@@ -73,21 +73,22 @@ class SimulationBoard(tk.Frame):
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
         self.tools = t.Tools(self.canvas, self.square_size, self.grid_active_width, self.grid_active_height)
 
+        # Borders
         for each_index_grid_height in range(0, self.grid_height):
             if each_index_grid_height == 0 or each_index_grid_height == self.grid_height-1:
                 for each_index_grid_width in range(0, self.grid_width + 1):
-                    tag = (self.CellNaming(each_index_grid_width, each_index_grid_height), "border")
+                    tag = (self.tools.CellNaming(each_index_grid_width, each_index_grid_height), "border")
                     self.CellBuilding(tag,
                                       each_index_grid_width,
                                       each_index_grid_height,
                                       color='black')
             else:
-                tag = (self.CellNaming(0, each_index_grid_height), "border")
+                tag = (self.tools.CellNaming(0, each_index_grid_height), "border")
                 self.CellBuilding(tag,
                                   0,
                                   each_index_grid_height,
                                   color='black')
-                tag = (self.CellNaming(self.grid_width-1, each_index_grid_width), "border")
+                tag = (self.tools.CellNaming(self.grid_width-1, each_index_grid_width), "border")
                 self.CellBuilding(tag,
                                   self.grid_width-1,
                                   each_index_grid_height,
@@ -106,8 +107,9 @@ class SimulationBoard(tk.Frame):
             
             for each_index_rows in list_rows:
                 for each_index_aisles in list_aisles:
-                    tag = (self.CellNaming(each_index_aisles, each_index_rows), "shelf")
                     if not(each_index_rows == 1 or each_index_rows == self.grid_height-2) and (each_index_aisles % 3 == 1 or each_index_aisles % 3 == 0):
+                        shelf_position_name = self.tools.CellNaming(each_index_aisles, each_index_rows)
+                        tag = (shelf_position_name, "shelf")
                         shelf_ID = self.CellBuilding(tag,
                                                      each_index_aisles,
                                                      each_index_rows,
@@ -115,7 +117,9 @@ class SimulationBoard(tk.Frame):
                         self.shelves[shelf_ID] = shf.Shelf(shelf_ID,
                                                            (each_index_aisles, each_index_rows),
                                                            self.tools)
+                        self.tools.SetShelvesDepots(shelf_position_name, shelf_ID)
                     else:
+                        tag = (self.tools.CellNaming(each_index_aisles, each_index_rows), "road")
                         self.CellBuilding(tag,
                                           each_index_aisles,
                                           each_index_rows,
@@ -127,23 +131,28 @@ class SimulationBoard(tk.Frame):
             _posX*self.square_size, _posY*self.square_size,
             (_posX+1)*self.square_size, (_posY+1)*self.square_size,
             outline="black", fill=color, tag=_tag)
-
-    # Cell naming function
-    def CellNaming(self, posX, posY):
-        return str(posX) + ":" + str(posY)
                         
     # Deposit area building function
     def DepotBuilding(self, depot_type='BottomCenter2', custom_depot=[]):
         if depot_type == 'LeftCorner':
-            self.depot_area.append((2, self.grid_active_height-2))
+            depot_ID = 1
+            depot_pos = [(2, self.grid_active_height-2)]
+            self.depot_area += depot_pos
+            self.tools.SetDepots(depot_pos, depot_ID)
         if depot_type == 'BottomCenter':
-            self.depot_area.append((int(self.grid_width/2), self.grid_active_height-2))
+            depot_ID = 2
+            depot_pos = [(int(self.grid_width/2), self.grid_active_height-2)]
+            self.depot_area += depot_pos
+            self.tools.SetDepots(depot_pos, depot_ID)
         if depot_type == 'BottomCenter2':
-            self.depot_area.append((int(self.grid_width/2), self.grid_active_height-2))
-            self.depot_area.append((int(self.grid_width/2-1), self.grid_active_height-2))
+            depot_ID = 3
+            depot_pos = [(int(self.grid_width/2), self.grid_active_height-2),
+                         (int(self.grid_width/2-1), self.grid_active_height-2)]
+            self.depot_area += depot_pos
+            self.tools.SetDepots(depot_pos, depot_ID)
 
         for each_depot in self.depot_area:
-            name = self.CellNaming(each_depot[0], each_depot[1])
+            name = self.tools.CellNaming(each_depot[0], each_depot[1])
             self.tools.ChangeColorObject(name, color='blue')
             self.tools.UpdateAbsWMap('Depot', each_depot)
 
@@ -155,7 +164,7 @@ class SimulationBoard(tk.Frame):
             self.agv_depot_area.append((int(self.grid_width/2), 1))
 
         for each_agv_depot in self.agv_depot_area:
-            name = self.CellNaming(each_agv_depot[0], each_agv_depot[1])
+            name = self.tools.CellNaming(each_agv_depot[0], each_agv_depot[1])
             self.tools.ChangeColorObject(name, color='red')
             self.tools.UpdateAbsWMap('AGVDepot', each_agv_depot)
 

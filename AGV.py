@@ -29,6 +29,8 @@ class AGV:
         self.tools = _tools
         self.previous_schedule = self.current_pos
 
+        self.AddSchedule([_pos])
+
     # Get ID
     def GetID(self):
         return self.ID
@@ -36,6 +38,10 @@ class AGV:
     # Get current position
     def GetCurrentPos(self):
         return self.current_pos
+
+    # Get last scheduled position
+    def GetLastScheduledPos(self):
+        return self.schedule[-1]
 
     # Get schedule
     def GetSchedule(self):
@@ -59,7 +65,11 @@ class AGV:
     # AGV move
     def Move(self):
         if not self.schedule == []:
-            posX, posY, *order = self.schedule.pop(0)
+            current_schedule = self.schedule.pop(0)
+            posX, posY, *order = current_schedule
+
+            if len(self.schedule) == 0:
+                self.schedule.append(current_schedule)
             
             self.current_pos = (posX, posY)
             if order:

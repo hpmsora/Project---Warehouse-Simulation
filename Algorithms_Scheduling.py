@@ -65,8 +65,9 @@ class Algorithms_Scheduling():
             num_AGVs += 1
         
         for index, each_new_order in enumerate(_new_orders):
+            order_num, orders = each_new_order
             AGVs_index = index % num_AGVs
-            new_schedules[AGVs_index][1].append(each_new_order)
+            new_schedules[AGVs_index][1].append((order_num, orders, 3)) # 3 -> depot ID
         #---------------------------
         
         new_paths = self.path_planning_algorithm.Update(new_schedules)
@@ -78,4 +79,4 @@ class Algorithms_Scheduling():
             new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH)
 
         for each_AGV, each_new_path in new_paths:
-            self.AGVs[each_AGV].SetSchedule(each_new_path)
+            self.AGVs[each_AGV].AddSchedule(each_new_path)

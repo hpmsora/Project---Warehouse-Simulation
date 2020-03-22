@@ -63,7 +63,7 @@ class Controller():
             total_remaining_time += len(each_AGV_Object.GetSchedule())
             
         # Re-Scheduling
-        if total_remaining_time == 0:
+        if total_remaining_time < 10:
             for each_new_orders in self.new_orders:
                 self.ShelfUpdate(each_new_orders)
             self.scheduling_algorithm.Update(self.new_orders)
@@ -79,4 +79,3 @@ class Controller():
         # Shelves update
         for each_shelf_ID, each_shelf_Object in self.shelves.items():
             each_shelf_Object.update()
-            
