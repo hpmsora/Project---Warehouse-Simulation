@@ -14,6 +14,8 @@ import copy as cp
 import itertools as itt
 import collections as col
 
+import multiprocessing as mp
+
 class Algorithms_PlathPlanning():
 
     AGVs = None
@@ -27,14 +29,14 @@ class Algorithms_PlathPlanning():
     def __init__(self, _AGVs, _shelves, _tools, _path_planning_type):
         self.AGVs = _AGVs
         self.shelves = _shelves
-        self.tools = _tools
-
         self.path_planning_type = _path_planning_type
+        
+        self.tools = _tools
 
     #--------------------------------------------------
 
-    # Q Learning
-    def Q_Learning(self, _new_schedules, num_episodes = 2000, discount_factor = 1.0, alpha = 0.6, epsilon = 0.1, num_actions = 4):
+    # Q-Learning
+    def Q_Learning(self, _new_schedules, num_episodes = 1000, discount_factor = 1.0, alpha = 0.6, epsilon = 0.1, num_actions = 4):
         print("[Path Planning]\t Q-Learning starting")
 
         AGVs_paths = []
@@ -52,7 +54,7 @@ class Algorithms_PlathPlanning():
         #    pos = self.AGVs[each_AGVs].GetCurrentPos()
         #    self.tools.UpdateWMap(w_map, 'AGV', pos, AGV_ID = each_AGVs)
         #-------
-
+        
         for each_AGV_ID, each_new_schedules in _new_schedules:
             each_AGV = self.AGVs[each_AGV_ID]
             Q_tables = []
@@ -73,55 +75,33 @@ class Algorithms_PlathPlanning():
             AGVs_Q_table[each_AGV_ID] = (each_AGV.GetLastScheduledPos(), Q_tables)
             AGVs_Order.append(each_AGV_ID)
 
-        reset_map = cp.deepcopy(w_map)
-        
+        reset_w_map = cp.deepcopy(w_map)
+
         # Movements
+        #-------Multiprocessing-Start
+        jobs = []
+        manager = mp.Manager()
+        AGVs_paths = manager.list()
         for each_AGVs_ID in AGVs_Order:
-            AGV_path = []
             
-            each_last_pos, each_Q_table = AGVs_Q_table[each_AGVs_ID]
-            starting_state = each_last_pos
-            
-            for each_target, each_each_policy, each_each_Q_table in each_Q_table:
-                target = []
-                target_order, target_ID = each_target
-                
-                if target_order == "Depot":
-                    target += self.tools.GetDepotsByID(target_ID)
-                else:
-                    target += self.tools.GetShelvesDepotsPosByID(target_ID)
-                
-                # Episodes
-                for each_episodes in range(num_episodes):
-                    w_map = cp.deepcopy(reset_map)
-                    state = starting_state
-
-                    for t in itt.count():
-                        action_probs = each_each_policy(state)
-                        action = np.random.choice(np.arange(len(action_probs)), p = action_probs)
-
-                        next_state, reward, done = self.tools.Step_Action(state, action, w_map, target)
-
-                        next_action = self.tools.Arg_Maximum(each_each_Q_table[next_state])
-                        td_target = reward + discount_factor * each_each_Q_table[next_state][next_action]
-                        td_delta = td_target - each_each_Q_table[state][action]
-                        each_each_Q_table[state][action] += alpha * td_delta
-
-                        if done:
-                            break
-                        state = next_state
-                
-                path = self.tools.GetPathByQTable(each_each_Q_table, starting_state, target)
-                starting_state = path[-1]
-                AGV_path += path
-
-                each_each_Q_table.clear() # Clear memory
-            
-            AGVs_paths.append((each_AGVs_ID, AGV_path))
+            p = mp.Process(target=self.Q_Learning_AGV,
+                           args=(each_AGVs_ID,
+                                 AGVs_Q_table,
+                                 reset_w_map,
+                                 num_episodes,
+                                 discount_factor,
+                                 alpha,
+                                 AGVs_paths))
+            jobs.append(p)
+            p.start()
+        for each_jobs in jobs:
+            each_jobs.join()
+        #-------Multiprocessing-End
         
         print('[Path Planning]\t Path planning finished')
         return AGVs_paths
 
+    # Q-Learning greedy policy
     def Q_Learning_Epsilon_Greedy_Policy(self, _Q_table, _epsilon, _num_actions):
         def policy_funcion(state):
             action_probs = np.ones(_num_actions, dtype = float) * _epsilon / _num_actions
@@ -130,16 +110,52 @@ class Algorithms_PlathPlanning():
             action_probs[best_action] += (1.0 - _epsilon)
             return action_probs
         return policy_funcion
-        
-    def print_wmap(self, w_map):
-        w = len(w_map)
-        h = len(w_map[0])
-        print(h)
-        for each_h in range(h):
-            row = ''
-            for each_w in range(w):
-                row += str(w_map[each_w][each_h]) + '\t'
-            print(row)
+
+    # Q-Learning
+    def Q_Learning_AGV(self, _each_AGVs_ID, _AGVs_Q_table, _reset_w_map, _num_episodes, _discount_factor, _alpha, _AGVs_paths):
+        AGV_path = []
+            
+        each_last_pos, each_Q_table = _AGVs_Q_table[_each_AGVs_ID]
+        starting_state = each_last_pos
+            
+        for each_target, each_each_policy, each_each_Q_table in each_Q_table:
+            target = []
+            target_order, target_ID = each_target
+                
+            if target_order == "Depot":
+                target += self.tools.GetDepotsByID(target_ID)
+            else:
+                target += self.tools.GetShelvesDepotsPosByID(target_ID)
+                
+            # Episodes
+            for each_episodes in range(_num_episodes):
+                w_map = cp.deepcopy(_reset_w_map)
+                state = starting_state
+
+                for t in itt.count():
+                    action_probs = each_each_policy(state)
+                    action = np.random.choice(np.arange(len(action_probs)), p = action_probs)
+                    
+                    next_state, reward, done = self.tools.Step_Action(state, action, w_map, target)
+                    
+                    next_action = self.tools.Arg_Maximum(each_each_Q_table[next_state])
+                    td_target = reward + _discount_factor * each_each_Q_table[next_state][next_action]
+                    td_delta = td_target - each_each_Q_table[state][action]
+                    each_each_Q_table[state][action] += _alpha * td_delta
+                
+                    if done:
+                        break
+                    state = next_state
+                
+            path = self.tools.GetPathByQTable(each_each_Q_table, starting_state, target)
+            starting_state = path[-1]
+            AGV_path += path
+            
+            each_each_Q_table.clear() # Clear memory
+
+        print("[Path Planning]\t Planning ...")
+
+        _AGVs_paths.append((_each_AGVs_ID, AGV_path))
         
     
     #--------------------------------------------------

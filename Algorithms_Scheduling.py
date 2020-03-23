@@ -29,9 +29,11 @@ class Algorithms_Scheduling():
     def __init__(self, _AGVs, _shelves, _tools, _scheduling_type, _path_planning_type, _evaluation_type):
         self.AGVs = _AGVs
         self.shelves = _shelves
-        self.tools = _tools
-
         self.scheduling_type = _scheduling_type
+
+        self.tools = _tools
+        self.path_planning_algorithm = None
+        self.evaluation_algorithm = None
         self.SetPathPlanningAlgorithm(_path_planning_type)
         self.SetEvaluationAlgorithm(_evaluation_type)
 
@@ -81,6 +83,5 @@ class Algorithms_Scheduling():
     def Update(self, _new_orders):
         if self.scheduling_type == "Genetic":
             new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH)
-
-        for each_AGV, each_new_path in new_paths:
-            self.AGVs[each_AGV].AddSchedule(each_new_path)
+            
+        return new_paths

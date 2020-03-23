@@ -66,7 +66,10 @@ class Controller():
         if total_remaining_time < 10:
             for each_new_orders in self.new_orders:
                 self.ShelfUpdate(each_new_orders)
-            self.scheduling_algorithm.Update(self.new_orders)
+            new_paths = self.scheduling_algorithm.Update(self.new_orders)
+
+            for each_AGV, each_new_path in new_paths:
+                self.AGVs[each_AGV].AddSchedule(each_new_path)
             #self.SetAGVScheule(self.AGVs)
 
             self.new_orders = []

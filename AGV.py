@@ -7,6 +7,8 @@
 #
 ###############################
 
+import copy as cp
+
 class AGV:
 
     ID = None
@@ -28,6 +30,9 @@ class AGV:
         self.current_pos = _pos
         self.tools = _tools
         self.previous_schedule = self.current_pos
+
+        self.schedule = []
+        self.order = []
 
         self.AddSchedule([_pos])
 
