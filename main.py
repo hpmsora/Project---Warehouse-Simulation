@@ -11,15 +11,17 @@ import SimulationGUI as sgui
 import tkinter as tk
 
 # Global Variables
-WAREHOUSE_TYPE = 'basic' # Default warehouse type is basic
+WAREHOUSE_TYPE = 'basic_island_wide' # Default warehouse type is basic
 ORDER_TYPE = 'basic'     # Default order type is basic stochastic
 
 NUM_AISLE = 10           # Default 2 aisle
-NUM_ROWS  = 10           # Default 5 rows each aisle
+NUM_ROWS  = 28           # Default 5 rows each aisle
 SQUARE_SIZE = 20         # Default 64 per each square
 
+DEPOT_TYPE = ['BottomCenter4_Above', 'BottomLeftQ4_Above', 'BottomRightQ4_Above']
+
 ORDER_PER_BATCH = 1     # Default average number of batch per order is 10
-NUM_ORDER = 5          # Default number of order at once is 100
+NUM_ORDER = 30          # Default number of order at once is 100
 
 NUM_AGVs = 1             # Default 20 AGVs
 
@@ -33,8 +35,8 @@ def Display_SimulationBoard():
     print(root.title)
     
     Board = sgui.SimulationBoard(root, num_aisles=NUM_AISLE, num_rows=NUM_ROWS, square_size=SQUARE_SIZE)
-    Board.GridBuilding(warehouse_type = 'basic')
-    Board.DepotBuilding()
+    Board.GridBuilding(warehouse_type = WAREHOUSE_TYPE)
+    Board.DepotBuilding(depot_type = DEPOT_TYPE)
     Board.AGVDepotBuilding()
 
     Board.AddAGV(NUM_AGVs)
