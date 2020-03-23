@@ -4,8 +4,8 @@
 #
 # Won Yong Ha
 #
-# V.1.0
-# Collision with wall free only.
+# V.1.1 - Parallel computing
+# V.1.0 - Collision with wall free only.
 #
 ###############################
 
