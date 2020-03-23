@@ -8,6 +8,7 @@
 ###############################
 
 import numpy as np
+import random as rnd
 import copy as cp
 
 class Tools():
@@ -29,7 +30,7 @@ class Tools():
     ABS_NO_ACC = -50
     TEMP_NO_ACC = -10
     OPEN = 0
-    TARGET = 150
+    TARGET = 200
     DEPOT_PLACE = 200
     
     shelves_depots = {}
@@ -139,12 +140,12 @@ class Tools():
         if _action == 0:   # Up
             posY += 1
         elif _action == 1: # Down
-            posY -= 1 
+            posY -= 1
         elif _action == 2: # Right
             posX += 1
         elif _action == 3: # Left
             posX -= 1
-
+            
         return (posX, posY)
 
     # Action Movement
@@ -153,15 +154,16 @@ class Tools():
         done = False
 
         next_pos = self.Next_Action(_pos, _action)
-        posX, posY = _pos
-        
-        if _w_map[posX][posY] == self.ABS_NO_ACC:
-            reward = self.ABS_NO_ACC
-            done = True
-        elif next_pos in _target:
+        posX, posY = next_pos
+
+        if next_pos in _target:
             reward = self.TARGET
             done = True
-
+            
+        elif _w_map[posX][posY] == self.ABS_NO_ACC:
+            reward = self.ABS_NO_ACC
+            done = True
+            
         return next_pos, reward, done
 
     # Get path by q-table
@@ -169,13 +171,27 @@ class Tools():
         path = []
 
         state = _start_point
-
+        
         while not state in _end_point:
             action = np.argmax(_q_table[state])
             state = self.Next_Action(state, action)
+            
             path.append(state)
-            print("A")
             
         path.append(state)
 
         return path
+
+    #--------------------------------------------------
+    # Math Tools
+    def Arg_Maximum(self, _state_actions):
+        max_index_list = []
+        max_value = _state_actions[0]
+        for index, value in enumerate(_state_actions):
+            if value > max_value:
+                max_index_list.clear()
+                max_value = value
+                max_index_list.append(index)
+            elif value == max_value:
+                max_index_list.append(index)
+        return rnd.choice(max_index_list)

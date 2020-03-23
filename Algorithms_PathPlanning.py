@@ -14,8 +14,6 @@ import copy as cp
 import itertools as itt
 import collections as col
 
-import plotting as plt
-
 class Algorithms_PlathPlanning():
 
     AGVs = None
@@ -36,7 +34,7 @@ class Algorithms_PlathPlanning():
     #--------------------------------------------------
 
     # Q Learning
-    def Q_Learning(self, _new_schedules, num_episodes = 1000, discount_factor = 1.0, alpha = 0.6, epsilon = 0.1, num_actions = 4):
+    def Q_Learning(self, _new_schedules, num_episodes = 2000, discount_factor = 1.0, alpha = 0.6, epsilon = 0.1, num_actions = 4):
         print("[Path Planning]\t Q-Learning starting")
 
         AGVs_paths = []
@@ -92,26 +90,19 @@ class Algorithms_PlathPlanning():
                     target += self.tools.GetDepotsByID(target_ID)
                 else:
                     target += self.tools.GetShelvesDepotsPosByID(target_ID)
-
-                stats = plt.EpisodeStats(
-                    episode_lengths = np.zeros(num_episodes),
-                    episode_rewards = np.zeros(num_episodes))
                 
                 # Episodes
                 for each_episodes in range(num_episodes):
                     w_map = cp.deepcopy(reset_map)
                     state = starting_state
-                    
+
                     for t in itt.count():
                         action_probs = each_each_policy(state)
-                        action = np.random.choice(np.arange(len(action_probs)), p =action_probs)
+                        action = np.random.choice(np.arange(len(action_probs)), p = action_probs)
 
                         next_state, reward, done = self.tools.Step_Action(state, action, w_map, target)
 
-                        stats.episode_rewards[each_episodes] += reward
-                        stats.episode_lengths[each_episodes] = t
-
-                        next_action = np.argmax(each_each_Q_table[next_state])
+                        next_action = self.tools.Arg_Maximum(each_each_Q_table[next_state])
                         td_target = reward + discount_factor * each_each_Q_table[next_state][next_action]
                         td_delta = td_target - each_each_Q_table[state][action]
                         each_each_Q_table[state][action] += alpha * td_delta
@@ -119,17 +110,23 @@ class Algorithms_PlathPlanning():
                         if done:
                             break
                         state = next_state
+                
                 path = self.tools.GetPathByQTable(each_each_Q_table, starting_state, target)
-                state = path[-1]
+                starting_state = path[-1]
                 AGV_path += path
+
+                each_each_Q_table.clear() # Clear memory
+            
             AGVs_paths.append((each_AGVs_ID, AGV_path))
+        
+        print('[Path Planning]\t Path planning finished')
         return AGVs_paths
 
     def Q_Learning_Epsilon_Greedy_Policy(self, _Q_table, _epsilon, _num_actions):
         def policy_funcion(state):
             action_probs = np.ones(_num_actions, dtype = float) * _epsilon / _num_actions
 
-            best_action = np.argmax(_Q_table[state])
+            best_action = self.tools.Arg_Maximum(_Q_table[state])
             action_probs[best_action] += (1.0 - _epsilon)
             return action_probs
         return policy_funcion

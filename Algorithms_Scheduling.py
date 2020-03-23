@@ -56,10 +56,14 @@ class Algorithms_Scheduling():
         while epoch_count < _max_epoch:
             epoch_count += 1
         print("[Scheduling]\t Genetic algorithm scheduling done.")
+
         #---------------------------
         # Example hard coding
         new_schedules = []
         num_AGVs = 0
+
+        DepotTypeID = 421
+        
         for each_AGV in self.AGVs:
             new_schedules.append((each_AGV, []))
             num_AGVs += 1
@@ -67,7 +71,7 @@ class Algorithms_Scheduling():
         for index, each_new_order in enumerate(_new_orders):
             order_num, orders = each_new_order
             AGVs_index = index % num_AGVs
-            new_schedules[AGVs_index][1].append((order_num, orders, 3)) # 3 -> depot ID
+            new_schedules[AGVs_index][1].append((order_num, orders, DepotTypeID)) # 3 -> depot ID
         #---------------------------
         
         new_paths = self.path_planning_algorithm.Update(new_schedules)
