@@ -26,18 +26,6 @@ class Controller():
         self.tools = _tools
 
         self.SetSchedulingAlgorithm(scheduling_type, path_planning_type, evaluation_type)
-        
-    # Set schedule
-    def SetAGVScheule(self, _AGVs):
-        route = []
-        for i in range(2, 15):
-            route.append((2,i))
-
-        count = 2
-        for each_AGV in _AGVs:
-            _AGVs[each_AGV].SetSchedule(route)
-            _AGVs[each_AGV].AddSchedule([(3,2,1)])
-            count += 1
 
     # Set scheduling algorithm
     def SetSchedulingAlgorithm(self, _scheduling_type, _path_planning_type, _evaluation_type):
@@ -66,8 +54,10 @@ class Controller():
         if total_remaining_time < 10:
             for each_new_orders in self.new_orders:
                 self.ShelfUpdate(each_new_orders)
-            self.scheduling_algorithm.Update(self.new_orders)
-            #self.SetAGVScheule(self.AGVs)
+            new_paths = self.scheduling_algorithm.Update(self.new_orders)
+
+            for each_AGV, each_new_path in new_paths:
+                self.AGVs[each_AGV].AddSchedule(each_new_path)
 
             self.new_orders = []
         

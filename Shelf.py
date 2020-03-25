@@ -25,8 +25,8 @@ class Shelf():
 
         self.status = "nothing"
         self.On_AGV = None
-        self.tools = _tools
         self.orders = []
+        self.tools = _tools
     
     # Add order
     def AddOrder(self, _add_order):

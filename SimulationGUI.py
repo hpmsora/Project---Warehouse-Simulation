@@ -4,6 +4,7 @@
 #
 # Won Yong Ha
 #
+# V.1.2 - Added multi AGVs
 # V.1.1 - Added wide
 # V.1.0 - General building
 #
@@ -33,6 +34,8 @@ class SimulationBoard(tk.Frame):
     background_color = 'grey'
     square_size = 64
 
+    movement_speed = 200
+
     # Internal Variables
     depot_area = []
     AGV_depot_area = []
@@ -49,11 +52,12 @@ class SimulationBoard(tk.Frame):
         return (self.num_aisles * self.square_size, self.num_rows * self.square_size)
 
     # Constructor
-    def __init__(self, _parent, num_aisles=2, num_rows=5, square_size=64):
+    def __init__(self, _parent, num_aisles=2, num_rows=5, square_size=64, movement_speed=200):
         self.parent = _parent
         self.num_aisles = num_aisles
         self.num_rows = num_rows
         self.square_size = square_size
+        self.movement_speed = movement_speed
         
     # Grid initialize with border cells function
     def GridInit(self):
@@ -236,7 +240,6 @@ class SimulationBoard(tk.Frame):
                 for each_AGV in range(AGV_size):
                     self.AGV_depot_area.append((int(self.grid_width * (2 * each_AGV + 1) / (AGV_size * 2)), 1 + above))
 
-        print(self.AGV_depot_area)
         for each_AGV_depot in self.AGV_depot_area:
             name = self.tools.CellNaming(each_AGV_depot[0], each_AGV_depot[1])
             self.tools.ChangeColorObject(name, color='red')
@@ -253,9 +256,13 @@ class SimulationBoard(tk.Frame):
     # AGV building function
     def AddAGV(self, num=5):
         num_AGVs = len(self.AGVs)
-        pos = self.AGV_depot_area[0]
-        init_posX, init_posY = pos
-        for each_newAGV in range(0, num):
+        for index, each_newAGV in enumerate(range(num)):
+
+            if index >= len(self.AGV_depot_area):
+                break;
+            
+            pos = self.AGV_depot_area[index]
+            init_posX, init_posY = pos
             newAGV_ID = self.AGVBuilding("AGV", init_posX,
                                          init_posY,
                                          color='yellow')
@@ -272,7 +279,7 @@ class SimulationBoard(tk.Frame):
                                         order_type=order_type,
                                         order_per_batch=order_per_batch,
                                         num_order=num_order,
-                                        order_gap = 30)
+                                        order_gap = 10)
 
     # Add order to list of order function
     def AddOrder(self, _order):
@@ -286,5 +293,5 @@ class SimulationBoard(tk.Frame):
         self.new_order = self.order_list.pop(0)
         
         self.controller.Update(self.new_order)
-        self.canvas.after(200, self.Update)
+        self.canvas.after(self.movement_speed, self.Update)
         

@@ -135,7 +135,7 @@ class Tools():
 
     # Get next state by action
     def Next_Action(self, _pos, _action):
-        posX, posY = _pos
+        posX, posY, *order = _pos
 
         if _action == 0:   # Up
             posY += 1
@@ -154,7 +154,7 @@ class Tools():
         done = False
 
         next_pos = self.Next_Action(_pos, _action)
-        posX, posY = next_pos
+        posX, posY, *order = next_pos
 
         if next_pos in _target:
             reward = self.TARGET
@@ -167,7 +167,7 @@ class Tools():
         return next_pos, reward, done
 
     # Get path by q-table
-    def GetPathByQTable(self, _q_table, _start_point, _end_point):
+    def GetPathByQTable(self, _q_table, _start_point, _end_point, _order):
         path = []
 
         state = _start_point
@@ -178,7 +178,12 @@ class Tools():
             
             path.append(state)
             
-        path.append(state)
+        if not _order[0] == 'Depot':
+            posX, posY = state
+            state = (posX, posY, _order)
+            path.append(state)
+        else:
+            path.append(state)
 
         return path
 

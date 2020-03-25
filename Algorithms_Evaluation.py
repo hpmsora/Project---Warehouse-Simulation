@@ -8,6 +8,8 @@
 #
 ###############################
 
+import sys
+
 class Algorithms_Evaluation():
 
     AGVs = None
@@ -28,42 +30,50 @@ class Algorithms_Evaluation():
     #--------------------------------------------------
     
     # Balance Include
-    def General_n_Balance(self):
+    def General_n_Balance(self, _new_path):
         ITC = {}
         max_ITC = 1
-        min_ITC = 0
+        min_ITC = sys.maxsize
         total_cost = 0
         max_order = 0
         total_order = 0
 
-        for each_AGV in self.AGVs.values():
-            key = each_AGV.GetID()
-            each_AGV_num_orders = len(each_AGV.GetOrder())
-            cost = len(each_AGV.GetSchedule()) + each_AGV_num_orders
-            ITC[key] = cost
+        
+        for each_AGV_ID, each_path in _new_path:
+            each_AGV_num_orders = 0
+            each_AGV_len_schedule = 0
+            
+            for each_pos_path in each_path:
+                if len(each_pos_path) == 3:
+                    each_AGV_num_orders += 1
+                each_AGV_len_schedule += 1
+                    
+            cost = each_AGV_len_schedule + each_AGV_num_orders
+            ITC[each_AGV_ID] = cost
             
             if each_AGV_num_orders > max_order:
                 max_order = each_AGV_num_orders
             total_order += each_AGV_num_orders
         
-        for each_key in ITC.keys():
-            value = ITC[each_key]
+        for each_key, each_value in ITC.items():
 
-            if value > max_ITC:
-                max_ITC = value
-            elif value < min_ITC:
-                min_ITC = value
-            total_cost += value
+            if each_value > max_ITC:
+                max_ITC = each_value
+            if each_value < min_ITC:
+                min_ITC = each_value
+            total_cost += each_value
 
         TT = max_ITC
         TTC = total_cost
         BU = min_ITC / max_ITC
 
-        return max_order/TT + total_order/TTC + BU
+        value = max_order/TT + total_order/TTC + BU
+        return (value, TT, TTC, BU)
 
     #--------------------------------------------------
 
     # Update
-    def Update(self):
+    def Update(self, _new_path):
+        print("[Evaluating] Processing ...")
         if self.EvaluationType == "General_n_Balance":
-            return self.General_n_Balance()
+            return self.General_n_Balance(_new_path)

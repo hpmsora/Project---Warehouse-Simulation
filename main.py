@@ -4,6 +4,7 @@
 #
 # Won Yong Ha
 #
+# V.1.0 - Genetic Algorithm
 #
 ###############################
 
@@ -14,8 +15,8 @@ import tkinter as tk
 WAREHOUSE_TYPE = 'basic_island_wide' # Default warehouse type is basic
 ORDER_TYPE = 'basic'     # Default order type is basic stochastic
 
-NUM_AISLE = 10           # Default 2 aisle
-NUM_ROWS  = 28           # Default 5 rows each aisle
+NUM_AISLE = 8           # Default 2 aisle
+NUM_ROWS  = 15           # Default 5 rows each aisle
 SQUARE_SIZE = 20         # Default 64 per each square
 
 DEPOT_TYPE = ['BottomCenter4_Above', 'BottomLeftQ4_Above', 'BottomRightQ4_Above']
@@ -23,7 +24,9 @@ DEPOT_TYPE = ['BottomCenter4_Above', 'BottomLeftQ4_Above', 'BottomRightQ4_Above'
 ORDER_PER_BATCH = 1     # Default average number of batch per order is 10
 NUM_ORDER = 30          # Default number of order at once is 100
 
-NUM_AGVs = 1             # Default 20 AGVs
+NUM_AGVs = 5             # Default 5 AGVs
+
+MOVEMENT_SPEED = 50
 
 # Fixed Variable
 PADDING_SIZE = 10
@@ -34,12 +37,16 @@ def Display_SimulationBoard():
     root.title("Warehouse Simulation")
     print(root.title)
     
-    Board = sgui.SimulationBoard(root, num_aisles=NUM_AISLE, num_rows=NUM_ROWS, square_size=SQUARE_SIZE)
+    Board = sgui.SimulationBoard(root,
+                                 num_aisles=NUM_AISLE,
+                                 num_rows=NUM_ROWS,
+                                 square_size=SQUARE_SIZE,
+                                 movement_speed=MOVEMENT_SPEED)
     Board.GridBuilding(warehouse_type = WAREHOUSE_TYPE)
     Board.DepotBuilding(depot_type = DEPOT_TYPE)
     Board.AGVDepotBuilding()
 
-    Board.AddAGV(NUM_AGVs)
+    Board.AddAGV(num = NUM_AGVs)
     Board.SetController()
     Board.SetOrder(order_type='basic', order_per_batch=ORDER_PER_BATCH, num_order=NUM_ORDER)
     
