@@ -43,7 +43,7 @@ class Algorithms_PlathPlanning():
         
         AGVs_Q_table = {}
         AGVs_Order = []
-
+        
         # Get grid map to 2d map
         w_map = self.tools.GetWMap()
 
@@ -111,7 +111,7 @@ class Algorithms_PlathPlanning():
             return action_probs
         return policy_funcion
 
-    # Q-Learning
+    # Q-Learning each job function
     def Q_Learning_AGV(self, _each_AGVs_ID, _AGVs_Q_table, _reset_w_map, _num_episodes, _discount_factor, _alpha, _AGVs_paths):
         AGV_path = []
             
@@ -121,7 +121,7 @@ class Algorithms_PlathPlanning():
         for each_target, each_each_policy, each_each_Q_table in each_Q_table:
             target = []
             target_order, target_ID = each_target
-                
+            
             if target_order == "Depot":
                 target += self.tools.GetDepotsByID(target_ID)
             else:
@@ -147,13 +147,13 @@ class Algorithms_PlathPlanning():
                         break
                     state = next_state
                 
-            path = self.tools.GetPathByQTable(each_each_Q_table, starting_state, target)
+            path = self.tools.GetPathByQTable(each_each_Q_table, starting_state, target, each_target)
             starting_state = path[-1]
             AGV_path += path
             
             each_each_Q_table.clear() # Clear memory
 
-        print("[Path Planning]\t Planning ...")
+        print("[Path Planning]\t Planning AGV - " + str(_each_AGVs_ID) + " Finished!")
 
         _AGVs_paths.append((_each_AGVs_ID, AGV_path))
         

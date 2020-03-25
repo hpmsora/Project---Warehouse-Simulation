@@ -77,6 +77,12 @@ class Algorithms_Scheduling():
         #---------------------------
         
         new_paths = self.path_planning_algorithm.Update(new_schedules)
+
+        # Evaluation Process
+        eval_value = self.evaluation_algorithm.Update(new_paths)
+
+        print(eval_value)
+        
         return new_paths
             
     # Update

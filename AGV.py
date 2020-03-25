@@ -19,7 +19,7 @@ class AGV:
     schedule = []
     #
     # [(_, _)...]    Xpos, Ypos
-    # [(_, _, _)...] Xpos, Ypos, orderID
+    # [(_, _, (_, _))...] Xpos, Ypos, (orderID, shelf_ID)
     #
     order = []
     tools = None
