@@ -35,6 +35,15 @@ class Algorithms_PlathPlanning():
         self.tools = _tools
         self.reserve_paths = {}
 
+    # Determine reserve path is full
+    def Is_Reserve_Full(self):
+        num_shelves = len(self.shelves)
+        num_AGVs = len(self.AGVs)
+        if len(self.reserve_paths) >= num_shelves * 2 + num_AGVs:
+            return True
+        else:
+            return False
+
     #--------------------------------------------------
 
     # Q-Learning
@@ -107,6 +116,7 @@ class Algorithms_PlathPlanning():
         #-------Multiprocessing-End
         
         print('[Path Planning]\t Path planning finished')
+        print('[Path Planning]\t Reserved path: ' + str(len(self.reserve_paths)))
         return AGVs_paths
 
     # Q-Learning greedy policy

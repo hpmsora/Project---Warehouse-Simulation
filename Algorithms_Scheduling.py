@@ -78,8 +78,12 @@ class Algorithms_Scheduling():
         # Evaluation Process
         eval_value = self.evaluation_algorithm.Update(new_paths)
 
-        while epoch_count < _max_epoch:
-            epoch_count += 1
+        is_full_reserved_path = self.path_planning_algorithm.Is_Reserve_Full()
+        if is_full_reserved_path:
+            while epoch_count < _max_epoch:
+                
+            
+                epoch_count += 1
         print("[Scheduling]\t Genetic algorithm scheduling done.")
 
         print(eval_value)
