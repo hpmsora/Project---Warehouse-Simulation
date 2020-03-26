@@ -170,20 +170,15 @@ class Tools():
     def GetPathByQTable(self, _q_table, _start_point, _end_point, _order):
         path = []
 
-        state = _start_point
+        action = np.argmax(_q_table[_start_point])
+        state = self.Next_Action(_start_point, action)
         
         while not state in _end_point:
+            path.append(state)
             action = np.argmax(_q_table[state])
             state = self.Next_Action(state, action)
             
-            path.append(state)
-            
-        if not _order[0] == 'Depot':
-            posX, posY = state
-            state = (posX, posY, _order)
-            path.append(state)
-        else:
-            path.append(state)
+        path.append(state)
 
         return path
 

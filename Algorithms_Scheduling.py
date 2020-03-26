@@ -54,32 +54,33 @@ class Algorithms_Scheduling():
         epoch_count = 0
 
         print("[Scheduling]\t New orders for scheduling is: " + str(_new_orders))
-        
-        while epoch_count < _max_epoch:
-            epoch_count += 1
-        print("[Scheduling]\t Genetic algorithm scheduling done.")
 
-        #---------------------------
-        # Example hard coding
-        new_schedules = []
+        
+        new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
         num_AGVs = 0
 
-        DepotTypeID = 421
-        
+        # Add depot place to new orders
+        depot_type_ID = 421  # One depot place for Version 1.0
+        for index, each_new_orders in enumerate(_new_orders):
+            order_num, orders = each_new_orders
+            _new_orders[index] = (order_num, orders, depot_type_ID)
+            
+        # Initial random scheduling 
         for each_AGV in self.AGVs:
             new_schedules.append((each_AGV, []))
             num_AGVs += 1
-        
         for index, each_new_order in enumerate(_new_orders):
-            order_num, orders = each_new_order
             AGVs_index = index % num_AGVs
-            new_schedules[AGVs_index][1].append((order_num, orders, DepotTypeID)) # 3 -> depot ID
-        #---------------------------
-        
+            new_schedules[AGVs_index][1].append(each_new_order)
+
         new_paths = self.path_planning_algorithm.Update(new_schedules)
 
         # Evaluation Process
         eval_value = self.evaluation_algorithm.Update(new_paths)
+
+        while epoch_count < _max_epoch:
+            epoch_count += 1
+        print("[Scheduling]\t Genetic algorithm scheduling done.")
 
         print(eval_value)
         

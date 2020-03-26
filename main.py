@@ -19,14 +19,14 @@ NUM_AISLE = 8           # Default 2 aisle
 NUM_ROWS  = 15           # Default 5 rows each aisle
 SQUARE_SIZE = 20         # Default 64 per each square
 
-DEPOT_TYPE = ['BottomCenter4_Above', 'BottomLeftQ4_Above', 'BottomRightQ4_Above']
+DEPOT_TYPE = ['BottomCenter1_Above', 'BottomLeftQ4_Above', 'BottomRightQ4_Above']
 
 ORDER_PER_BATCH = 1     # Default average number of batch per order is 10
 NUM_ORDER = 30          # Default number of order at once is 100
 
 NUM_AGVs = 5             # Default 5 AGVs
 
-MOVEMENT_SPEED = 50
+MOVEMENT_SPEED = 20
 
 # Fixed Variable
 PADDING_SIZE = 10
@@ -43,7 +43,7 @@ def Display_SimulationBoard():
                                  square_size=SQUARE_SIZE,
                                  movement_speed=MOVEMENT_SPEED)
     Board.GridBuilding(warehouse_type = WAREHOUSE_TYPE)
-    Board.DepotBuilding(depot_type = DEPOT_TYPE)
+    Board.DepotBuilding(depot_type = DEPOT_TYPE, above=0, depth=1)
     Board.AGVDepotBuilding()
 
     Board.AddAGV(num = NUM_AGVs)
