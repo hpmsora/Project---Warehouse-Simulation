@@ -74,6 +74,6 @@ class Algorithms_Evaluation():
 
     # Update
     def Update(self, _new_path):
-        print("[Evaluating] Processing ...")
+        #print("[Evaluating]\t Processing ...")
         if self.EvaluationType == "General_n_Balance":
             return self.General_n_Balance(_new_path)

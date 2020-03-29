@@ -132,7 +132,7 @@ class SimulationBoard(tk.Frame):
                                           color='white')
                         
         elif warehouse_type == 'basic_island_wide':
-            print("[Map]\t Basic island wide map")
+            print("[Map]\t\t Basic island wide map")
             road_width = 2
             island_height = 3
             upper_road_height = 4
@@ -196,6 +196,12 @@ class SimulationBoard(tk.Frame):
                              (int(self.grid_width/2-1), self.grid_active_height-2)]
                 self.depot_area += depot_pos
                 self.tools.SetDepots(depot_pos, depot_ID)
+            elif each_depot_type == 'BottomCenter1_Above':
+                depot_ID = 421
+                for each_depth in range(depth):
+                    depot_pos = [(int(self.grid_width/2), self.grid_active_height - 2 - above - each_depth)]
+                    self.depot_area += depot_pos
+                    self.tools.SetDepots(depot_pos, depot_ID)
             elif each_depot_type == 'BottomCenter4_Above':
                 depot_ID = 421
                 for each_depth in range(depth):
@@ -279,7 +285,7 @@ class SimulationBoard(tk.Frame):
                                         order_type=order_type,
                                         order_per_batch=order_per_batch,
                                         num_order=num_order,
-                                        order_gap = 10)
+                                        order_gap = 5)
 
     # Add order to list of order function
     def AddOrder(self, _order):
