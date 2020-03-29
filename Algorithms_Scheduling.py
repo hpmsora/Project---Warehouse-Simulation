@@ -77,7 +77,7 @@ class Algorithms_Scheduling():
             populations = []
             populations_schedules = []
             generation = 0
-            population_size = 100
+            population_size = 10
             AGVs_order = []
 
             AGVs_cuts = []
@@ -124,7 +124,7 @@ class Algorithms_Scheduling():
                 eval_value = self.evaluation_algorithm.Update(new_paths)
                 print(str(epoch_count) + ":\t" + str(eval_value))
 
-                if epoch_count > _max_epoch:
+                if epoch_count >= _max_epoch:
                     break
 
                 new_populations = []
