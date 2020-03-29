@@ -48,7 +48,7 @@ class Algorithms_PlathPlanning():
 
     # Q-Learning
     def Q_Learning(self, _new_schedules, num_episodes = 1000, discount_factor = 1.0, alpha = 0.6, epsilon = 0.1, num_actions = 4):
-        print("[Path Planning]\t Q-Learning starting")
+        #print("[Path Planning]\t Q-Learning starting")
 
         AGVs_paths = []
         
@@ -115,8 +115,6 @@ class Algorithms_PlathPlanning():
         self.reserve_paths.update(new_paths)
         #-------Multiprocessing-End
         
-        print('[Path Planning]\t Path planning finished')
-        print('[Path Planning]\t Reserved path: ' + str(len(self.reserve_paths)))
         return AGVs_paths
 
     # Q-Learning greedy policy
@@ -154,11 +152,9 @@ class Algorithms_PlathPlanning():
 
             if path_key in _reserve_paths:
                 path = _reserve_paths[path_key]
-                print("[Path Planning]\t Using saved path")
             elif path_key_reverse in _reserve_paths:
                 path = _reserve_paths[path_key_reverse]
                 path.reverse()
-                print("[Path Planning]\t Using saved path - Reverse")
             else:
                 # Episodes
                 for each_episodes in range(_num_episodes):
@@ -182,8 +178,6 @@ class Algorithms_PlathPlanning():
                 path = self.tools.GetPathByQTable(each_each_Q_table, starting_state, target, each_target)
 
                 _new_paths[path_key] = path
-                
-                print("[Path Planning]\t Created a new path - " + str(path_key))
 
             if not target_order == 'Depot':
                 posX, posY, *order = path[-1]
@@ -194,7 +188,7 @@ class Algorithms_PlathPlanning():
             
             each_each_Q_table.clear() # Clear memory
 
-        print("[Path Planning]\t Planning AGV - " + str(_each_AGVs_ID) + " Finished!")
+        #print("[Path Planning]\t Planning AGV - " + str(_each_AGVs_ID) + " Finished!")
 
         _AGVs_paths.append((_each_AGVs_ID, AGV_path))
         

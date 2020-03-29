@@ -132,7 +132,7 @@ class SimulationBoard(tk.Frame):
                                           color='white')
                         
         elif warehouse_type == 'basic_island_wide':
-            print("[Map]\t Basic island wide map")
+            print("[Map]\t\t Basic island wide map")
             road_width = 2
             island_height = 3
             upper_road_height = 4
@@ -285,7 +285,7 @@ class SimulationBoard(tk.Frame):
                                         order_type=order_type,
                                         order_per_batch=order_per_batch,
                                         num_order=num_order,
-                                        order_gap = 15)
+                                        order_gap = 5)
 
     # Add order to list of order function
     def AddOrder(self, _order):
