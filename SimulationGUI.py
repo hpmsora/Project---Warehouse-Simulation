@@ -34,7 +34,7 @@ class SimulationBoard(tk.Frame):
     background_color = 'grey'
     square_size = 64
 
-    movement_speed = 200
+    movement_speed = 50
 
     # Internal Variables
     depot_area = []
@@ -276,8 +276,8 @@ class SimulationBoard(tk.Frame):
         return len(self.AGVs)
 
     # Set controller function
-    def SetController(self, controller_type='Default'):
-        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools)
+    def SetController(self, controller_type='Default', order_independent=False):
+        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, order_independent=order_independent)
 
     # Set order generator function
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):

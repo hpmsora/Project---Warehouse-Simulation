@@ -15,6 +15,8 @@ import numpy as np
 import copy as cp
 import random as rd
 
+import time
+
 class Algorithms_Scheduling():
 
     AGVs = None
@@ -53,16 +55,19 @@ class Algorithms_Scheduling():
     #--------------------------------------------------
     
     # Genetic Algorithm
-    def GeneticAlgorithm(self, _new_orders, _max_epoch, _crossover_rate):
-        
-        #eval_value = self.evaluation_algorithm.Update()
-        epoch_count = 0
-
+    def GeneticAlgorithm(self, _new_orders, _max_generaion, _crossover_rate, _order_independent):
         print("[Scheduling]\t New orders for scheduling is: " + str(_new_orders))
 
-        
         new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
         num_AGVs = 0
+
+        # Order independent
+        if _order_independent:
+            new_orders = []
+            for each_orders_num, each_orders in _new_orders:
+                for each_each_orders in each_orders:
+                    new_orders.append((each_orders_num, [each_each_orders]))
+            _new_orders = new_orders
 
         # Add depot place to new orders
         depot_type_ID = 421  # One depot place for Version 1.0
@@ -77,7 +82,8 @@ class Algorithms_Scheduling():
             populations = []
             populations_schedules = []
             generation = 0
-            population_size = 10
+            max_generation = 200
+            population_size = 200
             AGVs_order = []
 
             AGVs_cuts = []
@@ -97,12 +103,12 @@ class Algorithms_Scheduling():
             # Initial population
             for _ in range(population_size):
                 populations.append(rd.sample(genes, k=genes_size))
-            
+
             while True:
                 for each_populations in populations:
                     each_new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(each_populations, AGVs_order)
-                    each_new_path = self.path_planning_algorithm.Update(each_new_schedule)
-                    each_eval_value, TT, TTC, BU = self.evaluation_algorithm.Update(each_new_path)
+                    each_new_path_lengths = self.path_planning_algorithm.Update(each_new_schedule, length_only = True)
+                    each_eval_value, TT, TTC, BU = self.evaluation_algorithm.Update(each_new_path_lengths, length_only = True)
                     populations_schedules.append((each_eval_value, each_populations))
 
                 #try:
@@ -122,9 +128,9 @@ class Algorithms_Scheduling():
 
                 # Evaluation process
                 eval_value = self.evaluation_algorithm.Update(new_paths)
-                print(str(epoch_count) + ":\t" + str(eval_value))
+                print(str(generation) + ":\t" + str(eval_value))
 
-                if epoch_count >= _max_epoch:
+                if generation >= max_generation:
                     break
 
                 new_populations = []
@@ -145,7 +151,7 @@ class Algorithms_Scheduling():
 
                 populations = new_populations
             
-                epoch_count += 1
+                generation += 1
 
             new_schedules = self.GeneticAlgorithm_PopulationToNewSchedules(populations[0], AGVs_order)
         else:
@@ -220,8 +226,8 @@ class Algorithms_Scheduling():
     #--------------------------------------------------
             
     # Update
-    def Update(self, _new_orders):
+    def Update(self, _new_orders, _order_independent):
         if self.scheduling_type == "Genetic":
-            new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH, self.CROSSOVER_RATE)
+            new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH, self.CROSSOVER_RATE, _order_independent)
             
         return new_paths
