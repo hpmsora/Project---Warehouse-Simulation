@@ -13,6 +13,7 @@ class Controller():
 
     AGVs = None
     shelves = None
+    order_independent = None
 
     # Internal Varialbles
     tools = None
@@ -20,9 +21,10 @@ class Controller():
     new_orders = []
 
     # Constructor
-    def __init__(self, _AGVs, _shelves, _tools, scheduling_type = "Genetic", path_planning_type = "Q_Learning", evaluation_type = "General_n_Balance"):
+    def __init__(self, _AGVs, _shelves, _tools, scheduling_type = "Genetic", path_planning_type = "Q_Learning", evaluation_type = "General_n_Balance", order_independent = False):
         self.AGVs = _AGVs
         self.shelves = _shelves
+        self.order_independent = order_independent
         self.tools = _tools
 
         self.SetSchedulingAlgorithm(scheduling_type, path_planning_type, evaluation_type)
@@ -30,7 +32,7 @@ class Controller():
     # Set scheduling algorithm
     def SetSchedulingAlgorithm(self, _scheduling_type, _path_planning_type, _evaluation_type):
         self.scheduling_algorithm = AlgSch.Algorithms_Scheduling(self.AGVs, self.shelves, self.tools, _scheduling_type, _path_planning_type, _evaluation_type)
-    
+  
     # Shelf update
     def ShelfUpdate(self, _new_order):
         new_order_ID = _new_order[0]
@@ -54,7 +56,7 @@ class Controller():
         if total_remaining_time < 10:
             for each_new_orders in self.new_orders:
                 self.ShelfUpdate(each_new_orders)
-            new_paths = self.scheduling_algorithm.Update(self.new_orders)
+            new_paths = self.scheduling_algorithm.Update(self.new_orders, self.order_independent)
 
             for each_AGV, each_new_path in new_paths:
                 self.AGVs[each_AGV].AddSchedule(each_new_path)

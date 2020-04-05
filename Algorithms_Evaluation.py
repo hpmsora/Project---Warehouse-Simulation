@@ -30,7 +30,7 @@ class Algorithms_Evaluation():
     #--------------------------------------------------
     
     # Balance Include
-    def General_n_Balance(self, _new_path):
+    def General_n_Balance(self, _new_path, length_only = False):
         ITC = {}
         max_ITC = 1
         min_ITC = sys.maxsize
@@ -39,14 +39,18 @@ class Algorithms_Evaluation():
         total_order = 0
 
         
-        for each_AGV_ID, each_path in _new_path:
-            each_AGV_num_orders = 0
+        for each_AGV_ID, each_path, *each_num_order in _new_path:
             each_AGV_len_schedule = 0
-            
-            for each_pos_path in each_path:
-                if len(each_pos_path) == 3:
-                    each_AGV_num_orders += 1
-                each_AGV_len_schedule += 1
+            each_AGV_num_orders = 0
+
+            if length_only:
+                each_AGV_len_schedule = each_path
+                each_AGV_num_orders = each_num_order[0]
+            else:
+                for each_pos_path in each_path:
+                    if len(each_pos_path) == 3:
+                        each_AGV_num_orders += 1
+                    each_AGV_len_schedule += 1
                     
             cost = each_AGV_len_schedule + each_AGV_num_orders
             ITC[each_AGV_ID] = cost
@@ -73,7 +77,7 @@ class Algorithms_Evaluation():
     #--------------------------------------------------
 
     # Update
-    def Update(self, _new_path):
+    def Update(self, _new_path, length_only = False):
         #print("[Evaluating]\t Processing ...")
         if self.EvaluationType == "General_n_Balance":
-            return self.General_n_Balance(_new_path)
+            return self.General_n_Balance(_new_path, length_only = length_only)
