@@ -239,5 +239,5 @@ class Algorithms_Scheduling():
         if self.scheduling_type == "Genetic":
             new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH, self.CROSSOVER_RATE, _order_independent)
 
-        #self.tools.CollisionTest(new_paths)
+        self.tools.CollisionTest(new_paths)
         return new_paths

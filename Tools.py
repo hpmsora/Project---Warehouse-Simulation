@@ -192,10 +192,13 @@ class Tools():
     # Collision test
     def CollisionTest(self, _AGVs_paths):
         paths = []
+        each_AGV_path = []
         AGVs_IDs = list(self.AGVs.keys())
+        
         for each_AGVs_ID in AGVs_IDs:
-            paths.append(self.AGVs[each_AGVs_ID])
-            
+            each_AGV_path = self.AGVs[each_AGVs_ID]
+            each_AGV_path += _AGVs_paths[each_AGVs_ID]
+
         for each_AGVs_ID, each_AGVs_paths in _AGVs_paths:
             paths.append(each_AGVs_paths)
         print(paths)
