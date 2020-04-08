@@ -4,6 +4,8 @@
 #
 # Won Yong Ha
 #
+# V.2.1 - Collision detector
+# V.2.0 - Basic simulation
 # V.1.2 - Added multi AGVs
 # V.1.1 - Added wide
 # V.1.0 - General building
@@ -275,9 +277,10 @@ class SimulationBoard(tk.Frame):
             self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID, pos, self.tools)
         return len(self.AGVs)
 
-    # Set controller function
+    # Set controller and tools function
     def SetController(self, controller_type='Default', order_independent=False):
         self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, order_independent=order_independent)
+        self.tools.SetAGVs(self.AGVs)
 
     # Set order generator function
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):

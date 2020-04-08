@@ -38,15 +38,16 @@ class Algorithms_Evaluation():
         max_order = 0
         total_order = 0
 
-        
-        for each_AGV_ID, each_path, *each_num_order in _new_path:
+        for each_AGV_ID in _new_path.keys():
             each_AGV_len_schedule = 0
             each_AGV_num_orders = 0
 
             if length_only:
+                each_path, each_num_order = _new_path[each_AGV_ID]
                 each_AGV_len_schedule = each_path
-                each_AGV_num_orders = each_num_order[0]
+                each_AGV_num_orders = each_num_order
             else:
+                each_path = _new_path[each_AGV_ID]
                 for each_pos_path in each_path:
                     if len(each_pos_path) == 3:
                         each_AGV_num_orders += 1

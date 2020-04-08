@@ -14,8 +14,7 @@ import Algorithms_Evaluation as AlgEval
 import numpy as np
 import copy as cp
 import random as rd
-
-import time
+import collections as col
 
 class Algorithms_Scheduling():
 
@@ -55,7 +54,11 @@ class Algorithms_Scheduling():
     #--------------------------------------------------
     
     # Genetic Algorithm
-    def GeneticAlgorithm(self, _new_orders, _max_generaion, _crossover_rate, _order_independent):
+    def GeneticAlgorithm(self,
+                         _new_orders,
+                         _max_generaion,
+                         _crossover_rate,
+                         _order_independent):
         print("[Scheduling]\t New orders for scheduling is: " + str(_new_orders))
 
         new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
@@ -174,7 +177,13 @@ class Algorithms_Scheduling():
         return new_paths
             
     # Genetic algorithm - crossover operator
-    def GeneticAlgorithm_CrossOperator(self, _parent_1, _parent_2, _crossover_num, _non_crossover_num, _AGVs_order, mutation_prob = 0):
+    def GeneticAlgorithm_CrossOperator(self,
+                                       _parent_1,
+                                       _parent_2,
+                                       _crossover_num,
+                                       _non_crossover_num,
+                                       _AGVs_order,
+                                       mutation_prob = 0):
         child = []
 
         _parent_2 = cp.deepcopy(_parent_2)
@@ -229,5 +238,6 @@ class Algorithms_Scheduling():
     def Update(self, _new_orders, _order_independent):
         if self.scheduling_type == "Genetic":
             new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH, self.CROSSOVER_RATE, _order_independent)
-            
+
+        #self.tools.CollisionTest(new_paths)
         return new_paths

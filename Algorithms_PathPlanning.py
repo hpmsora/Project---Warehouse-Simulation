@@ -101,7 +101,7 @@ class Algorithms_PlathPlanning():
         jobs = []
         manager1 = mp.Manager()
         manager2 = mp.Manager()
-        AGVs_paths = manager1.list()
+        AGVs_paths = manager1.dict()
         new_paths = manager2.dict()
         
         for each_AGVs_ID in AGVs_Order:
@@ -216,11 +216,11 @@ class Algorithms_PlathPlanning():
 
         #print("[Path Planning]\t Planning AGV - " + str(_each_AGVs_ID) + " Finished!")
 
-        _AGVs_paths.append((_each_AGVs_ID, AGV_path))
+        _AGVs_paths[_each_AGVs_ID] = AGV_path
         
     # Q-Learning length only
     def Q_Learning_Length_Only(self, _new_schedules):
-        new_paths_length = []
+        new_paths_length = col.defaultdict(lambda: (0,0))
 
         for each_AGV_ID, each_AGV_schedule in _new_schedules:
             each_AGV_path_length = 0
@@ -267,7 +267,7 @@ class Algorithms_PlathPlanning():
                         each_AGV_path_length += self.reserve_paths[path_key][0]
 
                     last_position = each_depot_pos
-            new_paths_length.append((each_AGV_ID, each_AGV_path_length, each_AGV_order_num))
+            new_paths_length[each_AGV_ID] = (each_AGV_path_length, each_AGV_order_num)
         return new_paths_length
                     
     #--------------------------------------------------

@@ -32,7 +32,8 @@ class Tools():
     OPEN = 0
     TARGET = 200
     DEPOT_PLACE = 200
-    
+
+    AGVs = None
     shelves_depots = {}
     depots = {}
 
@@ -45,6 +46,8 @@ class Tools():
         self.height = _height
         self.InitWMap()
 
+        self.AGVs = None
+
     # Building w_map
     def InitWMap(self):
         self.w_map = [[0 for i in range(self.height)] for j in range(self.width)]
@@ -52,6 +55,10 @@ class Tools():
             for each_h in range(self.height):
                 if each_w == 0 or each_w == self.width - 1 or each_h == 0 or each_h == self.height - 1:
                     self.w_map[each_w][each_h] = self.ABS_NO_ACC
+
+    # Set AGVs
+    def SetAGVs(self, _AGVs):
+        self.AGVs = _AGVs
 
     # Get shelves positions by ID
     def GetShelvesDepotsByID(self, _shelf_ID):
@@ -182,6 +189,19 @@ class Tools():
 
         return path
 
+    # Collision test
+    def CollisionTest(self, _AGVs_paths):
+        paths = []
+        AGVs_IDs = list(self.AGVs.keys())
+        for each_AGVs_ID in AGVs_IDs:
+            paths.append(self.AGVs[each_AGVs_ID])
+            
+        for each_AGVs_ID, each_AGVs_paths in _AGVs_paths:
+            paths.append(each_AGVs_paths)
+        print(paths)
+        for each_AGV_pos in zip(*list(zip(*_AGVs_paths))[1]):
+            print(each_AGV_pos)
+    
     #--------------------------------------------------
     # Math Tools
     def Arg_Maximum(self, _state_actions):
