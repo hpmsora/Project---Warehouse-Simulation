@@ -190,20 +190,27 @@ class Tools():
         return path
 
     # Collision test
-    def CollisionTest(self, _AGVs_paths):
+    def CollisionTest_Strict(self, _AGVs_paths):
         paths = []
-        each_AGV_path = []
+        paths_length = []
         AGVs_IDs = list(self.AGVs.keys())
         
         for each_AGVs_ID in AGVs_IDs:
-            each_AGV_path = self.AGVs[each_AGVs_ID]
-            each_AGV_path += _AGVs_paths[each_AGVs_ID]
+            each_AGVs_path = self.AGVs[each_AGVs_ID].GetSchedule()
+            each_AGVs_path += _AGVs_paths[each_AGVs_ID]
+            paths_length.append(len(each_AGVs_path))
+            paths.append(each_AGVs_path)
 
-        for each_AGVs_ID, each_AGVs_paths in _AGVs_paths:
-            paths.append(each_AGVs_paths)
+        paths_length_max = max(paths_length)
+        
+        for index, (each_paths, each_paths_length) in enumerate(zip(paths, paths_length)):
+            each_paths += [each_paths[-1]] * (paths_length_max - each_paths_length)
+            paths[index] = each_paths
+
         print(paths)
-        for each_AGV_pos in zip(*list(zip(*_AGVs_paths))[1]):
-            print(each_AGV_pos)
+        print("---")
+        for each_pos in zip(paths):
+            print(each_pos)
     
     #--------------------------------------------------
     # Math Tools
