@@ -85,7 +85,7 @@ class Algorithms_Scheduling():
             populations = []
             populations_schedules = []
             generation = 0
-            max_generation = 1#200
+            max_generation = 200
             population_size = 200
             AGVs_order = []
 
@@ -239,5 +239,5 @@ class Algorithms_Scheduling():
         if self.scheduling_type == "Genetic":
             new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH, self.CROSSOVER_RATE, _order_independent)
 
-        strict_collision = self.tools.CollisionTest_Strict(new_paths)
+        self.tools.CollisionTest_Strict(new_paths)
         return new_paths

@@ -194,6 +194,7 @@ class Tools():
         paths = []
         paths_length = []
         AGVs_IDs = list(self.AGVs.keys())
+        collision = 0
         
         for each_AGVs_ID in AGVs_IDs:
             each_AGVs_path = self.AGVs[each_AGVs_ID].GetSchedule()
@@ -207,10 +208,31 @@ class Tools():
             each_paths += [each_paths[-1]] * (paths_length_max - each_paths_length)
             paths[index] = each_paths
 
-        print(paths)
-        print("---")
-        for each_pos in zip(paths):
-            print(each_pos)
+        paths_time = list(zip(*paths))
+        if not paths_time:
+            return collision
+        each_paths_time_before = paths_time[0]
+
+        for each_paths_time in paths_time[1:]:
+            for index, (each_pos, each_pos_before) in enumerate(zip(each_paths_time, each_paths_time_before)):
+                for each_other_pos, each_other_pos_before in zip(each_paths_time[index+1:], each_paths_time_before[index+1:]):
+
+                    # Heading same position collision
+                    if each_pos == each_other_pos:
+                        collision += 1
+
+                    # Turning following position collosion
+                    if each_pos_before == each_other_pos and not (each_pos == each_other_pos_before) and not (each_other_pos, each_other_pos_before):
+                        if not self.Tuple_Subtraction(each_other_pos, each_other_pos_before) == self.Tuple_Subtraction(each_pos, each_pos_before):
+                            collision += 1
+
+                    # Corssover collision
+                    if (each_pos == each_other_pos_before and each_other_pos == each_pos_before) and not (each_pos == each_pos_before and each_other_pos == each_other_pos_before):
+                        collision += 1
+
+            each_paths_time_before = each_paths_time
+
+        return collision
     
     #--------------------------------------------------
     # Math Tools
@@ -225,3 +247,6 @@ class Tools():
             elif value == max_value:
                 max_index_list.append(index)
         return rnd.choice(max_index_list)
+
+    def Tuple_Subtraction(self, _pos_1, _pos_2):
+        return tuple(map(lambda i, j: i - j, _pos_1, _pos_2))
