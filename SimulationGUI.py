@@ -38,7 +38,10 @@ class SimulationBoard(tk.Frame):
 
     movement_speed = 50
 
+    graph_GUI_height = 1000     # Pixel size
+
     # Internal Variables
+    canvas = None
     depot_area = []
     AGV_depot_area = []
     shelves = {}
@@ -49,9 +52,9 @@ class SimulationBoard(tk.Frame):
     new_order = None
     tools = None
 
-    @property
-    def canvas_size(self):
-        return (self.num_aisles * self.square_size, self.num_rows * self.square_size)
+    #@property
+    #def canvas_size(self):
+    #    return (self.num_aisles * self.square_size, self.num_rows * self.square_size)
 
     # Constructor
     def __init__(self, _parent, num_aisles=2, num_rows=5, square_size=64, movement_speed=200):
@@ -60,6 +63,8 @@ class SimulationBoard(tk.Frame):
         self.num_rows = num_rows
         self.square_size = square_size
         self.movement_speed = movement_speed
+
+        self.canvas  = None
         
     # Grid initialize with border cells function
     def GridInit(self):
@@ -238,7 +243,7 @@ class SimulationBoard(tk.Frame):
             self.tools.UpdateAbsWMap('Depot', each_depot)
 
     # AGV deposit are building function
-    def AGVDepotBuilding(self, AGV_depot_type=['Equal'], custom_depot=[], AGV_size = 5, above = 1):
+    def AGVDepotBuilding(self, AGV_depot_type=['Equal'], custom_depot=[], AGV_size=5, above=1):
         for each_AGV_depot_type in AGV_depot_type:
             if each_AGV_depot_type == 'LeftCorner':
                 self.AGV_depot_area.append((0, self.grid_active_height - 2 - above))
@@ -281,6 +286,7 @@ class SimulationBoard(tk.Frame):
     def SetController(self, controller_type='Default', order_independent=False):
         self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, order_independent=order_independent)
         self.tools.SetAGVs(self.AGVs)
+        self.SetGraphGUI()
 
     # Set order generator function
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):
@@ -293,6 +299,12 @@ class SimulationBoard(tk.Frame):
     # Add order to list of order function
     def AddOrder(self, _order):
         self.order_list += self.order_generator.OrderGenerator()
+
+    # Build a graph
+    def SetGraphGUI(self):
+        new_canvas_height = int(self.canvas.cget("height")) + self.graph_GUI_height
+        self.canvas.config(height = new_canvas_height)
+    
 
     # Update
     def Update(self):
