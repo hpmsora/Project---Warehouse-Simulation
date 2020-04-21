@@ -4,6 +4,8 @@
 #
 # Won Yong Ha
 #
+# V.2.1 - Collision detector
+# V.2.0 - Basic simulation
 # V.1.2 - Added multi AGVs
 # V.1.1 - Added wide
 # V.1.0 - General building
@@ -18,6 +20,7 @@ import AGV as AGV
 import Shelf as shf
 
 import Tools as t
+import SimulationGUI_GraphGUI as ggui
 
 class SimulationBoard(tk.Frame):
 
@@ -37,6 +40,8 @@ class SimulationBoard(tk.Frame):
     movement_speed = 50
 
     # Internal Variables
+    parent = None
+    canvas = None
     depot_area = []
     AGV_depot_area = []
     shelves = {}
@@ -45,11 +50,13 @@ class SimulationBoard(tk.Frame):
     order_generator = None
     order_list = []
     new_order = None
+
+    graph_GUI = None
     tools = None
 
-    @property
-    def canvas_size(self):
-        return (self.num_aisles * self.square_size, self.num_rows * self.square_size)
+    #@property
+    #def canvas_size(self):
+    #    return (self.num_aisles * self.square_size, self.num_rows * self.square_size)
 
     # Constructor
     def __init__(self, _parent, num_aisles=2, num_rows=5, square_size=64, movement_speed=200):
@@ -58,6 +65,10 @@ class SimulationBoard(tk.Frame):
         self.num_rows = num_rows
         self.square_size = square_size
         self.movement_speed = movement_speed
+
+        self.canvas  = None
+        self.tools = None
+        self.graph_GUI = None
         
     # Grid initialize with border cells function
     def GridInit(self):
@@ -77,7 +88,7 @@ class SimulationBoard(tk.Frame):
                                 height=canvas_height,
                                 background=self.background_color)
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
-        self.tools = t.Tools(self.canvas, self.square_size, self.grid_active_width, self.grid_active_height)
+        self.tools = t.Tools(self.parent, self.canvas, self.square_size, self.grid_active_width, self.grid_active_height)
 
         # Borders
         for each_index_grid_height in range(0, self.grid_height):
@@ -236,7 +247,7 @@ class SimulationBoard(tk.Frame):
             self.tools.UpdateAbsWMap('Depot', each_depot)
 
     # AGV deposit are building function
-    def AGVDepotBuilding(self, AGV_depot_type=['Equal'], custom_depot=[], AGV_size = 5, above = 1):
+    def AGVDepotBuilding(self, AGV_depot_type=['Equal'], custom_depot=[], AGV_size=5, above=1):
         for each_AGV_depot_type in AGV_depot_type:
             if each_AGV_depot_type == 'LeftCorner':
                 self.AGV_depot_area.append((0, self.grid_active_height - 2 - above))
@@ -275,9 +286,13 @@ class SimulationBoard(tk.Frame):
             self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID, pos, self.tools)
         return len(self.AGVs)
 
-    # Set controller function
-    def SetController(self, controller_type='Default', order_independent=False):
-        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, order_independent=order_independent)
+    # Set controller and tools function
+    def SetController(self, controller_type='Default', order_independent=False, graph_GUI_show = False):
+        if graph_GUI_show:
+            self.SetGraphGUI()
+
+        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, order_independent=order_independent, graph_GUI = self.graph_GUI)
+        self.tools.SetAGVs(self.AGVs)
 
     # Set order generator function
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):
@@ -290,6 +305,10 @@ class SimulationBoard(tk.Frame):
     # Add order to list of order function
     def AddOrder(self, _order):
         self.order_list += self.order_generator.OrderGenerator()
+
+    # Build a graph
+    def SetGraphGUI(self):
+        self.graph_GUI = ggui.SimulationGUI_GraphGUI(self.tools)
 
     # Update
     def Update(self):

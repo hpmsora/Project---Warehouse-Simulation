@@ -18,6 +18,7 @@ class Algorithms_Evaluation():
     
     # Internal Variables
     tools = None
+    variables_type = []
 
     # Constructor
     def __init__(self, _AGVs, _shelves, _tools, _EvaluationType):
@@ -26,6 +27,11 @@ class Algorithms_Evaluation():
         self.tools = _tools
 
         self.EvaluationType = _EvaluationType
+
+        if self.EvaluationType == "General_n_Balance":
+            self.variables_type = ("Total", ("TT", "TTC", "BU"))
+        else:
+            self.variables_type = ("Total")
 
     #--------------------------------------------------
     
@@ -38,15 +44,16 @@ class Algorithms_Evaluation():
         max_order = 0
         total_order = 0
 
-        
-        for each_AGV_ID, each_path, *each_num_order in _new_path:
+        for each_AGV_ID in _new_path.keys():
             each_AGV_len_schedule = 0
             each_AGV_num_orders = 0
 
             if length_only:
+                each_path, each_num_order = _new_path[each_AGV_ID]
                 each_AGV_len_schedule = each_path
-                each_AGV_num_orders = each_num_order[0]
+                each_AGV_num_orders = each_num_order
             else:
+                each_path = _new_path[each_AGV_ID]
                 for each_pos_path in each_path:
                     if len(each_pos_path) == 3:
                         each_AGV_num_orders += 1
@@ -72,9 +79,13 @@ class Algorithms_Evaluation():
         BU = min_ITC / max_ITC
 
         value = max_order/TT + total_order/TTC + BU
-        return (value, TT, TTC, BU)
+        return (value, (max_order/TT, total_order/TTC, BU))
 
     #--------------------------------------------------
+
+    # Get evaluation variable information
+    def GetVariablesType(self):
+        return self.variables_type
 
     # Update
     def Update(self, _new_path, length_only = False):

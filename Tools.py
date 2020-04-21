@@ -13,6 +13,7 @@ import copy as cp
 
 class Tools():
 
+    parent = None
     canvas = None
     square_size = None
     
@@ -32,18 +33,31 @@ class Tools():
     OPEN = 0
     TARGET = 200
     DEPOT_PLACE = 200
-    
+
+    AGVs = None
     shelves_depots = {}
     depots = {}
 
+    # Graph GUI internal variables
+    graph_data = None
+    graph_variables_type = None
+    graph_variables_type_list = None
+
     # Constructor
-    def __init__(self, _canvas, _square_size, _width, _height):
+    def __init__(self, _parent, _canvas, _square_size, _width, _height):
+        self.parent = _parent
         self.canvas = _canvas
         self.square_size = _square_size
 
         self.width = _width
         self.height = _height
         self.InitWMap()
+
+        self.AGVs = None
+
+        self.graph_data = {}
+        self.graph_variables_type = ()
+        graph_variables_type_list = []
 
     # Building w_map
     def InitWMap(self):
@@ -52,6 +66,18 @@ class Tools():
             for each_h in range(self.height):
                 if each_w == 0 or each_w == self.width - 1 or each_h == 0 or each_h == self.height - 1:
                     self.w_map[each_w][each_h] = self.ABS_NO_ACC
+
+    # Get parent object
+    def GetParent(self):
+        return self.parent
+
+    # Get canvas object
+    def GetCanvas(self):
+        return self.canvas
+
+    # Set AGVs
+    def SetAGVs(self, _AGVs):
+        self.AGVs = _AGVs
 
     # Get shelves positions by ID
     def GetShelvesDepotsByID(self, _shelf_ID):
@@ -71,10 +97,6 @@ class Tools():
 
     def SetDepots(self, _depot_pos, _depot_ID):
         self.depots[_depot_ID] = _depot_pos
-        
-    # Get canvas object
-    def GetCanvas(self):
-        return canvas
 
     # Get width
     def GetWidth(self):
@@ -87,6 +109,22 @@ class Tools():
     # Get w_map
     def GetWMap(self):
         return cp.deepcopy(self.w_map)
+
+    # Get graph variables type
+    def GetGraphVariablesType(self):
+        return self.graph_variables_type
+
+    # Set graph variables type
+    def SetGraphVariablesType(self, _graph_variables_type):
+        self.graph_variables_type = _graph_variables_type
+        data_total, data_variables = self.graph_variables_type
+        self.graph_variables_type_list = [data_total] + list(data_variables)
+        for each_values in self.graph_variables_type_list:
+            self.graph_data[each_values] = [[0],[0]]
+
+    # Get graph data
+    def GetGraphData(self):
+        return self.graph_data
 
     # Update absolute w_map
     def UpdateAbsWMap(self, _type, _pos):
@@ -182,8 +220,72 @@ class Tools():
 
         return path
 
+    # Collision test
+    def CollisionTest_Strict(self, _AGVs_paths):
+        paths = []
+        paths_length = []
+        AGVs_IDs = list(self.AGVs.keys())
+        collision = 0
+        
+        for each_AGVs_ID in AGVs_IDs:
+            each_AGVs_path = self.AGVs[each_AGVs_ID].GetSchedule()
+            each_AGVs_path += _AGVs_paths[each_AGVs_ID]
+            paths_length.append(len(each_AGVs_path))
+            paths.append(each_AGVs_path)
+
+        paths_length_max = max(paths_length)
+        
+        for index, (each_paths, each_paths_length) in enumerate(zip(paths, paths_length)):
+            each_paths += [each_paths[-1]] * (paths_length_max - each_paths_length)
+            paths[index] = each_paths
+
+        paths_time = list(zip(*paths))
+        if not paths_time:
+            return collision
+        each_paths_time_before = paths_time[0]
+
+        for each_paths_time in paths_time[1:]:
+            for index, (each_pos, each_pos_before) in enumerate(zip(each_paths_time, each_paths_time_before)):
+                for each_other_pos, each_other_pos_before in zip(each_paths_time[index+1:], each_paths_time_before[index+1:]):
+
+                    # Heading same position collision
+                    if each_pos == each_other_pos:
+                        collision += 1
+
+                    # Turning following position collosion
+                    if each_pos_before == each_other_pos and not (each_pos == each_other_pos_before) and not (each_other_pos, each_other_pos_before):
+                        if not self.Tuple_Subtraction(each_other_pos, each_other_pos_before) == self.Tuple_Subtraction(each_pos, each_pos_before):
+                            collision += 1
+
+                    # Corssover collision
+                    if (each_pos == each_other_pos_before and each_other_pos == each_pos_before) and not (each_pos == each_pos_before and each_other_pos == each_other_pos_before):
+                        collision += 1
+
+            each_paths_time_before = each_paths_time
+
+        return collision
+    
+    #--------------------------------------------------
+    # Graph Tools
+    
+    # Update each iteration
+    def Update_GraphData(self, _index, _data):
+        data_total, data_variables = _data
+        data_list = [data_total] + list(data_variables)
+        for index, each_graph_variables_type in enumerate(self.graph_variables_type_list):
+            self.graph_data[each_graph_variables_type][0] += [_index]
+            self.graph_data[each_graph_variables_type][1] += [data_list[index]]
+
+    # Reset graph data
+    def ResetGraphData(self):
+        for each_values in self.graph_variables_type_list:
+            self.graph_data[each_values] = [[0],[0]]
+
+
     #--------------------------------------------------
     # Math Tools
+
+    # Find arg maximum
     def Arg_Maximum(self, _state_actions):
         max_index_list = []
         max_value = _state_actions[0]
@@ -195,3 +297,7 @@ class Tools():
             elif value == max_value:
                 max_index_list.append(index)
         return rnd.choice(max_index_list)
+
+    # Tuple subtraction
+    def Tuple_Subtraction(self, _pos_1, _pos_2):
+        return tuple(map(lambda i, j: i - j, _pos_1, _pos_2))

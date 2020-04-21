@@ -35,7 +35,6 @@ PADDING_SIZE = 10
 def Display_SimulationBoard():
     root = tk.Tk()
     root.title("Warehouse Simulation")
-    print(root.title)
     
     Board = sgui.SimulationBoard(root,
                                  num_aisles=NUM_AISLE,
@@ -47,7 +46,7 @@ def Display_SimulationBoard():
     Board.AGVDepotBuilding()
 
     Board.AddAGV(num = NUM_AGVs)
-    Board.SetController(order_independent = True)
+    Board.SetController(order_independent = True, graph_GUI_show = True)
     Board.SetOrder(order_type='basic', order_per_batch=ORDER_PER_BATCH, num_order=NUM_ORDER)
     
     Board.pack(side='top', fill='both', expand='true', padx=PADDING_SIZE, pady=PADDING_SIZE)
@@ -55,8 +54,10 @@ def Display_SimulationBoard():
     
     root.mainloop()
 
+# Main method
 def main():
     Display_SimulationBoard()
 
+# Trigger
 if __name__ == "__main__":
     main()

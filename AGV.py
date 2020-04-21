@@ -50,7 +50,7 @@ class AGV:
 
     # Get schedule
     def GetSchedule(self):
-        return self.schedule
+        return cp.deepcopy(self.schedule)
     
     # Set schedule
     def SetSchedule(self, _new_schedule):
