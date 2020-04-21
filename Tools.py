@@ -81,7 +81,7 @@ class Tools():
         
     # Get canvas object
     def GetCanvas(self):
-        return canvas
+        return self.canvas
 
     # Get width
     def GetWidth(self):

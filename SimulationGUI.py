@@ -20,6 +20,7 @@ import AGV as AGV
 import Shelf as shf
 
 import Tools as t
+import SimulationGUI_GraphGUI as ggui
 
 class SimulationBoard(tk.Frame):
 
@@ -38,8 +39,6 @@ class SimulationBoard(tk.Frame):
 
     movement_speed = 50
 
-    graph_GUI_height = 1000     # Pixel size
-
     # Internal Variables
     canvas = None
     depot_area = []
@@ -50,6 +49,8 @@ class SimulationBoard(tk.Frame):
     order_generator = None
     order_list = []
     new_order = None
+
+    graph_GUI = None
     tools = None
 
     #@property
@@ -65,6 +66,8 @@ class SimulationBoard(tk.Frame):
         self.movement_speed = movement_speed
 
         self.canvas  = None
+        self.tools = None
+        self.graph_GUI = None
         
     # Grid initialize with border cells function
     def GridInit(self):
@@ -286,7 +289,6 @@ class SimulationBoard(tk.Frame):
     def SetController(self, controller_type='Default', order_independent=False):
         self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, order_independent=order_independent)
         self.tools.SetAGVs(self.AGVs)
-        self.SetGraphGUI()
 
     # Set order generator function
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):
@@ -302,9 +304,7 @@ class SimulationBoard(tk.Frame):
 
     # Build a graph
     def SetGraphGUI(self):
-        new_canvas_height = int(self.canvas.cget("height")) + self.graph_GUI_height
-        self.canvas.config(height = new_canvas_height)
-    
+        self.graph_GUI = ggui.SimulationGUI_GraphGUI(self.tools)
 
     # Update
     def Update(self):

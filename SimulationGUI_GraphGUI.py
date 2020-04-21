@@ -8,12 +8,22 @@
 #
 ###############################
 
+import matplotlib.animation as ani
+
 class SimulationGUI_GraphGUI():
 
-	self.ID = None
 	
 	# Internal Varialbe
+	tools = None
+	canvas = None
+
+	graph_GUI_height = 500     # Pixel size
 
 	# Constructor
-    def __init__(self, _graph_ID, _tools):
-    	self.ID = _graph_ID
+	def __init__(self, _tools):
+		self.tools = _tools
+
+		self.canvas = self.tools.GetCanvas()
+
+		new_canvas_height = int(self.canvas.cget("height")) + self.graph_GUI_height
+		self.canvas.config(height = new_canvas_height)

@@ -240,4 +240,5 @@ class Algorithms_Scheduling():
             new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH, self.CROSSOVER_RATE, _order_independent)
 
         strict_collision = self.tools.CollisionTest_Strict(new_paths)
+        print(strict_collision)
         return new_paths
