@@ -13,6 +13,7 @@ import copy as cp
 
 class Tools():
 
+    parent = None
     canvas = None
     square_size = None
     
@@ -37,8 +38,14 @@ class Tools():
     shelves_depots = {}
     depots = {}
 
+    # Graph GUI internal variables
+    graph_data = None
+    graph_variables_type = None
+    graph_variables_type_list = None
+
     # Constructor
-    def __init__(self, _canvas, _square_size, _width, _height):
+    def __init__(self, _parent, _canvas, _square_size, _width, _height):
+        self.parent = _parent
         self.canvas = _canvas
         self.square_size = _square_size
 
@@ -48,6 +55,10 @@ class Tools():
 
         self.AGVs = None
 
+        self.graph_data = {}
+        self.graph_variables_type = ()
+        graph_variables_type_list = []
+
     # Building w_map
     def InitWMap(self):
         self.w_map = [[0 for i in range(self.height)] for j in range(self.width)]
@@ -55,6 +66,14 @@ class Tools():
             for each_h in range(self.height):
                 if each_w == 0 or each_w == self.width - 1 or each_h == 0 or each_h == self.height - 1:
                     self.w_map[each_w][each_h] = self.ABS_NO_ACC
+
+    # Get parent object
+    def GetParent(self):
+        return self.parent
+
+    # Get canvas object
+    def GetCanvas(self):
+        return self.canvas
 
     # Set AGVs
     def SetAGVs(self, _AGVs):
@@ -78,10 +97,6 @@ class Tools():
 
     def SetDepots(self, _depot_pos, _depot_ID):
         self.depots[_depot_ID] = _depot_pos
-        
-    # Get canvas object
-    def GetCanvas(self):
-        return self.canvas
 
     # Get width
     def GetWidth(self):
@@ -94,6 +109,22 @@ class Tools():
     # Get w_map
     def GetWMap(self):
         return cp.deepcopy(self.w_map)
+
+    # Get graph variables type
+    def GetGraphVariablesType(self):
+        return self.graph_variables_type
+
+    # Set graph variables type
+    def SetGraphVariablesType(self, _graph_variables_type):
+        self.graph_variables_type = _graph_variables_type
+        data_total, data_variables = self.graph_variables_type
+        self.graph_variables_type_list = [data_total] + list(data_variables)
+        for each_values in self.graph_variables_type_list:
+            self.graph_data[each_values] = [[0],[0]]
+
+    # Get graph data
+    def GetGraphData(self):
+        return self.graph_data
 
     # Update absolute w_map
     def UpdateAbsWMap(self, _type, _pos):
@@ -235,7 +266,26 @@ class Tools():
         return collision
     
     #--------------------------------------------------
+    # Graph Tools
+    
+    # Update each iteration
+    def Update_GraphData(self, _index, _data):
+        data_total, data_variables = _data
+        data_list = [data_total] + list(data_variables)
+        for index, each_graph_variables_type in enumerate(self.graph_variables_type_list):
+            self.graph_data[each_graph_variables_type][0] += [_index]
+            self.graph_data[each_graph_variables_type][1] += [data_list[index]]
+
+    # Reset graph data
+    def ResetGraphData(self):
+        for each_values in self.graph_variables_type_list:
+            self.graph_data[each_values] = [[0],[0]]
+
+
+    #--------------------------------------------------
     # Math Tools
+
+    # Find arg maximum
     def Arg_Maximum(self, _state_actions):
         max_index_list = []
         max_value = _state_actions[0]
@@ -248,5 +298,6 @@ class Tools():
                 max_index_list.append(index)
         return rnd.choice(max_index_list)
 
+    # Tuple subtraction
     def Tuple_Subtraction(self, _pos_1, _pos_2):
         return tuple(map(lambda i, j: i - j, _pos_1, _pos_2))

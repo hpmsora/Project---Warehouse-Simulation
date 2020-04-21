@@ -40,6 +40,7 @@ class SimulationBoard(tk.Frame):
     movement_speed = 50
 
     # Internal Variables
+    parent = None
     canvas = None
     depot_area = []
     AGV_depot_area = []
@@ -87,7 +88,7 @@ class SimulationBoard(tk.Frame):
                                 height=canvas_height,
                                 background=self.background_color)
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
-        self.tools = t.Tools(self.canvas, self.square_size, self.grid_active_width, self.grid_active_height)
+        self.tools = t.Tools(self.parent, self.canvas, self.square_size, self.grid_active_width, self.grid_active_height)
 
         # Borders
         for each_index_grid_height in range(0, self.grid_height):
@@ -286,8 +287,11 @@ class SimulationBoard(tk.Frame):
         return len(self.AGVs)
 
     # Set controller and tools function
-    def SetController(self, controller_type='Default', order_independent=False):
-        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, order_independent=order_independent)
+    def SetController(self, controller_type='Default', order_independent=False, graph_GUI_show = False):
+        if graph_GUI_show:
+            self.SetGraphGUI()
+
+        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, order_independent=order_independent, graph_GUI = self.graph_GUI)
         self.tools.SetAGVs(self.AGVs)
 
     # Set order generator function

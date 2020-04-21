@@ -28,20 +28,25 @@ class Algorithms_Scheduling():
     
     # Internal Variables
     tools = None
+    graph_GUI = None
     path_planning_algorithm = None
     evaluation_algorithm = None
 
     # Constructor
-    def __init__(self, _AGVs, _shelves, _tools, _scheduling_type, _path_planning_type, _evaluation_type):
+    def __init__(self, _AGVs, _shelves, _tools, _scheduling_type, _path_planning_type, _evaluation_type, graph_GUI = None):
         self.AGVs = _AGVs
         self.shelves = _shelves
         self.scheduling_type = _scheduling_type
 
         self.tools = _tools
+        self.graph_GUI = graph_GUI
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
         self.SetPathPlanningAlgorithm(_path_planning_type)
         self.SetEvaluationAlgorithm(_evaluation_type)
+
+        self.tools.SetGraphVariablesType(self.evaluation_algorithm.GetVariablesType())
+        self.graph_GUI.BuildGraph()
 
     # Set path planning algorithm
     def SetPathPlanningAlgorithm(self, _path_planning_type):
@@ -60,6 +65,8 @@ class Algorithms_Scheduling():
                          _crossover_rate,
                          _order_independent):
         print("[Scheduling]\t New orders for scheduling is: " + str(_new_orders))
+
+        self.tools.ResetGraphData()
 
         new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
         num_AGVs = 0
@@ -85,7 +92,7 @@ class Algorithms_Scheduling():
             populations = []
             populations_schedules = []
             generation = 0
-            max_generation = 1#200
+            max_generation = 200
             population_size = 200
             AGVs_order = []
 
@@ -111,10 +118,10 @@ class Algorithms_Scheduling():
                 for each_populations in populations:
                     each_new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(each_populations, AGVs_order)
                     each_new_path_lengths = self.path_planning_algorithm.Update(each_new_schedule, length_only = True)
-                    each_eval_value, TT, TTC, BU = self.evaluation_algorithm.Update(each_new_path_lengths, length_only = True)
-                    populations_schedules.append((each_eval_value, each_populations))
+                    each_eval_value, each_eval_variables = self.evaluation_algorithm.Update(each_new_path_lengths, length_only = True)
+                    populations_schedules.append((each_eval_value, each_eval_variables, each_populations))
 
-                #try:
+                #try:(TT, TTC, BU)
                 populations_schedules.sort(key=lambda each_populations: each_populations[0], reverse=True)
                 #except TypeError:
                 #    print("[Error]\t TypeError for sorting")
@@ -122,8 +129,12 @@ class Algorithms_Scheduling():
                 #        if not type(each_value) == type(0.1):
                 #            print(each_value)
                 #    print()
+
+                # Update graph data
+                each_eval_value, each_eval_variables, _ = populations_schedules[0]
+                self.tools.Update_GraphData(generation, (each_eval_value, each_eval_variables))
                 
-                populations = [each_population for _, each_population in populations_schedules]
+                populations = [each_population for _, _, each_population in populations_schedules]
                 
                 # Path planning process
                 new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(populations[0], AGVs_order)
@@ -240,5 +251,5 @@ class Algorithms_Scheduling():
             new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH, self.CROSSOVER_RATE, _order_independent)
 
         strict_collision = self.tools.CollisionTest_Strict(new_paths)
-        print(strict_collision)
+        print("Collosions: " + str(strict_collision))
         return new_paths
