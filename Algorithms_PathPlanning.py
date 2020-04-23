@@ -221,6 +221,7 @@ class Algorithms_PlathPlanning():
     # Q-Learning length only
     def Q_Learning_Length_Only(self, _new_schedules):
         new_paths_length = col.defaultdict(lambda: (0,0))
+        print(_new_schedules)
 
         for each_AGV_ID, each_AGV_schedule in _new_schedules:
             each_AGV_path_length = 0
@@ -267,6 +268,7 @@ class Algorithms_PlathPlanning():
                         each_AGV_path_length += self.reserve_paths[path_key][0]
 
                     last_position = each_depot_pos
+
             new_paths_length[each_AGV_ID] = (each_AGV_path_length, each_AGV_order_num)
         return new_paths_length
                     
