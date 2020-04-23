@@ -19,6 +19,7 @@ class SimulationGUI_GraphGUI():
 
 	# Custom Variables
 	graph_GUI_height = 300     # Pixel size
+	graph_GUI_each_width = 1.2 # Inch size
 	
 	# Internal Varialbes
 	tools = None
@@ -58,7 +59,7 @@ class SimulationGUI_GraphGUI():
 	def BuildGraph(self):
 		eval_total, eval_varialbes = self.tools.GetGraphVariablesType()
 		for each_value_type in [eval_total] + list(eval_varialbes):
-			each_graph = np_fig.Figure(figsize=(1.5,1), dpi=100)
+			each_graph = np_fig.Figure(figsize=(self.graph_GUI_each_width,1), dpi=100)
 			each_plot = each_graph.add_subplot(111)
 			graph_canvas = mp_tkagg.FigureCanvasTkAgg(each_graph, self.graph_frame)
 			graph_canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
