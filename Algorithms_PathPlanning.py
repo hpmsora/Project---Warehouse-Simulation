@@ -84,12 +84,16 @@ class Algorithms_PlathPlanning():
                     # Heading to target
                     Q_table = col.defaultdict(lambda: np.zeros(num_actions))
                     policy  = self.Q_Learning_Epsilon_Greedy_Policy(Q_table, epsilon, num_actions)
-                    Q_tables.append(((each_each_new_schedules_ID, each_each_each_new_schedules), policy, Q_table))
+                    Q_tables.append(((each_each_new_schedules_ID, each_each_each_new_schedules),
+                                     policy,
+                                     Q_table))
                     
                     # Heading to depot
                     Q_table = col.defaultdict(lambda: np.zeros(num_actions))
                     policy  = self.Q_Learning_Epsilon_Greedy_Policy(Q_table, epsilon, num_actions)
-                    Q_tables.append((('Depot', _each_each_depot), policy, Q_table))
+                    Q_tables.append((('Depot', _each_each_depot),
+                                     policy,
+                                     Q_table))
             
             AGVs_Q_table[each_AGV_ID] = (each_AGV.GetLastScheduledPos(), Q_tables)
             AGVs_Order.append(each_AGV_ID)
@@ -201,7 +205,10 @@ class Algorithms_PlathPlanning():
                         if done:
                             break
                         state = next_state
-                path = self.tools.GetPathByQTable(each_each_Q_table, starting_state, target, each_target)
+                path = self.tools.GetPathByQTable(each_each_Q_table,
+                                                  starting_state,
+                                                  target,
+                                                  each_target)
 
                 _new_paths[path_key] = (len(path), path)
 
