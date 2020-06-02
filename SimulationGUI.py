@@ -287,11 +287,11 @@ class SimulationBoard(tk.Frame):
         return len(self.AGVs)
 
     # Set controller and tools function
-    def SetController(self, controller_type='Default', order_independent=False, graph_GUI_show = False):
+    def SetController(self, controller_type='Default', evaluation_type = "General_n_Balance", order_independent=False, graph_GUI_show = False):
         if graph_GUI_show:
             self.SetGraphGUI()
 
-        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, order_independent=order_independent, graph_GUI = self.graph_GUI)
+        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, evaluation_type = evaluation_type, order_independent=order_independent, graph_GUI = self.graph_GUI)
         self.tools.SetAGVs(self.AGVs)
 
     # Set order generator function

@@ -50,11 +50,17 @@ class Algorithms_Scheduling():
 
     # Set path planning algorithm
     def SetPathPlanningAlgorithm(self, _path_planning_type):
-        self.path_planning_algorithm = AlgPath.Algorithms_PlathPlanning(self.AGVs, self.shelves, self.tools, _path_planning_type)
+        self.path_planning_algorithm = AlgPath.Algorithms_PlathPlanning(self.AGVs,
+                                                                        self.shelves,
+                                                                        self.tools,
+                                                                        _path_planning_type)
 
     # Set evaluation algorithm
     def SetEvaluationAlgorithm(self, _evaluation_type):
-        self.evaluation_algorithm = AlgEval.Algorithms_Evaluation(self.AGVs, self.shelves, self.tools, _evaluation_type)
+        self.evaluation_algorithm = AlgEval.Algorithms_Evaluation(self.AGVs,
+                                                                  self.shelves,
+                                                                  self.tools,
+                                                                  _evaluation_type)
 
     #--------------------------------------------------
     
@@ -248,7 +254,10 @@ class Algorithms_Scheduling():
     # Update
     def Update(self, _new_orders, _order_independent):
         if self.scheduling_type == "Genetic":
-            new_paths = self.GeneticAlgorithm(_new_orders, self.MAX_EPOCH, self.CROSSOVER_RATE, _order_independent)
+            new_paths = self.GeneticAlgorithm(_new_orders,
+                                              self.MAX_EPOCH,
+                                              self.CROSSOVER_RATE,
+                                              _order_independent)
 
         strict_collision = self.tools.CollisionTest_Strict(new_paths)
         print("Collosions: " + str(strict_collision))

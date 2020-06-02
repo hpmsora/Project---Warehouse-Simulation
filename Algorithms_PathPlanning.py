@@ -84,12 +84,16 @@ class Algorithms_PlathPlanning():
                     # Heading to target
                     Q_table = col.defaultdict(lambda: np.zeros(num_actions))
                     policy  = self.Q_Learning_Epsilon_Greedy_Policy(Q_table, epsilon, num_actions)
-                    Q_tables.append(((each_each_new_schedules_ID, each_each_each_new_schedules), policy, Q_table))
+                    Q_tables.append(((each_each_new_schedules_ID, each_each_each_new_schedules),
+                                     policy,
+                                     Q_table))
                     
                     # Heading to depot
                     Q_table = col.defaultdict(lambda: np.zeros(num_actions))
                     policy  = self.Q_Learning_Epsilon_Greedy_Policy(Q_table, epsilon, num_actions)
-                    Q_tables.append((('Depot', _each_each_depot), policy, Q_table))
+                    Q_tables.append((('Depot', _each_each_depot),
+                                     policy,
+                                     Q_table))
             
             AGVs_Q_table[each_AGV_ID] = (each_AGV.GetLastScheduledPos(), Q_tables)
             AGVs_Order.append(each_AGV_ID)
@@ -201,7 +205,10 @@ class Algorithms_PlathPlanning():
                         if done:
                             break
                         state = next_state
-                path = self.tools.GetPathByQTable(each_each_Q_table, starting_state, target, each_target)
+                path = self.tools.GetPathByQTable(each_each_Q_table,
+                                                  starting_state,
+                                                  target,
+                                                  each_target)
 
                 _new_paths[path_key] = (len(path), path)
 
@@ -221,6 +228,7 @@ class Algorithms_PlathPlanning():
     # Q-Learning length only
     def Q_Learning_Length_Only(self, _new_schedules):
         new_paths_length = col.defaultdict(lambda: (0,0))
+        print(_new_schedules)
 
         for each_AGV_ID, each_AGV_schedule in _new_schedules:
             each_AGV_path_length = 0
@@ -267,6 +275,7 @@ class Algorithms_PlathPlanning():
                         each_AGV_path_length += self.reserve_paths[path_key][0]
 
                     last_position = each_depot_pos
+
             new_paths_length[each_AGV_ID] = (each_AGV_path_length, each_AGV_order_num)
         return new_paths_length
                     
