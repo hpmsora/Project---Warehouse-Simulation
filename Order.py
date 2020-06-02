@@ -4,6 +4,8 @@
 #
 # Won Yong Ha
 #
+# V.1.0 Random ordering
+# V.1.1 Saving
 #
 ###############################
 
@@ -52,5 +54,7 @@ class Order():
                 else:
                     order.append((self.order_ID_count, []))
                 self.order_ID_count += 1
+        print("AAAAAAAAAAAA")
+        print(order)
         return order
                 
