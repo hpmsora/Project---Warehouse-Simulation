@@ -228,7 +228,6 @@ class Algorithms_PlathPlanning():
     # Q-Learning length only
     def Q_Learning_Length_Only(self, _new_schedules):
         new_paths_length = col.defaultdict(lambda: (0,0))
-        print(_new_schedules)
 
         for each_AGV_ID, each_AGV_schedule in _new_schedules:
             each_AGV_path_length = 0

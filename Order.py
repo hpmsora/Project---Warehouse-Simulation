@@ -21,25 +21,47 @@ class Order():
     num_order = None
     order_gap = 1
     
+    order_file_name = None # Must include extension (.csv)
+    
     shelves = None
+
+    tools_data = None
 
     # Internal Variables
     order_ID_count = None
     
     # Constructor
-    def __init__(self, _shelves, order_type="basic", order_per_batch=1, num_order = 100, order_gap = 1):
+    def __init__(self,
+                 _shelves,
+                 _tools_data,
+                 order_type="basic",
+                 order_per_batch=1,
+                 num_order = 100,
+                 order_gap = 1,
+                 order_file_name = "Defualt.csv"):
         self.shelves = _shelves
         self.order_type = order_type
         self.order_per_batch = order_per_batch
         self.num_order = num_order
         self.order_gap = order_gap
+
+        self.order_file_name = order_file_name
+
+        self.tools_data = _tools_data
         
         self.order_ID_count = 0
 
     # Get number of order at once
     def GetNumOrder(self):
         return self.num_order
+
+    # Get saved order
+    def SavedOrder(self):
+        saved_order = self.tools_data.OrderDataLoading(self.order_file_name)
+        self.order_ID_count = len(saved_order)
         
+        return saved_order
+    
     # Order generator
     def OrderGenerator(self):
         all_shelves = list(self.shelves.keys())
@@ -54,7 +76,8 @@ class Order():
                 else:
                     order.append((self.order_ID_count, []))
                 self.order_ID_count += 1
-        print("AAAAAAAAAAAA")
-        print(order)
+
+        self.tools_data.OrderDataSaving(order, self.order_file_name)
+        
         return order
                 
