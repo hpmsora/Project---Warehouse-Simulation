@@ -29,7 +29,6 @@ class Tools_Data():
                 orders.append((int(each_row[0]),
                                [int(x) for x in each_row[1:]]))
             new_file.close()
-            print(orders)
         else:
             new_file = open(file_path, 'w', newline='')
             new_file_writer = csv.writer(new_file)

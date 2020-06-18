@@ -97,7 +97,7 @@ class Algorithms_Evaluation():
             each_AGV_num_orders = 0
 
             if length_only:
-                print(_new_path)
+                #print(_new_path)
                 each_path, each_num_order = _new_path[each_AGV_ID]
                 each_AGV_len_schedule = each_path
                 each_AGV_num_orders = each_num_order
