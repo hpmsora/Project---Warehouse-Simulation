@@ -48,6 +48,10 @@ class AGV:
     def GetLastScheduledPos(self):
         return self.schedule[-1]
 
+    # Get remained schedule length
+    def GetRemainedScheduleLength(self):
+        return len(self.schedule)
+
     # Get schedule
     def GetSchedule(self):
         return cp.deepcopy(self.schedule)

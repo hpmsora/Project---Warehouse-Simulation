@@ -4,6 +4,7 @@
 #
 # Won Yong Ha
 #
+# V.1.2 - Length only function update
 # V.1.1 - Parallel computing
 # V.1.0 - Collision with wall free only.
 #
@@ -232,8 +233,10 @@ class Algorithms_PlathPlanning():
         for each_AGV_ID, each_AGV_schedule in _new_schedules:
             each_AGV_path_length = 0
             each_AGV_order_num = 0
+            each_AGV_order_list = {} # (Time, pox X, pos Y)
             
             last_position = self.AGVs[each_AGV_ID].GetLastScheduledPos()
+            time_step = self.AGVs[each_AGV_ID].GetRemainedScheduleLength()
 
             for order_ID, shelf_IDs, depot_ID in each_AGV_schedule:
                 for each_shelf_IDs in shelf_IDs:
@@ -244,16 +247,20 @@ class Algorithms_PlathPlanning():
                     path_key = (last_position, each_shelf_pos)
                     reverse_path_key = (each_shelf_pos, last_position)
 
+                    (each_shelf_pos_X, each_shelf_pos_Y) = each_shelf_pos
+
                     if path_key in self.reserve_paths:
-                        each_AGV_path_length += self.reserve_paths[path_key][0]
+                        each_path_length = self.reserve_paths[path_key][0]
                     elif reverse_path_key in self.reserve_paths:
-                        each_AGV_path_length += self.reserve_paths[reverse_path_key][0]
+                        each_path_length = self.reserve_paths[reverse_path_key][0]
                     else:
                         last_positions = col.defaultdict(lambda: ())
                         last_positions[each_AGV_ID] = last_position
                         path = self.Q_Learning([(each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
                                                last_positions=last_positions)
-                        each_AGV_path_length += self.reserve_paths[path_key][0]
+                        each_path_length = self.reserve_paths[path_key][0]
+                        
+                    each_AGV_path_length += each_path_length
 
                     last_position = each_shelf_pos
 
