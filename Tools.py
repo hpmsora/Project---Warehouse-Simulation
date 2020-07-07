@@ -220,7 +220,10 @@ class Tools():
 
         return path
 
+    #--------------------------------------------------
     # Collision test
+
+    # Strict collision test
     def CollisionTest_Strict(self, _AGVs_paths):
         paths = []
         paths_length = []
@@ -253,17 +256,22 @@ class Tools():
                         collision += 1
 
                     # Turning following position collosion
-                    if each_pos_before == each_other_pos and not (each_pos == each_other_pos_before) and not (each_other_pos, each_other_pos_before):
+                    if each_pos_before == each_other_pos and \
+                       not (each_pos == each_other_pos_before) and \
+                       not (each_other_pos, each_other_pos_before):
                         if not self.Tuple_Subtraction(each_other_pos, each_other_pos_before) == self.Tuple_Subtraction(each_pos, each_pos_before):
                             collision += 1
 
                     # Corssover collision
-                    if (each_pos == each_other_pos_before and each_other_pos == each_pos_before) and not (each_pos == each_pos_before and each_other_pos == each_other_pos_before):
+                    if (each_pos == each_other_pos_before and \
+                        each_other_pos == each_pos_before) and \
+                        not (each_pos == each_pos_before and each_other_pos == each_other_pos_before):
                         collision += 1
 
             each_paths_time_before = each_paths_time
 
         return collision
+
     
     #--------------------------------------------------
     # Graph Tools

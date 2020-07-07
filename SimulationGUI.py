@@ -20,6 +20,7 @@ import AGV as AGV
 import Shelf as shf
 
 import Tools as t
+import Tools_Data as t_d
 import SimulationGUI_GraphGUI as ggui
 
 class SimulationBoard(tk.Frame):
@@ -53,6 +54,7 @@ class SimulationBoard(tk.Frame):
 
     graph_GUI = None
     tools = None
+    tools_data = None
 
     #@property
     #def canvas_size(self):
@@ -68,6 +70,7 @@ class SimulationBoard(tk.Frame):
 
         self.canvas  = None
         self.tools = None
+        self.tools_data = None
         self.graph_GUI = None
         
     # Grid initialize with border cells function
@@ -88,7 +91,12 @@ class SimulationBoard(tk.Frame):
                                 height=canvas_height,
                                 background=self.background_color)
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
-        self.tools = t.Tools(self.parent, self.canvas, self.square_size, self.grid_active_width, self.grid_active_height)
+        self.tools = t.Tools(self.parent,
+                             self.canvas,
+                             self.square_size,
+                             self.grid_active_width,
+                             self.grid_active_height)
+        self.tools_data = t_d.Tools_Data()
 
         # Borders
         for each_index_grid_height in range(0, self.grid_height):
@@ -124,7 +132,8 @@ class SimulationBoard(tk.Frame):
             
             for each_index_rows in list_rows:
                 for each_index_aisles in list_aisles:
-                    if not(each_index_rows == 1 or each_index_rows == self.grid_height-2) and (each_index_aisles % 3 == 1 or each_index_aisles % 3 == 0):
+                    if not(each_index_rows == 1 or each_index_rows == self.grid_height-2) \
+                       and (each_index_aisles % 3 == 1 or each_index_aisles % 3 == 0):
                         shelf_position_name = self.tools.CellNaming(each_index_aisles, each_index_rows)
                         tag = (shelf_position_name, "shelf")
                         shelf_ID = self.CellBuilding(tag,
@@ -287,20 +296,34 @@ class SimulationBoard(tk.Frame):
         return len(self.AGVs)
 
     # Set controller and tools function
-    def SetController(self, controller_type='Default', evaluation_type = "General_n_Balance", order_independent=False, graph_GUI_show = False):
+    def SetController(self,
+                      controller_type='Default',
+                      evaluation_type = "General_n_Balance",
+                      order_independent=False,
+                      graph_GUI_show = False):
         if graph_GUI_show:
             self.SetGraphGUI()
 
-        self.controller = ctr.Controller(self.AGVs, self.shelves, self.tools, evaluation_type = evaluation_type, order_independent=order_independent, graph_GUI = self.graph_GUI)
+        self.controller = ctr.Controller(self.AGVs,
+                                         self.shelves,
+                                         self.tools,
+                                         self.tools_data,
+                                         evaluation_type = evaluation_type,
+                                         order_independent = order_independent,
+                                         graph_GUI = self.graph_GUI)
         self.tools.SetAGVs(self.AGVs)
 
     # Set order generator function
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):
         self.order_generator = od.Order(self.shelves,
+                                        self.tools_data,
                                         order_type=order_type,
                                         order_per_batch=order_per_batch,
                                         num_order=num_order,
-                                        order_gap = 5)
+                                        order_gap = 5,
+                                        order_file_name = "Default.csv")
+        
+        self.order_list += self.order_generator.SavedOrder()
 
     # Add order to list of order function
     def AddOrder(self, _order):
