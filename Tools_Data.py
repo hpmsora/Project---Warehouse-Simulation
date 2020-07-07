@@ -16,7 +16,7 @@ class Tools_Data():
     data_directory_name = None
     results_directory_name = None
 
-    def __init__(self, data_directory_name="../_Data/", results_directory_name="../_Results/"):
+    def __init__(self, data_directory_name="../Values_Data/", results_directory_name="../Values_Results/"):
         self.data_directory_name = data_directory_name
         self.results_directory_name = results_directory_name
 

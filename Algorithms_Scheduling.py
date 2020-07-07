@@ -33,7 +33,14 @@ class Algorithms_Scheduling():
     evaluation_algorithm = None
 
     # Constructor
-    def __init__(self, _AGVs, _shelves, _tools, _scheduling_type, _path_planning_type, _evaluation_type, graph_GUI = None):
+    def __init__(self,
+                 _AGVs,
+                 _shelves,
+                 _tools,
+                 _scheduling_type,
+                 _path_planning_type,
+                 _evaluation_type,
+                 graph_GUI = None):
         self.AGVs = _AGVs
         self.shelves = _shelves
         self.scheduling_type = _scheduling_type

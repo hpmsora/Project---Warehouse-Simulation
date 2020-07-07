@@ -4,36 +4,40 @@
 #
 # Won Yong Ha
 #
-# V.1.0
+# V.1.1 Collision evaluation added
+# V.1.0 General evaluation
 #
 ###############################
 
 import sys
+import Algorithms_Evaluation_Collision as AlgEvalColl
 
 class Algorithms_Evaluation():
 
     AGVs = None
     shelves = None
-    EvaluationType = ""
+    evaluation_type = None
     
     # Internal Variables
     tools = None
-    variables_type = []
+    variables_type = None
+    eval_collision = None
 
     # Constructor
-    def __init__(self, _AGVs, _shelves, _tools, _EvaluationType):
+    def __init__(self, _AGVs, _shelves, _tools, _evaluation_type):
         self.AGVs = _AGVs
         self.shelves = _shelves
         self.tools = _tools
 
-        self.EvaluationType = _EvaluationType
+        self.evaluation_type = _evaluation_type
 
-        if self.EvaluationType == "General_n_Balance":
+        if self.evaluation_type == "General_n_Balance":
             self.variables_type = ("Total", ("TT", "TTC", "BU"))
-        elif self.EvaluationType == "General_n_Balance_n_Collision":
+        elif self.evaluation_type == "General_n_Balance_n_Collision":
             self.variables_type = ("Total", ("TT", "TTC", "BU", "CI"))
+            self.eval_collision = AlgEvalColl.Algorithms_Evaluation_Collision()
         else:
-            self.variables_type = ("Total")
+            self.variables_type = ("Total", ("Total"))
 
     #--------------------------------------------------
     
@@ -97,7 +101,6 @@ class Algorithms_Evaluation():
             each_AGV_num_orders = 0
 
             if length_only:
-                #print(_new_path)
                 each_path, each_num_order, each_order_list = _new_path[each_AGV_ID]
                 each_AGV_len_schedule = each_path
                 each_AGV_num_orders = each_num_order
@@ -126,7 +129,7 @@ class Algorithms_Evaluation():
         TT = max_ITC
         TTC = total_cost
         BU = min_ITC / max_ITC
-        CI = 0
+        CI = self.eval_collision.Update(_new_path)
 
         value = max_order/TT + total_order/TTC + BU + CI
         return (value, (max_order/TT, total_order/TTC, BU, CI))
@@ -140,7 +143,7 @@ class Algorithms_Evaluation():
     # Update
     def Update(self, _new_path, length_only = False):
         #print("[Evaluating]\t Processing ...")
-        if self.EvaluationType == "General_n_Balance":
+        if self.evaluation_type == "General_n_Balance":
             return self.General_n_Balance(_new_path, length_only = length_only)
-        if self.EvaluationType == "General_n_Balance_n_Collision":
+        if self.evaluation_type == "General_n_Balance_n_Collision":
             return self.General_n_Balance_n_Collision(_new_path, length_only = length_only)
