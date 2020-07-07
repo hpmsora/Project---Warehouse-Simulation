@@ -4,6 +4,7 @@
 #
 # Won Yong Ha
 #
+# V.1.3 - Lnegth only function output expansion
 # V.1.2 - Length only function update
 # V.1.1 - Parallel computing
 # V.1.0 - Collision with wall free only.
@@ -233,7 +234,7 @@ class Algorithms_PlathPlanning():
         for each_AGV_ID, each_AGV_schedule in _new_schedules:
             each_AGV_path_length = 0
             each_AGV_order_num = 0
-            each_AGV_order_list = {} # (Time, pox X, pos Y)
+            each_AGV_order_list = [] # (Time, pox X, pos Y)
             
             last_position = self.AGVs[each_AGV_ID].GetLastScheduledPos()
             time_step = self.AGVs[each_AGV_ID].GetRemainedScheduleLength()
@@ -246,8 +247,6 @@ class Algorithms_PlathPlanning():
                     each_shelf_pos = self.tools.GetShelvesDepotsPosByID(each_shelf_IDs)[0]
                     path_key = (last_position, each_shelf_pos)
                     reverse_path_key = (each_shelf_pos, last_position)
-
-                    (each_shelf_pos_X, each_shelf_pos_Y) = each_shelf_pos
 
                     if path_key in self.reserve_paths:
                         each_path_length = self.reserve_paths[path_key][0]
@@ -262,6 +261,10 @@ class Algorithms_PlathPlanning():
                         
                     each_AGV_path_length += each_path_length
 
+                    (each_shelf_pos_X, each_shelf_pos_Y) = each_shelf_pos
+                    time_step += each_path_length
+                    each_AGV_order_list.append((time_step, each_shelf_pos_X, each_shelf_pos_Y))
+
                     last_position = each_shelf_pos
 
                     # To the depot
@@ -270,19 +273,25 @@ class Algorithms_PlathPlanning():
                     reverse_path_key = (each_depot_pos, last_position)
 
                     if path_key in self.reserve_paths:
-                        each_AGV_path_length += self.reserve_paths[path_key][0]
+                        each_path_length += self.reserve_paths[path_key][0]
                     elif reverse_path_key in self.reserve_paths:
-                        each_AGV_path_length += self.reserve_paths[reverse_path_key][0]
+                        each_path_length += self.reserve_paths[reverse_path_key][0]
                     else:
                         last_positions = col.defaultdict(lambda: ())
                         last_positions[each_AGV_ID] = last_position
                         path = self.Q_Learning([(each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
                                                last_positions=last_positions)
-                        each_AGV_path_length += self.reserve_paths[path_key][0]
+                        each_path_length += self.reserve_paths[path_key][0]
+
+                    each_AGV_path_length += each_path_length
+
+                    (each_depot_pos_X, each_depot_pos_Y) = each_depot_pos
+                    time_step += each_path_length
+                    each_AGV_order_list.append((time_step, each_depot_pos_X, each_depot_pos_Y))
 
                     last_position = each_depot_pos
 
-            new_paths_length[each_AGV_ID] = (each_AGV_path_length, each_AGV_order_num)
+            new_paths_length[each_AGV_ID] = (each_AGV_path_length, each_AGV_order_num, each_AGV_order_list)
         return new_paths_length
                     
     #--------------------------------------------------

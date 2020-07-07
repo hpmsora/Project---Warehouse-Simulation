@@ -38,7 +38,7 @@ class Algorithms_Evaluation():
     #--------------------------------------------------
     
     # Balance include
-    def General_n_Balance(self, _new_path, length_only = False):
+    def General_n_Balance(self, _new_path, length_only = True):
         ITC = {}
         max_ITC = 1
         min_ITC = sys.maxsize
@@ -51,7 +51,7 @@ class Algorithms_Evaluation():
             each_AGV_num_orders = 0
 
             if length_only:
-                each_path, each_num_order = _new_path[each_AGV_ID]
+                each_path, each_num_order, _ = _new_path[each_AGV_ID]
                 each_AGV_len_schedule = each_path
                 each_AGV_num_orders = each_num_order
             else:
@@ -84,7 +84,7 @@ class Algorithms_Evaluation():
         return (value, (max_order/TT, total_order/TTC, BU))
 
     # Balance and collision include
-    def General_n_Balance_n_Collision(self, _new_path, length_only = False):
+    def General_n_Balance_n_Collision(self, _new_path, length_only = True):
         ITC = {}
         max_ITC = 1
         min_ITC = sys.maxsize
@@ -98,7 +98,7 @@ class Algorithms_Evaluation():
 
             if length_only:
                 #print(_new_path)
-                each_path, each_num_order = _new_path[each_AGV_ID]
+                each_path, each_num_order, each_order_list = _new_path[each_AGV_ID]
                 each_AGV_len_schedule = each_path
                 each_AGV_num_orders = each_num_order
             else:

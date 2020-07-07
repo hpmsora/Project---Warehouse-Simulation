@@ -307,6 +307,7 @@ class SimulationBoard(tk.Frame):
         self.controller = ctr.Controller(self.AGVs,
                                          self.shelves,
                                          self.tools,
+                                         self.tools_data,
                                          evaluation_type = evaluation_type,
                                          order_independent = order_independent,
                                          graph_GUI = self.graph_GUI)

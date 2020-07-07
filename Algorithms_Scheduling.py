@@ -122,9 +122,12 @@ class Algorithms_Scheduling():
 
             while True:
                 for each_populations in populations:
-                    each_new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(each_populations, AGVs_order)
-                    each_new_path_lengths = self.path_planning_algorithm.Update(each_new_schedule, length_only = True)
-                    each_eval_value, each_eval_variables = self.evaluation_algorithm.Update(each_new_path_lengths, length_only = True)
+                    each_new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(each_populations,
+                                                                                       AGVs_order)
+                    each_new_path_lengths = self.path_planning_algorithm.Update(each_new_schedule,
+                                                                                length_only = True)
+                    each_eval_value, each_eval_variables = self.evaluation_algorithm.Update(each_new_path_lengths,
+                                                                                            length_only = True)
                     populations_schedules.append((each_eval_value, each_eval_variables, each_populations))
 
                 #try:(TT, TTC, BU)
@@ -187,11 +190,11 @@ class Algorithms_Scheduling():
         new_paths = self.path_planning_algorithm.Update(new_schedules)
 
         # Evaluation process
-        eval_value = self.evaluation_algorithm.Update(new_paths)
+        eval_values = self.evaluation_algorithm.Update(new_paths)
         
         print("[Scheduling]\t Genetic algorithm scheduling done.\t\t" + str(eval_value))
         
-        return new_paths
+        return (new_paths, eval_values)
             
     # Genetic algorithm - crossover operator
     def GeneticAlgorithm_CrossOperator(self,
@@ -258,7 +261,5 @@ class Algorithms_Scheduling():
                                               self.MAX_EPOCH,
                                               self.CROSSOVER_RATE,
                                               _order_independent)
-
-        strict_collision = self.tools.CollisionTest_Strict(new_paths)
-        print("Collosions: " + str(strict_collision))
+            
         return new_paths
