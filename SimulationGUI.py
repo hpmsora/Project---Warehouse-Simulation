@@ -61,7 +61,12 @@ class SimulationBoard(tk.Frame):
     #    return (self.num_aisles * self.square_size, self.num_rows * self.square_size)
 
     # Constructor
-    def __init__(self, _parent, num_aisles=2, num_rows=5, square_size=64, movement_speed=200):
+    def __init__(self,
+                 _parent,
+                 num_aisles=2,
+                 num_rows=5,
+                 square_size=64,
+                 movement_speed=200):
         self.parent = _parent
         self.num_aisles = num_aisles
         self.num_rows = num_rows
@@ -289,9 +294,10 @@ class SimulationBoard(tk.Frame):
             
             pos = self.AGV_depot_area[index]
             init_posX, init_posY = pos
-            newAGV_ID = self.AGVBuilding("AGV", init_posX,
+            newAGV_ID = self.AGVBuilding("AGV",
+                                         init_posX,
                                          init_posY,
-                                         color='yellow')
+                                         color = 'yellow')
             self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID, pos, self.tools)
         return len(self.AGVs)
 
@@ -317,9 +323,9 @@ class SimulationBoard(tk.Frame):
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):
         self.order_generator = od.Order(self.shelves,
                                         self.tools_data,
-                                        order_type=order_type,
-                                        order_per_batch=order_per_batch,
-                                        num_order=num_order,
+                                        order_type = order_type,
+                                        order_per_batch = order_per_batch,
+                                        num_order = num_order,
                                         order_gap = 5,
                                         order_file_name = "Default.csv")
         
@@ -335,7 +341,7 @@ class SimulationBoard(tk.Frame):
 
     # Update
     def Update(self):
-        if len(self.order_list) <= len(self.AGVs)*3:
+        if len(self.order_list) <= self.tools.GetOrderLimitThreshold():
             self.AddOrder(self.order_generator)
 
         self.new_order = self.order_list.pop(0)

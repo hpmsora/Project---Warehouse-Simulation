@@ -10,6 +10,7 @@
 import numpy as np
 import random as rnd
 import copy as cp
+import sys
 
 class Tools():
 
@@ -38,13 +39,21 @@ class Tools():
     shelves_depots = {}
     depots = {}
 
+    order_limit_threshold = None
+
     # Graph GUI internal variables
     graph_data = None
     graph_variables_type = None
     graph_variables_type_list = None
 
     # Constructor
-    def __init__(self, _parent, _canvas, _square_size, _width, _height):
+    def __init__(self,
+                 _parent,
+                 _canvas,
+                 _square_size,
+                 _width,
+                 _height,
+                 order_limit_threshold = 15):
         self.parent = _parent
         self.canvas = _canvas
         self.square_size = _square_size
@@ -55,10 +64,12 @@ class Tools():
 
         self.AGVs = None
 
+        self.order_limit_threshold = order_limit_threshold
+
         self.graph_data = {}
         self.graph_variables_type = ()
-        graph_variables_type_list = []
-
+        self.graph_variables_type_list = []
+        
     # Building w_map
     def InitWMap(self):
         self.w_map = [[0 for i in range(self.height)] for j in range(self.width)]
@@ -70,6 +81,10 @@ class Tools():
     # Get parent object
     def GetParent(self):
         return self.parent
+    
+    # Get order limit threshold
+    def GetOrderLimitThreshold(self):
+        return self.order_limit_threshold
 
     # Get canvas object
     def GetCanvas(self):
@@ -309,3 +324,45 @@ class Tools():
     # Tuple subtraction
     def Tuple_Subtraction(self, _pos_1, _pos_2):
         return tuple(map(lambda i, j: i - j, _pos_1, _pos_2))
+
+    # Time coordinate data to occupancy matrix
+    def Matrixization(self, _new_path):
+        path_list = []
+        
+        for each_AGV in _new_path:
+            (_, _, coords) = _new_path[each_AGV]
+            path_list += coords
+
+        path_list = np.array(path_list)
+
+        t_min = sys.maxsize
+        t_max = 0
+        x_min = sys.maxsize
+        x_max = 0
+        y_min = sys.maxsize
+        y_max = 0
+        
+        for (t, x, y) in path_list:
+            if t_max < t:
+                t_max = t
+            if t_min > t:
+                t_min = t
+            if x_max < x:
+                x_max = x
+            if x_min > x:
+                x_min = x
+            if y_max < y:
+                y_max = y
+            if y_min > y:
+                y_min = y
+
+        density_matrix = np.zeros((t_max - t_min + 1,
+                                   x_max - x_min + 1,
+                                   y_max - y_min + 1))
+
+        for (t, x, y) in path_list:
+            density_matrix[t - t_min, x - x_min, y - y_min] = 1
+
+        #print(list(density_matrix))
+
+        return []

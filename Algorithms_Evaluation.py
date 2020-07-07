@@ -35,7 +35,7 @@ class Algorithms_Evaluation():
             self.variables_type = ("Total", ("TT", "TTC", "BU"))
         elif self.evaluation_type == "General_n_Balance_n_Collision":
             self.variables_type = ("Total", ("TT", "TTC", "BU", "CI"))
-            self.eval_collision = AlgEvalColl.Algorithms_Evaluation_Collision()
+            self.eval_collision = AlgEvalColl.Algorithms_Evaluation_Collision(self.tools)
         else:
             self.variables_type = ("Total", ("Total"))
 
@@ -129,7 +129,7 @@ class Algorithms_Evaluation():
         TT = max_ITC
         TTC = total_cost
         BU = min_ITC / max_ITC
-        CI = self.eval_collision.Update(_new_path)
+        CI = self.eval_collision.Update(_new_path, length_only)
 
         value = max_order/TT + total_order/TTC + BU + CI
         return (value, (max_order/TT, total_order/TTC, BU, CI))
