@@ -1,2 +1,2 @@
 # Project---Warehouse-Simulation
-Warehouse simulation program
+Warehouse simulation platform
