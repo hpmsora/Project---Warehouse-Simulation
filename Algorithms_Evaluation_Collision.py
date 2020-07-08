@@ -27,13 +27,14 @@ class Algorithms_Evaluation_Collision():
         # Estimator
         if length_only:
             density_matrix = self.tools.Matrixization(new_path)
+            
+            return 0
         # Realtor
         elif not length_only:
             pass
         else:
             return 0
         return 0
-        
     
     # Update
     def Update(self, _new_path, length_only):
