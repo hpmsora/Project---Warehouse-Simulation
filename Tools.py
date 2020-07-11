@@ -326,7 +326,7 @@ class Tools():
         return tuple(map(lambda i, j: i - j, _pos_1, _pos_2))
 
     # Time coordinate data to occupancy matrix
-    def Matrixization(self, _new_path):
+    def Matrixization_Density(self, _new_path):
         path_list = []
         
         for each_AGV in _new_path:
@@ -364,5 +364,14 @@ class Tools():
             density_matrix[t - t_min, x - x_min, y - y_min] = 1
 
         #print(list(density_matrix))
+
+        return []
+
+    # Time coordinate data to adjacency matrix
+    def Matrixization_Adjacency(self, _new_path, threshold = 0):
+        adjacency_dict = {}
+        
+        for each_AGV in _new_path:
+            print(_new_path[each_AGV])
 
         return []
