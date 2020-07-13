@@ -4,9 +4,12 @@
 #
 # Won Yong Ha
 #
+# V.1.1 Eigenvector centrality method
 # V.1.0 Entropy method
 #
 ###############################
+
+import scipy.linalg as la
 
 class Algorithms_Evaluation_Collision():
 
@@ -46,6 +49,9 @@ class Algorithms_Evaluation_Collision():
         # Estimator
         if length_only:
             adjacency_matrix = self.tools.Matrixization_Adjacency(_new_path)
+            eigvals, eigvecs = la.eig(adjacency_matrix)
+            print(adjacency_matrix)
+            #print(eigvals)
             return 0
 
         # Realtor

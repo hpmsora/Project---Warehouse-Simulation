@@ -5,11 +5,17 @@
 # Won Yong Ha
 #
 #
+# V.1.2 Add matrix calculation
+# V.1.1 Add Q-learning map
+# V.1.0 General tools
+#
 ###############################
 
 import numpy as np
 import random as rnd
 import copy as cp
+import collections as col
+
 import sys
 
 class Tools():
@@ -369,9 +375,32 @@ class Tools():
 
     # Time coordinate data to adjacency matrix
     def Matrixization_Adjacency(self, _new_path, threshold = 0):
-        adjacency_dict = {}
+        adjacency_matrix = []
         
+        adjacency_dict = col.defaultdict(list)
         for each_AGV in _new_path:
-            print(_new_path[each_AGV])
+            (_, _, each_orders) = _new_path[each_AGV]
+            for each_index, each_order in enumerate(each_orders[:-1]):
+                (current_order_time_step, _, _) = each_order
+                next_order = each_orders[each_index+1]
+                (next_order_time_step, _, _) = next_order
+                adjacency_dict[each_order] += [(next_order, next_order_time_step - current_order_time_step)]
+                adjacency_dict[next_order] += []
+        
+        # Assigned order
+        adjacency_matrix_order = {}
+        adjacency_matrix_size = 0
+        for each_index, each_adjancency_dict in enumerate(adjacency_dict):
+            adjacency_matrix_size += 1
+            adjacency_matrix_order[each_adjancency_dict] = each_index
 
-        return []
+        adjacency_matrix = np.zeros((adjacency_matrix_size, adjacency_matrix_size))
+        
+        for each_adjancency_dict in adjacency_dict:
+            m_i = adjacency_matrix_order[each_adjancency_dict]
+
+            for (each_connection, each_length) in adjacency_dict[each_adjancency_dict]:
+                m_j = adjacency_matrix_order[each_connection]
+                adjacency_matrix[m_i, m_j] = each_length
+
+        return adjacency_matrix
