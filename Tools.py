@@ -15,6 +15,7 @@ import numpy as np
 import random as rnd
 import copy as cp
 import collections as col
+import bisect as bit
 
 import sys
 
@@ -330,6 +331,40 @@ class Tools():
     # Tuple subtraction
     def Tuple_Subtraction(self, _pos_1, _pos_2):
         return tuple(map(lambda i, j: i - j, _pos_1, _pos_2))
+
+    # Time coordinate data ordering (Not using)
+    def Matrixization_TimeOrder(self, _new_path):
+        path_list = []
+
+        for each_AGV in _new_path:
+            (_, _, coords) = _new_path[each_AGV]
+            path_list += coords
+
+        path_list = sorted(path_list, key=lambda x: x[-1])
+        print(path_list)
+
+    # Time coordinate data seperation
+    def Matrixization_Separation(self, _new_path):
+        path_list_x = []
+        path_list_y = []
+        path_list_t = []
+
+        m_size = 0
+
+        for each_AGV in _new_path:
+            (_, _, coords) = _new_path[each_AGV]
+            for each_coords in coords:
+                (pos_x, pos_y, time_t) = each_coords
+                path_list_x.append(pos_x)
+                path_list_y.append(pos_y)
+                path_list_t.append(time_t)
+                m_size += 1
+
+        path_list_x = [path_list_x]*m_size
+        path_list_y = [path_list_y]*m_size
+        path_list_t = [path_list_t]*m_size
+
+        return (path_list_x, path_list_y, path_list_t)
 
     # Time coordinate data to occupancy matrix
     def Matrixization_Density(self, _new_path):
