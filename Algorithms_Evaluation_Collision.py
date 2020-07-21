@@ -50,7 +50,21 @@ class Algorithms_Evaluation_Collision():
         if _length_only:
             (pos_x, pos_y, time_t) = self.tools.Matrixization_Separation(_new_path)
 
-            print(pos_x)
+            pos_x = np.array(pos_x)
+            pos_y = np.array(pos_y)
+            time_t = np.array(time_t)
+
+            pos_x_diff = np.substract(pos_x, pos_x.transpose())
+            pos_y_diff = np.substract(pos_y, pos_y.transpose())
+            time_t_diff = np.substract(time_t, time_t.transpose())
+            
+            collision_index = np.trace(np.multiply(pos_x_diff, pos_x_diff.transpose())
+                                       + np.multiply(pos_y_diff, pos_y_diff.transpose())
+                                       + np.multiply(time_z_diff, time_z_diff.transpose()))
+
+            print(collision_index)
+
+            collision_index = 0
             
             return collision_index
         
