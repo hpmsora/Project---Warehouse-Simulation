@@ -10,6 +10,8 @@
 ###############################
 
 import scipy.linalg as la
+import numpy as np
+import math
 
 class Algorithms_Evaluation_Collision():
 
@@ -17,11 +19,15 @@ class Algorithms_Evaluation_Collision():
 
     # Internal Variables
     tools = None
+    standard_index = None
     
     # Contructor
     def __init__(self, _tools, collision_test_type="EntropyDistance"):
         self.tools = _tools
         self.collision_test_type = collision_test_type
+
+        if self.collision_test_type == "EntropyDistance":
+            self.standard_index = self.tools.GetWidth()**2 + self.tools.GetHeight()**2
 
     # Entropy - Matrix
     def CollisionTest_EntropyMatrix(self, _new_path, _length_only):
@@ -48,25 +54,30 @@ class Algorithms_Evaluation_Collision():
 
         # Estimator
         if _length_only:
-            (pos_x, pos_y, time_t) = self.tools.Matrixization_Separation(_new_path)
+            (pos_x, pos_y, time_t, m_size) = self.tools.Matrixization_Separation(_new_path)
 
             pos_x = np.array(pos_x)
             pos_y = np.array(pos_y)
             time_t = np.array(time_t)
 
-            pos_x_diff = np.substract(pos_x, pos_x.transpose())
-            pos_y_diff = np.substract(pos_y, pos_y.transpose())
-            time_t_diff = np.substract(time_t, time_t.transpose())
+            pos_x_diff = np.subtract(pos_x, pos_x.transpose())
+            pos_y_diff = np.subtract(pos_y, pos_y.transpose())
+            time_t_diff = np.subtract(time_t, time_t.transpose())
             
-            collision_index = np.trace(np.multiply(pos_x_diff, pos_x_diff.transpose())
-                                       + np.multiply(pos_y_diff, pos_y_diff.transpose())
-                                       + np.multiply(time_z_diff, time_z_diff.transpose()))
+            distance_matrix = np.dot(pos_x_diff, pos_x_diff.transpose()) \
+                            + np.dot(pos_y_diff, pos_y_diff.transpose()) \
+                            + np.dot(time_t_diff, time_t_diff.transpose())
+
+            distance_matrix = distance_matrix.diagonal()
+
+            collision_index = np.sqrt(distance_matrix).sum()
+
+            collision_index_max = math.sqrt(self.standard_index + m_size**2)
 
             print(collision_index)
-
-            collision_index = 0
+            print(collision_index_max)
             
-            return collision_index
+            return collision_index/collision_index_max
         
         # Realtor
         elif not _length_only:

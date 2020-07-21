@@ -364,7 +364,7 @@ class Tools():
         path_list_y = [path_list_y]*m_size
         path_list_t = [path_list_t]*m_size
 
-        return (path_list_x, path_list_y, path_list_t)
+        return (path_list_x, path_list_y, path_list_t, m_size)
 
     # Time coordinate data to occupancy matrix
     def Matrixization_Density(self, _new_path):
