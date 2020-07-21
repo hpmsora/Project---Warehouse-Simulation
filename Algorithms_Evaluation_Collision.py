@@ -70,14 +70,18 @@ class Algorithms_Evaluation_Collision():
 
             distance_matrix = distance_matrix.diagonal()
 
-            collision_index = np.sqrt(distance_matrix).sum()
+            collision_index_sum = np.sqrt(distance_matrix).sum()
 
-            collision_index_max = math.sqrt(self.standard_index + m_size**2)
+            collision_index_max = m_size*math.sqrt(self.standard_index + m_size**2)
+
+            print(collision_index_sum)
+            print(collision_index_max)
+
+            collision_index = collision_index_sum / collision_index_max
 
             print(collision_index)
-            print(collision_index_max)
             
-            return collision_index/collision_index_max
+            return collision_index
         
         # Realtor
         elif not _length_only:
