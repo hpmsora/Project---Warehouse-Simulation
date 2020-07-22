@@ -350,6 +350,7 @@ class Tools():
         path_list_t = []
 
         m_size = 0
+        max_t = 0
 
         for each_AGV in _new_path:
             (_, _, coords) = _new_path[each_AGV]
@@ -360,11 +361,14 @@ class Tools():
                 path_list_t.append(time_t)
                 m_size += 1
 
+                if max_t < time_t:
+                    max_t = time_t
+
         path_list_x = [path_list_x]*m_size
         path_list_y = [path_list_y]*m_size
         path_list_t = [path_list_t]*m_size
 
-        return (path_list_x, path_list_y, path_list_t, m_size)
+        return (path_list_x, path_list_y, path_list_t, max_t, m_size)
 
     # Time coordinate data to occupancy matrix
     def Matrixization_Density(self, _new_path):
