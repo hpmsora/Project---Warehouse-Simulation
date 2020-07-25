@@ -47,6 +47,7 @@ class Tools():
     depots = {}
 
     order_limit_threshold = None
+    reschedule_time_threshold = None
 
     # Graph GUI internal variables
     graph_data = None
@@ -60,7 +61,8 @@ class Tools():
                  _square_size,
                  _width,
                  _height,
-                 order_limit_threshold = 15):
+                 order_limit_threshold = 15,
+                 reschedule_time_threshold = 50):
         self.parent = _parent
         self.canvas = _canvas
         self.square_size = _square_size
@@ -72,6 +74,7 @@ class Tools():
         self.AGVs = None
 
         self.order_limit_threshold = order_limit_threshold
+        self.reschedule_time_threshold = reschedule_time_threshold
 
         self.graph_data = {}
         self.graph_variables_type = ()
@@ -92,6 +95,10 @@ class Tools():
     # Get order limit threshold
     def GetOrderLimitThreshold(self):
         return self.order_limit_threshold
+
+    # Get reschedule time threshold
+    def GetRescheduleTimeThreshold(self):
+        return self.reschedule_time_threshold
 
     # Get canvas object
     def GetCanvas(self):
@@ -192,6 +199,8 @@ class Tools():
 
     #--------------------------------------------------
     # Console Printing Tools
+
+    # Evaluation data printing function
     def PrintEvaluationData(self, _eval_data, _level, decimals=4, order_num="", comment=""):
         total_value, component_values = _eval_data
 
@@ -280,15 +289,15 @@ class Tools():
             paths_length.append(len(each_AGVs_path))
             paths.append(each_AGVs_path)
 
-        paths_length_max = max(paths_length)
+        paths_length_min = min(paths_length)
+        if paths_length_min <=0:
+            return collision
         
         for index, (each_paths, each_paths_length) in enumerate(zip(paths, paths_length)):
-            each_paths += [each_paths[-1]] * (paths_length_max - each_paths_length)
-            paths[index] = each_paths
+            #each_paths += [each_paths[-1]] * (paths_length_max - each_paths_length)
+            paths[index] = each_paths[:paths_length_min]
 
         paths_time = list(zip(*paths))
-        if not paths_time:
-            return collision
         each_paths_time_before = paths_time[0]
 
         for each_paths_time in paths_time[1:]:
@@ -372,12 +381,13 @@ class Tools():
         path_list_t = []
 
         m_size = 0
+        min_t = float('inf')
         max_t = 0
 
         for each_AGV in _new_path:
             (_, _, coords) = _new_path[each_AGV]
             for each_coords in coords:
-                (pos_x, pos_y, time_t) = each_coords
+                (time_t, pos_x, pos_y) = each_coords
                 path_list_x.append(pos_x)
                 path_list_y.append(pos_y)
                 path_list_t.append(time_t)
@@ -386,11 +396,14 @@ class Tools():
                 if max_t < time_t:
                     max_t = time_t
 
+                if min_t > time_t:
+                    min_t = time_t
+
         path_list_x = [path_list_x]*m_size
         path_list_y = [path_list_y]*m_size
         path_list_t = [path_list_t]*m_size
 
-        return (path_list_x, path_list_y, path_list_t, max_t, m_size)
+        return (path_list_t, path_list_x, path_list_y, min_t, max_t, m_size)
 
     # Time coordinate data to occupancy matrix
     def Matrixization_Density(self, _new_path):

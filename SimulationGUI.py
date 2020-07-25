@@ -26,8 +26,8 @@ import SimulationGUI_GraphGUI as ggui
 class SimulationBoard(tk.Frame):
 
     # Custom Variables
-    num_aisles = 2
-    num_rows = 5
+    num_aisles = None
+    num_rows = None
 
     grid_width = 0
     grid_height = 0
@@ -36,7 +36,7 @@ class SimulationBoard(tk.Frame):
     grid_active_height = 0
     
     background_color = 'grey'
-    square_size = 64
+    square_size = None
 
     movement_speed = 50
 
@@ -100,7 +100,8 @@ class SimulationBoard(tk.Frame):
                              self.canvas,
                              self.square_size,
                              self.grid_active_width,
-                             self.grid_active_height)
+                             self.grid_active_height,
+                             reschedule_time_threshold = 50)
         self.tools_data = t_d.Tools_Data()
 
         # Borders
@@ -157,11 +158,11 @@ class SimulationBoard(tk.Frame):
                                           color='white')
                         
         elif warehouse_type == 'basic_island_wide':
-            print("[Map]\t\t Basic island wide map")
+            print("[Map]\tBasic island wide map")
             road_width = 2
             island_height = 3
-            upper_road_height = 4
-            lower_road_height = 6
+            upper_road_height = 3
+            lower_road_height = 4
             
             self.grid_width = (road_width + 2)*self.num_aisles
             self.grid_height = self.num_rows+2
@@ -304,7 +305,7 @@ class SimulationBoard(tk.Frame):
     # Set controller and tools function
     def SetController(self,
                       controller_type='Default',
-                      evaluation_type = "General_n_Balance",
+                      evaluation_type = 'General_n_Balance',
                       order_independent=False,
                       graph_GUI_show = False):
         if graph_GUI_show:
@@ -315,6 +316,7 @@ class SimulationBoard(tk.Frame):
                                          self.tools,
                                          self.tools_data,
                                          evaluation_type = evaluation_type,
+                                         time_threshold = self.tools.GetRescheduleTimeThreshold(),
                                          order_independent = order_independent,
                                          graph_GUI = self.graph_GUI)
         self.tools.SetAGVs(self.AGVs)

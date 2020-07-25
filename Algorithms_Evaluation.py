@@ -4,6 +4,7 @@
 #
 # Won Yong Ha
 #
+# V.1.2 Collision evaluation edited
 # V.1.1 Collision evaluation added
 # V.1.0 General evaluation
 #
@@ -96,8 +97,6 @@ class Algorithms_Evaluation():
         max_order = 0
         total_order = 0
 
-        CI_rate = 0.1
-
         for each_AGV_ID in _new_path.keys():
             each_AGV_len_schedule = 0
             each_AGV_num_orders = 0
@@ -131,9 +130,9 @@ class Algorithms_Evaluation():
         TT = max_ITC
         TTC = total_cost
         BU = min_ITC / max_ITC
-        CI = self.eval_collision.Update(_new_path, length_only)
-
-        value = max_order/TT + total_order/TTC + BU + CI * CI_rate
+        CI = self.eval_collision.Update(_new_path, length_only) * BU
+        
+        value = max_order/TT + total_order/TTC + BU + CI
         return (value, (max_order/TT, total_order/TTC, BU, CI))
 
     #--------------------------------------------------

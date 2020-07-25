@@ -15,9 +15,9 @@ import tkinter as tk
 WAREHOUSE_TYPE = 'basic_island_wide' # Default warehouse type is basic
 ORDER_TYPE = 'basic'     # Default order type is basic stochastic
 
-NUM_AISLE = 8           # Default 2 aisle
-NUM_ROWS  = 15           # Default 5 rows each aisle
-SQUARE_SIZE = 20         # Default 64 per each square
+NUM_AISLE = 8           # Default 8 aisle
+NUM_ROWS  = 12           # Default 15 rows each aisle
+SQUARE_SIZE = 20         # Default 20 per each square
 
 DEPOT_TYPE = ['BottomCenter1_Above', 'BottomLeftQ4_Above', 'BottomRightQ4_Above']
 

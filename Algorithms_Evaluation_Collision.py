@@ -54,25 +54,25 @@ class Algorithms_Evaluation_Collision():
 
         # Estimator
         if _length_only:
-            (pos_x, pos_y, time_t, max_t, m_size) = self.tools.Matrixization_Separation(_new_path)
+            (time_t, pos_x, pos_y, min_t, max_t, m_size) = self.tools.Matrixization_Separation(_new_path)
 
+            time_t = np.array(time_t)
             pos_x = np.array(pos_x)
             pos_y = np.array(pos_y)
-            time_t = np.array(time_t)
 
+            time_t_diff = np.subtract(time_t, time_t.transpose())
             pos_x_diff = np.subtract(pos_x, pos_x.transpose())
             pos_y_diff = np.subtract(pos_y, pos_y.transpose())
-            time_t_diff = np.subtract(time_t, time_t.transpose())
             
-            distance_matrix = np.multiply(pos_x_diff, pos_x_diff) \
+            distance_matrix = np.multiply(time_t_diff, time_t_diff) \
                             + np.multiply(pos_y_diff, pos_y_diff) \
-                            + np.multiply(time_t_diff, time_t_diff)
+                            + np.multiply(pos_x_diff, pos_x_diff)
 
             distance_matrix = np.dot(np.sqrt(distance_matrix), np.ones((m_size, 1)))
 
             collision_index_sum = distance_matrix.sum()
 
-            collision_index_max = (m_size**2)*math.sqrt(self.standard_index + max_t**2)
+            collision_index_max = (m_size**2)*math.sqrt((max_t-min_t)**2 + self.standard_index)
 
             collision_index = collision_index_sum / collision_index_max
 
