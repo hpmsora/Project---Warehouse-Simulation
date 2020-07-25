@@ -77,12 +77,13 @@ class Algorithms_Scheduling():
                          _max_generaion,
                          _crossover_rate,
                          _order_independent):
-        print("[Scheduling]\t New orders for scheduling is: " + str(_new_orders))
+        print("[Scheduling]\tNew orders for scheduling is: " + str(_new_orders))
 
         self.tools.ResetGraphData()
 
         new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
         num_AGVs = 0
+        eval_value = (0, (0)) # Initial eval data
 
         # Order independent
         if _order_independent:
@@ -154,11 +155,11 @@ class Algorithms_Scheduling():
                 
                 # Path planning process
                 new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(populations[0], AGVs_order)
-                new_paths = self.path_planning_algorithm.Update(new_schedule)
+                new_paths = self.path_planning_algorithm.Update(new_schedule, length_only=True)
 
                 # Evaluation process
-                eval_value = self.evaluation_algorithm.Update(new_paths)
-                print(str(generation) + ":\t" + str(eval_value))
+                eval_value = self.evaluation_algorithm.Update(new_paths, length_only=True)
+                self.tools.PrintEvaluationData(eval_value, "Scheduling", order_num=generation)
 
                 if generation >= max_generation:
                     break
@@ -197,11 +198,12 @@ class Algorithms_Scheduling():
         new_paths = self.path_planning_algorithm.Update(new_schedules)
 
         # Evaluation process
-        eval_values = self.evaluation_algorithm.Update(new_paths)
+        real_eval_value = eval_value
         
-        print("[Scheduling]\t Genetic algorithm scheduling done.\t\t" + str(eval_value))
+        print("[Scheduling]\tGenetic algorithm scheduling done.")
+        self.tools.PrintEvaluationData(real_eval_value, "Scheduling", comment="Final")
         
-        return (new_paths, eval_values)
+        return (new_paths, real_eval_value)
             
     # Genetic algorithm - crossover operator
     def GeneticAlgorithm_CrossOperator(self,

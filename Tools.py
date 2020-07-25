@@ -191,6 +191,28 @@ class Tools():
         return (int(pos[0]), int(pos[1]))
 
     #--------------------------------------------------
+    # Console Printing Tools
+    def PrintEvaluationData(self, _eval_data, _level, decimals=4, order_num="", comment=""):
+        total_value, component_values = _eval_data
+
+        print_str = "( "
+
+        for each_value in component_values:
+            print_str += str(round(each_value, 4)) + "\t"
+
+        print_str += ")"
+
+        if not order_num == "":
+            print("[" + _level  + "]\t" + str(order_num) + "\tT: " \
+                  + str(round(total_value, decimals)) + "\t" + print_str)
+        elif comment == "":
+            print("[" + _level  + "]\t" + comment + "\tT: " \
+                  + str(round(total_value, decimals)) + "\t" + print_str)
+        else:
+            print("[" + _level  + "]\tT: " \
+                  + str(round(total_value, decimals)) + "\t" + print_str)
+
+    #--------------------------------------------------
     # Algorithms Tools
 
     # Get next state by action
