@@ -26,8 +26,8 @@ import SimulationGUI_GraphGUI as ggui
 class SimulationBoard(tk.Frame):
 
     # Custom Variables
-    num_aisles = 2
-    num_rows = 5
+    num_aisles = None
+    num_rows = None
 
     grid_width = 0
     grid_height = 0
@@ -36,7 +36,7 @@ class SimulationBoard(tk.Frame):
     grid_active_height = 0
     
     background_color = 'grey'
-    square_size = 64
+    square_size = None
 
     movement_speed = 50
 
@@ -61,7 +61,12 @@ class SimulationBoard(tk.Frame):
     #    return (self.num_aisles * self.square_size, self.num_rows * self.square_size)
 
     # Constructor
-    def __init__(self, _parent, num_aisles=2, num_rows=5, square_size=64, movement_speed=200):
+    def __init__(self,
+                 _parent,
+                 num_aisles=2,
+                 num_rows=5,
+                 square_size=64,
+                 movement_speed=200):
         self.parent = _parent
         self.num_aisles = num_aisles
         self.num_rows = num_rows
@@ -95,7 +100,8 @@ class SimulationBoard(tk.Frame):
                              self.canvas,
                              self.square_size,
                              self.grid_active_width,
-                             self.grid_active_height)
+                             self.grid_active_height,
+                             reschedule_time_threshold = 50)
         self.tools_data = t_d.Tools_Data()
 
         # Borders
@@ -152,11 +158,11 @@ class SimulationBoard(tk.Frame):
                                           color='white')
                         
         elif warehouse_type == 'basic_island_wide':
-            print("[Map]\t\t Basic island wide map")
+            print("[Map]\tBasic island wide map")
             road_width = 2
             island_height = 3
-            upper_road_height = 4
-            lower_road_height = 6
+            upper_road_height = 3
+            lower_road_height = 4
             
             self.grid_width = (road_width + 2)*self.num_aisles
             self.grid_height = self.num_rows+2
@@ -289,16 +295,17 @@ class SimulationBoard(tk.Frame):
             
             pos = self.AGV_depot_area[index]
             init_posX, init_posY = pos
-            newAGV_ID = self.AGVBuilding("AGV", init_posX,
+            newAGV_ID = self.AGVBuilding("AGV",
+                                         init_posX,
                                          init_posY,
-                                         color='yellow')
+                                         color = 'yellow')
             self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID, pos, self.tools)
         return len(self.AGVs)
 
     # Set controller and tools function
     def SetController(self,
                       controller_type='Default',
-                      evaluation_type = "General_n_Balance",
+                      evaluation_type = 'General_n_Balance',
                       order_independent=False,
                       graph_GUI_show = False):
         if graph_GUI_show:
@@ -309,6 +316,7 @@ class SimulationBoard(tk.Frame):
                                          self.tools,
                                          self.tools_data,
                                          evaluation_type = evaluation_type,
+                                         time_threshold = self.tools.GetRescheduleTimeThreshold(),
                                          order_independent = order_independent,
                                          graph_GUI = self.graph_GUI)
         self.tools.SetAGVs(self.AGVs)
@@ -317,9 +325,9 @@ class SimulationBoard(tk.Frame):
     def SetOrder(self, order_type='basic', order_per_batch=1, num_order=100):
         self.order_generator = od.Order(self.shelves,
                                         self.tools_data,
-                                        order_type=order_type,
-                                        order_per_batch=order_per_batch,
-                                        num_order=num_order,
+                                        order_type = order_type,
+                                        order_per_batch = order_per_batch,
+                                        num_order = num_order,
                                         order_gap = 5,
                                         order_file_name = "Default.csv")
         
@@ -335,7 +343,7 @@ class SimulationBoard(tk.Frame):
 
     # Update
     def Update(self):
-        if len(self.order_list) <= len(self.AGVs)*3:
+        if len(self.order_list) <= self.tools.GetOrderLimitThreshold():
             self.AddOrder(self.order_generator)
 
         self.new_order = self.order_list.pop(0)

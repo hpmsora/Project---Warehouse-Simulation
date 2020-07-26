@@ -5,11 +5,19 @@
 # Won Yong Ha
 #
 #
+# V.1.2 Add matrix calculation
+# V.1.1 Add Q-learning map
+# V.1.0 General tools
+#
 ###############################
 
 import numpy as np
 import random as rnd
 import copy as cp
+import collections as col
+import bisect as bit
+
+import sys
 
 class Tools():
 
@@ -38,13 +46,23 @@ class Tools():
     shelves_depots = {}
     depots = {}
 
+    order_limit_threshold = None
+    reschedule_time_threshold = None
+
     # Graph GUI internal variables
     graph_data = None
     graph_variables_type = None
     graph_variables_type_list = None
 
     # Constructor
-    def __init__(self, _parent, _canvas, _square_size, _width, _height):
+    def __init__(self,
+                 _parent,
+                 _canvas,
+                 _square_size,
+                 _width,
+                 _height,
+                 order_limit_threshold = 15,
+                 reschedule_time_threshold = 50):
         self.parent = _parent
         self.canvas = _canvas
         self.square_size = _square_size
@@ -55,10 +73,13 @@ class Tools():
 
         self.AGVs = None
 
+        self.order_limit_threshold = order_limit_threshold
+        self.reschedule_time_threshold = reschedule_time_threshold
+
         self.graph_data = {}
         self.graph_variables_type = ()
-        graph_variables_type_list = []
-
+        self.graph_variables_type_list = []
+        
     # Building w_map
     def InitWMap(self):
         self.w_map = [[0 for i in range(self.height)] for j in range(self.width)]
@@ -70,6 +91,14 @@ class Tools():
     # Get parent object
     def GetParent(self):
         return self.parent
+    
+    # Get order limit threshold
+    def GetOrderLimitThreshold(self):
+        return self.order_limit_threshold
+
+    # Get reschedule time threshold
+    def GetRescheduleTimeThreshold(self):
+        return self.reschedule_time_threshold
 
     # Get canvas object
     def GetCanvas(self):
@@ -169,6 +198,30 @@ class Tools():
         return (int(pos[0]), int(pos[1]))
 
     #--------------------------------------------------
+    # Console Printing Tools
+
+    # Evaluation data printing function
+    def PrintEvaluationData(self, _eval_data, _level, decimals=4, order_num="", comment=""):
+        total_value, component_values = _eval_data
+
+        print_str = "( "
+
+        for each_value in component_values:
+            print_str += str(round(each_value, 4)) + "\t"
+
+        print_str += ")"
+
+        if not order_num == "":
+            print("[" + _level  + "]\t" + str(order_num) + "\tT: " \
+                  + str(round(total_value, decimals)) + "\t" + print_str)
+        elif comment == "":
+            print("[" + _level  + "]\t" + comment + "\tT: " \
+                  + str(round(total_value, decimals)) + "\t" + print_str)
+        else:
+            print("[" + _level  + "]\tT: " \
+                  + str(round(total_value, decimals)) + "\t" + print_str)
+
+    #--------------------------------------------------
     # Algorithms Tools
 
     # Get next state by action
@@ -236,15 +289,15 @@ class Tools():
             paths_length.append(len(each_AGVs_path))
             paths.append(each_AGVs_path)
 
-        paths_length_max = max(paths_length)
+        paths_length_min = min(paths_length)
+        if paths_length_min <=0:
+            return collision
         
         for index, (each_paths, each_paths_length) in enumerate(zip(paths, paths_length)):
-            each_paths += [each_paths[-1]] * (paths_length_max - each_paths_length)
-            paths[index] = each_paths
+            #each_paths += [each_paths[-1]] * (paths_length_max - each_paths_length)
+            paths[index] = each_paths[:paths_length_min]
 
         paths_time = list(zip(*paths))
-        if not paths_time:
-            return collision
         each_paths_time_before = paths_time[0]
 
         for each_paths_time in paths_time[1:]:
@@ -309,3 +362,119 @@ class Tools():
     # Tuple subtraction
     def Tuple_Subtraction(self, _pos_1, _pos_2):
         return tuple(map(lambda i, j: i - j, _pos_1, _pos_2))
+
+    # Time coordinate data ordering (Not using)
+    def Matrixization_TimeOrder(self, _new_path):
+        path_list = []
+
+        for each_AGV in _new_path:
+            (_, _, coords) = _new_path[each_AGV]
+            path_list += coords
+
+        path_list = sorted(path_list, key=lambda x: x[-1])
+        print(path_list)
+
+    # Time coordinate data seperation
+    def Matrixization_Separation(self, _new_path):
+        path_list_x = []
+        path_list_y = []
+        path_list_t = []
+
+        m_size = 0
+        min_t = float('inf')
+        max_t = 0
+
+        for each_AGV in _new_path:
+            (_, _, coords) = _new_path[each_AGV]
+            for each_coords in coords:
+                (time_t, pos_x, pos_y) = each_coords
+                path_list_x.append(pos_x)
+                path_list_y.append(pos_y)
+                path_list_t.append(time_t)
+                m_size += 1
+
+                if max_t < time_t:
+                    max_t = time_t
+
+                if min_t > time_t:
+                    min_t = time_t
+
+        path_list_x = [path_list_x]*m_size
+        path_list_y = [path_list_y]*m_size
+        path_list_t = [path_list_t]*m_size
+
+        return (path_list_t, path_list_x, path_list_y, min_t, max_t, m_size)
+
+    # Time coordinate data to occupancy matrix
+    def Matrixization_Density(self, _new_path):
+        path_list = []
+        
+        for each_AGV in _new_path:
+            (_, _, coords) = _new_path[each_AGV]
+            path_list += coords
+
+        path_list = np.array(path_list)
+
+        t_min = sys.maxsize
+        t_max = 0
+        x_min = sys.maxsize
+        x_max = 0
+        y_min = sys.maxsize
+        y_max = 0
+        
+        for (t, x, y) in path_list:
+            if t_max < t:
+                t_max = t
+            if t_min > t:
+                t_min = t
+            if x_max < x:
+                x_max = x
+            if x_min > x:
+                x_min = x
+            if y_max < y:
+                y_max = y
+            if y_min > y:
+                y_min = y
+
+        density_matrix = np.zeros((t_max - t_min + 1,
+                                   x_max - x_min + 1,
+                                   y_max - y_min + 1))
+
+        for (t, x, y) in path_list:
+            density_matrix[t - t_min, x - x_min, y - y_min] = 1
+
+        #print(list(density_matrix))
+
+        return []
+
+    # Time coordinate data to adjacency matrix
+    def Matrixization_Adjacency(self, _new_path, threshold = 0):
+        adjacency_matrix = []
+        
+        adjacency_dict = col.defaultdict(list)
+        for each_AGV in _new_path:
+            (_, _, each_orders) = _new_path[each_AGV]
+            for each_index, each_order in enumerate(each_orders[:-1]):
+                (current_order_time_step, _, _) = each_order
+                next_order = each_orders[each_index+1]
+                (next_order_time_step, _, _) = next_order
+                adjacency_dict[each_order] += [(next_order, next_order_time_step - current_order_time_step)]
+                adjacency_dict[next_order] += []
+        
+        # Assigned order
+        adjacency_matrix_order = {}
+        adjacency_matrix_size = 0
+        for each_index, each_adjancency_dict in enumerate(adjacency_dict):
+            adjacency_matrix_size += 1
+            adjacency_matrix_order[each_adjancency_dict] = each_index
+
+        adjacency_matrix = np.zeros((adjacency_matrix_size, adjacency_matrix_size))
+        
+        for each_adjancency_dict in adjacency_dict:
+            m_i = adjacency_matrix_order[each_adjancency_dict]
+
+            for (each_connection, each_length) in adjacency_dict[each_adjancency_dict]:
+                m_j = adjacency_matrix_order[each_connection]
+                adjacency_matrix[m_i, m_j] = each_length
+
+        return adjacency_matrix
