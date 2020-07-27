@@ -133,7 +133,8 @@ class Algorithms_Scheduling():
                     each_new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(each_populations,
                                                                                        AGVs_order)
                     each_new_path_lengths = self.path_planning_algorithm.Update(each_new_schedule,
-                                                                                length_only = True)
+                                                                                length_only = True,
+                                                                                count = generation)
                     each_eval_value, each_eval_variables = self.evaluation_algorithm.Update(each_new_path_lengths,
                                                                                             length_only = True)
                     populations_schedules.append((each_eval_value, each_eval_variables, each_populations))

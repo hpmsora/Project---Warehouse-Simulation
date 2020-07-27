@@ -4,7 +4,8 @@
 #
 # Won Yong Ha
 #
-# V.1.3 - Lnegth only function output expansion
+# V.1.4 - Length only function parallelized
+# V.1.3 - Length only function output expansion
 # V.1.2 - Length only function update
 # V.1.1 - Parallel computing
 # V.1.0 - Collision with wall free only.
@@ -51,6 +52,7 @@ class Algorithms_PlathPlanning():
     # Q-Learning
     def Q_Learning(self,
                    _new_schedules,
+                   length_only = False,
                    num_episodes = 1000,
                    discount_factor = 1.0,
                    alpha = 0.6,
@@ -128,9 +130,12 @@ class Algorithms_PlathPlanning():
             p.start()
         for each_jobs in jobs:
             each_jobs.join()
+        #-------Multiprocessing-End
 
         self.reserve_paths.update(new_paths)
-        #-------Multiprocessing-End
+        
+        if length_only:
+            return new_paths
         
         return AGVs_paths
 
@@ -227,7 +232,7 @@ class Algorithms_PlathPlanning():
 
         _AGVs_paths[_each_AGVs_ID] = AGV_path
 
-    def Q_Learning_Length_Only_AGV(self, _each_AGV_ID, _each_AGV_schedule, _new_paths_length):
+    def Q_Learning_Length_Only_AGV(self, _each_AGV_ID, _each_AGV_schedule, _new_paths_length, _new_paths):
         each_AGV_path_length = 0
         each_AGV_order_num = 0
         each_AGV_order_list = [] # (Time, pox X, pos Y)
@@ -251,8 +256,9 @@ class Algorithms_PlathPlanning():
                 else:
                     last_positions = col.defaultdict(lambda: ())
                     last_positions[_each_AGV_ID] = last_position
-                    path = self.Q_Learning([(_each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
-                                           last_positions=last_positions)
+                    _new_paths.update(self.Q_Learning([(_each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
+                                                      length_only=True,
+                                                      last_positions=last_positions))
                     each_path_length = self.reserve_paths[path_key][0]
                     
                 each_AGV_path_length += each_path_length
@@ -275,8 +281,9 @@ class Algorithms_PlathPlanning():
                 else:
                     last_positions = col.defaultdict(lambda: ())
                     last_positions[_each_AGV_ID] = last_position
-                    path = self.Q_Learning([(_each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
-                                           last_positions=last_positions)
+                    _new_paths.update(self.Q_Learning([(_each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
+                                                      length_only=True,
+                                                      last_positions=last_positions))
                     each_path_length += self.reserve_paths[path_key][0]
                     
                 each_AGV_path_length += each_path_length
@@ -290,83 +297,55 @@ class Algorithms_PlathPlanning():
         _new_paths_length[_each_AGV_ID] = (each_AGV_path_length, each_AGV_order_num, each_AGV_order_list)
     
     # Q-Learning length only
-    def Q_Learning_Length_Only(self, _new_schedules):
-        
-        new_paths_length = col.defaultdict(lambda: (0,0))
-        
-        for each_AGV_ID, each_AGV_schedule in _new_schedules:
-            self.Q_Learning_Length_Only_AGV(each_AGV_ID, each_AGV_schedule, new_paths_length)
-            """each_AGV_path_length = 0
-            each_AGV_order_num = 0
-            each_AGV_order_list = [] # (Time, pox X, pos Y)
+    def Q_Learning_Length_Only(self, _new_schedules, count = 0):
+
+        # First path planning
+        if count == 0:
+            #-------Multiprocessing-Start
+            jobs = []
+            manager1 = mp.Manager()
+            manager2 = mp.Manager()
+            new_paths_length = manager1.dict()
+            new_paths = manager2.dict()
             
-            last_position = self.AGVs[each_AGV_ID].GetLastScheduledPos()
-            time_step = self.AGVs[each_AGV_ID].GetRemainedScheduleLength()
+            for each_AGV_ID, each_AGV_schedule in _new_schedules:
+            
+                p = mp.Process(target=self.Q_Learning_Length_Only_AGV,
+                               args=(each_AGV_ID,
+                                     each_AGV_schedule,
+                                     new_paths_length,
+                                     new_paths))
+                jobs.append(p)
+                p.start()
 
-            for order_ID, shelf_IDs, depot_ID in each_AGV_schedule:
-                for each_shelf_IDs in shelf_IDs:
-                    each_AGV_order_num += 1
+            for each_jobs in jobs:
+                each_jobs.join()
+            #-------Multiprocessing-End
 
-                    # To the shelf
-                    each_shelf_pos = self.tools.GetShelvesDepotsPosByID(each_shelf_IDs)[0]
-                    path_key = (last_position, each_shelf_pos)
-                    reverse_path_key = (each_shelf_pos, last_position)
+            # Update global reserve paths
+            if not len(new_paths) == 0:
+                self.reserve_paths.update(new_paths)
+                
+            new_paths_length = dict(new_paths_length)
 
-                    if path_key in self.reserve_paths:
-                        each_path_length = self.reserve_paths[path_key][0]
-                    elif reverse_path_key in self.reserve_paths:
-                        each_path_length = self.reserve_paths[reverse_path_key][0]
-                    else:
-                        last_positions = col.defaultdict(lambda: ())
-                        last_positions[each_AGV_ID] = last_position
-                        path = self.Q_Learning([(each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
-                                               last_positions=last_positions)
-                        each_path_length = self.reserve_paths[path_key][0]
-                        
-                    each_AGV_path_length += each_path_length
+        # Non-First path planning
+        else:
+            new_paths_length = col.defaultdict(lambda: (0,0))
+            
+            for each_AGV_ID, each_AGV_schedule in _new_schedules:
+                self.Q_Learning_Length_Only_AGV(each_AGV_ID, each_AGV_schedule, new_paths_length, {})
 
-                    (each_shelf_pos_X, each_shelf_pos_Y) = each_shelf_pos
-                    time_step += each_path_length
-                    each_AGV_order_list.append((time_step, each_shelf_pos_X, each_shelf_pos_Y))
-
-                    last_position = each_shelf_pos
-
-                    # To the depot
-                    each_depot_pos = self.tools.GetDepotsByID(depot_ID)[0]
-                    path_key = (last_position, each_depot_pos)
-                    reverse_path_key = (each_depot_pos, last_position)
-
-                    if path_key in self.reserve_paths:
-                        each_path_length += self.reserve_paths[path_key][0]
-                    elif reverse_path_key in self.reserve_paths:
-                        each_path_length += self.reserve_paths[reverse_path_key][0]
-                    else:
-                        last_positions = col.defaultdict(lambda: ())
-                        last_positions[each_AGV_ID] = last_position
-                        path = self.Q_Learning([(each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
-                                               last_positions=last_positions)
-                        each_path_length += self.reserve_paths[path_key][0]
-
-                    each_AGV_path_length += each_path_length
-
-                    (each_depot_pos_X, each_depot_pos_Y) = each_depot_pos
-                    time_step += each_path_length
-                    each_AGV_order_list.append((time_step, each_depot_pos_X, each_depot_pos_Y))
-
-                    last_position = each_depot_pos
-
-            new_paths_length[each_AGV_ID] = (each_AGV_path_length, each_AGV_order_num, each_AGV_order_list)"""
         return new_paths_length
                     
     #--------------------------------------------------
     
     # Update
-    def Update(self, _new_schedules, length_only = False):
+    def Update(self, _new_schedules, length_only = False, count = None):
         new_paths = []
         
         if self.path_planning_type == "Q_Learning":
             if length_only:
-                new_paths = self.Q_Learning_Length_Only(_new_schedules)
+                new_paths = self.Q_Learning_Length_Only(_new_schedules, count = count)
             else:
                 new_paths = self.Q_Learning(_new_schedules)
         return new_paths
