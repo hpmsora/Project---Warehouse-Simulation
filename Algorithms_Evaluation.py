@@ -11,6 +11,7 @@
 ###############################
 
 import sys
+import numba as nb
 import Algorithms_Evaluation_Collision as AlgEvalColl
 
 class Algorithms_Evaluation():
@@ -89,6 +90,7 @@ class Algorithms_Evaluation():
         return (value, (max_order/TT, total_order/TTC, BU))
 
     # Balance and collision include
+    @nb.jit
     def General_n_Balance_n_Collision(self, _new_path, length_only = True):
         ITC = {}
         max_ITC = 1
