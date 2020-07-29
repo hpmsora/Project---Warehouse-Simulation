@@ -55,7 +55,7 @@ class Algorithms_Scheduling():
         self.tools = _tools
         self.graph_GUI = graph_GUI
         self.max_generation = 200
-        self.population_size = 200
+        self.population_size = 5000
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
         self.SetPathPlanningAlgorithm(_path_planning_type)
@@ -311,6 +311,6 @@ class Algorithms_Scheduling():
                                               self.CROSSOVER_RATE,
                                               _order_independent,
                                               GPU_accelerating = self.GPU_accelerating,
-                                              GPU_accelerating_data = (self.n_AGV, population_size))
+                                              GPU_accelerating_data = (self.n_AGV, self.population_size))
             
         return new_paths
