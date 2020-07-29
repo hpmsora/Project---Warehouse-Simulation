@@ -16,6 +16,8 @@ import copy as cp
 import random as rd
 import collections as col
 
+import time as t
+
 class Algorithms_Scheduling():
 
     AGVs = None
@@ -29,8 +31,13 @@ class Algorithms_Scheduling():
     # Internal Variables
     tools = None
     graph_GUI = None
+    max_generation = None
+    population_size = None
     path_planning_algorithm = None
     evaluation_algorithm = None
+    
+    GPU_accelerating = None
+    n_AGV = None
 
     # Constructor
     def __init__(self,
@@ -47,6 +54,8 @@ class Algorithms_Scheduling():
 
         self.tools = _tools
         self.graph_GUI = graph_GUI
+        self.max_generation = 200
+        self.population_size = 200
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
         self.SetPathPlanningAlgorithm(_path_planning_type)
@@ -68,6 +77,9 @@ class Algorithms_Scheduling():
                                                                   self.shelves,
                                                                   self.tools,
                                                                   _evaluation_type)
+        if _evaluation_type == "General_n_Balance_n_Collision":
+            self.GPU_accelerating = True
+            self.n_AGV = len(self.AGVs)
 
     #--------------------------------------------------
     
@@ -76,7 +88,9 @@ class Algorithms_Scheduling():
                          _new_orders,
                          _max_generaion,
                          _crossover_rate,
-                         _order_independent):
+                         _order_independent,
+                         GPU_accelerating = False,
+                         GPU_accelerating_data = None):
         print("[Scheduling]\tNew orders for scheduling is: " + str(_new_orders))
 
         self.tools.ResetGraphData()
@@ -106,8 +120,6 @@ class Algorithms_Scheduling():
             populations = []
             populations_schedules = []
             generation = 0
-            max_generation = 200
-            population_size = 200
             AGVs_order = []
 
             AGVs_cuts = []
@@ -118,27 +130,50 @@ class Algorithms_Scheduling():
 
             genes_size = len(genes)
 
-            elite_size = int(20*population_size/100)
-            non_elite_size = population_size - elite_size
-            half_size = int(50*population_size/100)
+            elite_size = int(20*self.population_size/100)
+            non_elite_size = self.population_size - elite_size
+            half_size = int(50*self.population_size/100)
             crossover_num = int(genes_size*_crossover_rate)
             non_crossover_num = genes_size - crossover_num
 
             # Initial population
-            for _ in range(population_size):
+            for _ in range(self.population_size):
                 populations.append(rd.sample(genes, k=genes_size))
 
             while True:
+
+                new_path_lengths_list = []
+                new_populations_list = []
+                
+                total_t = 0 ##########
+                ss = t.time() ##########
+                
                 for each_populations in populations:
                     each_new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(each_populations,
                                                                                        AGVs_order)
                     each_new_path_lengths = self.path_planning_algorithm.Update(each_new_schedule,
                                                                                 length_only = True,
                                                                                 count = generation)
-                    each_eval_value, each_eval_variables = self.evaluation_algorithm.Update(each_new_path_lengths,
+                    
+                    if GPU_accelerating:
+                        new_path_lengths_list.append(each_new_path_lengths)
+                        new_populations_list.append(each_populations)
+                    else:
+                        s = t.time() ##############
+                        each_eval_value, each_eval_variables = self.evaluation_algorithm.Update(each_new_path_lengths,
                                                                                             length_only = True)
-                    populations_schedules.append((each_eval_value, each_eval_variables, each_populations))
+                        populations_schedules.append((each_eval_value, each_eval_variables, each_populations))
+                        e = t.time() ##############
+                        total_t += e-s ##############
+                        
+                if GPU_accelerating:
+                    populations_schedules = self.evaluation_algorithm.Update(new_path_lengths_list,
+                                                                             length_only = True,
+                                                                             GPU_accelerating = GPU_accelerating,
+                                                                             GPU_accelerating_data = GPU_accelerating_data)
+                    populations_schedules = np.column_stack((populations_schedules, new_populations_list))
 
+                print(total_t)
                 #try:(TT, TTC, BU)
                 populations_schedules.sort(key=lambda each_populations: each_populations[0], reverse=True)
                 #except TypeError:
@@ -151,7 +186,7 @@ class Algorithms_Scheduling():
                 # Update graph data
                 each_eval_value, each_eval_variables, _ = populations_schedules[0]
                 self.tools.Update_GraphData(generation, (each_eval_value, each_eval_variables))
-                
+
                 populations = [each_population for _, _, each_population in populations_schedules]
                 
                 # Path planning process
@@ -162,7 +197,7 @@ class Algorithms_Scheduling():
                 eval_value = self.evaluation_algorithm.Update(new_paths, length_only=True)
                 self.tools.PrintEvaluationData(eval_value, "Scheduling", order_num=generation)
 
-                if generation >= max_generation:
+                if generation >= self.max_generation:
                     break
 
                 new_populations = []
@@ -184,6 +219,10 @@ class Algorithms_Scheduling():
                 populations = new_populations
             
                 generation += 1
+
+                ee = t.time() #############
+
+                print(ee-ss) ##############
 
             new_schedules = self.GeneticAlgorithm_PopulationToNewSchedules(populations[0], AGVs_order)
         else:
@@ -270,6 +309,8 @@ class Algorithms_Scheduling():
             new_paths = self.GeneticAlgorithm(_new_orders,
                                               self.MAX_EPOCH,
                                               self.CROSSOVER_RATE,
-                                              _order_independent)
+                                              _order_independent,
+                                              GPU_accelerating = self.GPU_accelerating,
+                                              GPU_accelerating_data = (self.n_AGV, population_size))
             
         return new_paths

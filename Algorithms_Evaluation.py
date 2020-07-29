@@ -11,8 +11,10 @@
 ###############################
 
 import sys
-import numba as nb
+import cupy as cp
 import Algorithms_Evaluation_Collision as AlgEvalColl
+
+import time as t ###########
 
 class Algorithms_Evaluation():
 
@@ -55,10 +57,10 @@ class Algorithms_Evaluation():
         for each_AGV_ID in _new_path.keys():
             each_AGV_len_schedule = 0
             each_AGV_num_orders = 0
+            each_AGV_len_schedule, each_num_order, _ = _new_path[each_AGV_ID]
 
             if length_only:
-                each_path, each_num_order, _ = _new_path[each_AGV_ID]
-                each_AGV_len_schedule = each_path
+                each_AGV_len_schedule, each_num_order, _ = _new_path[each_AGV_ID]
                 each_AGV_num_orders = each_num_order
             else:
                 each_path = _new_path[each_AGV_ID]
@@ -90,8 +92,7 @@ class Algorithms_Evaluation():
         return (value, (max_order/TT, total_order/TTC, BU))
 
     # Balance and collision include
-    @nb.jit
-    def General_n_Balance_n_Collision(self, _new_path, length_only = True):
+    def General_n_Balance_n_Collision(self, _new_path, length_only = True, GPU_accelerating = False, GPU_accelerating_data = None):
         ITC = {}
         max_ITC = 1
         min_ITC = sys.maxsize
@@ -99,43 +100,61 @@ class Algorithms_Evaluation():
         max_order = 0
         total_order = 0
 
-        for each_AGV_ID in _new_path.keys():
-            each_AGV_len_schedule = 0
-            each_AGV_num_orders = 0
+        if GPU_accelerating and length_only:
+            s = t.time() ###########
+            n_AGV, population_size = GPU_accelerating_data
+            T_matrix = cp.zeros((population_size, n_AGV, 2))
 
-            if length_only:
-                each_path, each_num_order, each_order_list = _new_path[each_AGV_ID]
-                each_AGV_len_schedule = each_path
-                each_AGV_num_orders = each_num_order
-            else:
-                each_path = _new_path[each_AGV_ID]
-                for each_pos_path in each_path:
-                    if len(each_pos_path) == 3:
-                        each_AGV_num_orders += 1
-                    each_AGV_len_schedule += 1
+            for index_c, each_new_path  in enumerate(_new_path):
+                for index_n, each_AGV_ID in enumerate(each_new_path):
+                    each_AGV_len_schedule, each_num_order, each_order_list = _new_path[each_AGV_ID]
+                    T_matrix[index_c, index_n, 0] = each_AGV_len_schedule
+                    T_matrix[index_c, index_n, 1] = each_num_order
+            e = t.time() ###########
+
+            print(e-s) #########
+            return 0
+
+        else:
+            for each_AGV_ID in _new_path.keys():
+                each_AGV_len_schedule = 0
+                each_AGV_num_orders = 0
+
+                if length_only:
+                    each_AGV_len_schedule, each_num_order, each_order_list = _new_path[each_AGV_ID]
+                    each_AGV_num_orders = each_num_order
+                else:
+                    each_path = _new_path[each_AGV_ID]
+                    for each_pos_path in each_path:
+                        if len(each_pos_path) == 3:
+                            each_AGV_num_orders += 1
+                        each_AGV_len_schedule += 1
                     
-            cost = each_AGV_len_schedule + each_AGV_num_orders
-            ITC[each_AGV_ID] = cost
-            
-            if each_AGV_num_orders > max_order:
-                max_order = each_AGV_num_orders
-            total_order += each_AGV_num_orders
+                cost = each_AGV_len_schedule + each_AGV_num_orders
+                ITC[each_AGV_ID] = cost
+                
+                if each_AGV_num_orders > max_order:
+                    max_order = each_AGV_num_orders
+                total_order += each_AGV_num_orders
         
-        for each_key, each_value in ITC.items():
-
-            if each_value > max_ITC:
-                max_ITC = each_value
-            if each_value < min_ITC:
-                min_ITC = each_value
-            total_cost += each_value
+            for _, each_value in ITC.items():
+                
+                if each_value > max_ITC:
+                    max_ITC = each_value
+                if each_value < min_ITC:
+                    min_ITC = each_value
+                total_cost += each_value
 
         TT = max_ITC
         TTC = total_cost
         BU = min_ITC / max_ITC
         CI = self.eval_collision.Update(_new_path, length_only) * BU
+
+        G1 = max_order/TT
+        G2 = total_order/TTC
         
-        value = max_order/TT + total_order/TTC + BU + CI
-        return (value, (max_order/TT, total_order/TTC, BU, CI))
+        value = G1 + G2 + BU + CI
+        return (value, (G1, G2, BU, CI))
 
     #--------------------------------------------------
 
@@ -144,9 +163,12 @@ class Algorithms_Evaluation():
         return self.variables_type
 
     # Update
-    def Update(self, _new_path, length_only = False):
+    def Update(self, _new_path, length_only = False, GPU_accelerating = False, GPU_accelerating_data = None):
         #print("[Evaluating]\t Processing ...")
         if self.evaluation_type == "General_n_Balance":
             return self.General_n_Balance(_new_path, length_only = length_only)
         if self.evaluation_type == "General_n_Balance_n_Collision":
-            return self.General_n_Balance_n_Collision(_new_path, length_only = length_only)
+            return self.General_n_Balance_n_Collision(_new_path,
+                                                      length_only = length_only,
+                                                      GPU_accelerating = GPU_accelerating,
+                                                      GPU_accelerating_data = GPU_accelerating_data)
