@@ -13,20 +13,25 @@ import os
 
 class Tools_Data():
 
-    data_directory_name = None
+    data_order_directory_name = None
+    data_path_directory_name = None
     results_directory_name = None
 
-    def __init__(self, data_directory_name="../Values_Data/", results_directory_name="../Values_Results/"):
-        self.data_directory_name = data_directory_name
+    def __init__(self,
+                 data_order_directory_name="../Values_OrderData/",
+                 data_path_directory_name="../Values_PathData/",
+                 results_directory_name="../Values_Results/"):
+        self.data_order_directory_name = data_order_directory_name
+        self.data_path_directory_name = data_path_directory_name
         self.results_directory_name = results_directory_name
 
     # Loading the order data if exist
     def OrderDataLoading(self, _order_file_name):
-        file_name = self.data_directory_name + _order_file_name
+        file_name = self.data_order_directory_name + _order_file_name
         orders = []
 
-        if not os.path.exists(self.data_directory_name):
-            os.makedirs(self.data_directory_name)
+        if not os.path.exists(self.data_order_directory_name):
+            os.makedirs(self.data_order_directory_name)
 
         if os.path.isfile(file_name):
             new_file = open(file_name, 'r')
@@ -43,13 +48,20 @@ class Tools_Data():
 
     # Overwrite the order data upon file name
     def OrderDataSaving(self, _order_data, _order_file_name):
-        file_name = self.data_directory_name + _order_file_name
+        file_name = self.data_order_directory_name + _order_file_name
 
         with open(file_name, 'a', newline='') as new_file:
             new_file_writer = csv.writer(new_file)
             for each_order_data in _order_data:
                 each_order_data = [each_order_data[0]] + each_order_data[1]
                 new_file_writer.writerow(each_order_data)
+
+    def PathDataSaving(self, _path_data, _path_file_name):
+
+        print(_path_data)
+
+        with open(file_name, 'a', newline='') as new_file:
+            new_file_writer = csv.writer(new_file)
 
     # Write the result
     def ResultsSaving(self, _results, _results_file_name):

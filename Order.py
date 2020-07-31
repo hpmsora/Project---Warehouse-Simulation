@@ -4,8 +4,8 @@
 #
 # Won Yong Ha
 #
-# V.1.0 Random ordering
 # V.1.1 Saving
+# V.1.0 Random ordering
 #
 ###############################
 

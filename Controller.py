@@ -16,6 +16,7 @@ class Controller():
     order_independent = None
 
     time_threshold = None
+    order_threshold = None
     result_file_name = None
 
     # Internal Varialbles
@@ -34,7 +35,8 @@ class Controller():
                  scheduling_type = "Genetic",
                  path_planning_type = "Q_Learning",
                  evaluation_type = "General_n_Balance",
-                 time_threshold=10,
+                 time_threshold = 10,
+                 order_threshold = 10,
                  results_file_name="Result.csv",
                  order_independent = False,
                  graph_GUI = None):
@@ -42,6 +44,7 @@ class Controller():
         self.shelves = _shelves
         self.order_independent = order_independent
         self.time_threshold = time_threshold
+        self.order_threshold = order_threshold
         self.results_file_name = results_file_name
         
         self.tools = _tools
@@ -80,7 +83,7 @@ class Controller():
             total_remaining_time += len(each_AGV_Object.GetSchedule())
             
         # Re-Scheduling
-        if len(self.new_orders) >= 20: # total_remaining_time < self.time_threshold:
+        if len(self.new_orders) >= self.order_threshold: # total_remaining_time < self.time_threshold:
             
             for each_new_orders in self.new_orders:
                 self.ShelfUpdate(each_new_orders)

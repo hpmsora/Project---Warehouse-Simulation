@@ -36,10 +36,10 @@ class Tools():
     #   0 : Open
     #  150: Target
     #  200: Depot Place
-    ABS_NO_ACC = -50
+    ABS_NO_ACC = -100
     TEMP_NO_ACC = -10
     OPEN = 0
-    TARGET = 200
+    TARGET = 400
     DEPOT_PLACE = 200
 
     AGVs = None
@@ -239,7 +239,7 @@ class Tools():
             
         return (posX, posY)
 
-    # Action Movement
+    # Action movement
     def Step_Action(self, _pos, _action, _w_map, _target):
         reward = -1
         done = False

@@ -16,6 +16,8 @@ import copy as cp
 import random as rd
 import collections as col
 
+import time as t
+
 class Algorithms_Scheduling():
 
     AGVs = None
@@ -29,8 +31,13 @@ class Algorithms_Scheduling():
     # Internal Variables
     tools = None
     graph_GUI = None
+    max_generation = None
+    population_size = None
     path_planning_algorithm = None
     evaluation_algorithm = None
+    
+    GPU_accelerating = None
+    n_AGV = None
 
     # Constructor
     def __init__(self,
@@ -47,6 +54,8 @@ class Algorithms_Scheduling():
 
         self.tools = _tools
         self.graph_GUI = graph_GUI
+        self.max_generation = 500
+        self.population_size = 100
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
         self.SetPathPlanningAlgorithm(_path_planning_type)
@@ -68,6 +77,9 @@ class Algorithms_Scheduling():
                                                                   self.shelves,
                                                                   self.tools,
                                                                   _evaluation_type)
+        if _evaluation_type == "General_n_Balance_n_Collision":
+            self.GPU_accelerating = True
+            self.n_AGV = len(self.AGVs)
 
     #--------------------------------------------------
     
@@ -76,7 +88,9 @@ class Algorithms_Scheduling():
                          _new_orders,
                          _max_generaion,
                          _crossover_rate,
-                         _order_independent):
+                         _order_independent,
+                         GPU_accelerating = False,
+                         GPU_accelerating_data = None):
         print("[Scheduling]\tNew orders for scheduling is: " + str(_new_orders))
 
         self.tools.ResetGraphData()
@@ -94,7 +108,7 @@ class Algorithms_Scheduling():
             _new_orders = new_orders
 
         # Add depot place to new orders
-        depot_type_ID = 421  # One depot place for Version 1.0
+        depot_type_ID = 403  # One depot place for Version 1.0
         for index, each_new_orders in enumerate(_new_orders):
             order_num, orders = each_new_orders
             _new_orders[index] = (order_num, orders, depot_type_ID)
@@ -106,8 +120,6 @@ class Algorithms_Scheduling():
             populations = []
             populations_schedules = []
             generation = 0
-            max_generation = 200
-            population_size = 200
             AGVs_order = []
 
             AGVs_cuts = []
@@ -118,26 +130,51 @@ class Algorithms_Scheduling():
 
             genes_size = len(genes)
 
-            elite_size = int(20*population_size/100)
-            non_elite_size = population_size - elite_size
-            half_size = int(50*population_size/100)
+            elite_size = int(20*self.population_size/100)
+            non_elite_size = self.population_size - elite_size
+            half_size = int(50*self.population_size/100)
             crossover_num = int(genes_size*_crossover_rate)
             non_crossover_num = genes_size - crossover_num
 
             # Initial population
-            for _ in range(population_size):
+            for _ in range(self.population_size):
                 populations.append(rd.sample(genes, k=genes_size))
 
             while True:
+
+                populations_schedules = []
+                T_matrix_list = []
+                S_matrix_list = []
+
                 for each_populations in populations:
                     each_new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(each_populations,
                                                                                        AGVs_order)
-                    each_new_path_lengths = self.path_planning_algorithm.Update(each_new_schedule,
-                                                                                length_only = True)
-                    each_eval_value, each_eval_variables = self.evaluation_algorithm.Update(each_new_path_lengths,
+                    each_new_path_lengths, T_matrix, S_matrix = self.path_planning_algorithm.Update(each_new_schedule,
+                                                                                                    length_only = True,
+                                                                                                    count = generation,
+                                                                                                    GPU_accelerating = GPU_accelerating)
+                    
+                    if GPU_accelerating:
+                        T_matrix_list.append(T_matrix)
+                        S_matrix_list.append(S_matrix)
+                        
+                    else:
+                        each_eval_value, each_eval_variables = self.evaluation_algorithm.Update(each_new_path_lengths,
                                                                                             length_only = True)
-                    populations_schedules.append((each_eval_value, each_eval_variables, each_populations))
-
+                        populations_schedules.append((each_eval_value, each_eval_variables, each_populations))
+                        
+                if GPU_accelerating:
+                    eval_value_matrix, eval_variables_matrix = self.evaluation_algorithm.Update([],
+                                                                                                length_only = True,
+                                                                                                GPU_accelerating = GPU_accelerating,
+                                                                                                GPU_accelerating_data = GPU_accelerating_data,
+                                                                                                matrix_data = (T_matrix_list, S_matrix_list))
+                    for index, each_populations in enumerate(populations):
+                        eval_variables = []
+                        for each_eval_variables_matrix in eval_variables_matrix:
+                            eval_variables.append(each_eval_variables_matrix[index])
+                        populations_schedules.append((eval_value_matrix[index], eval_variables, each_populations))
+                
                 #try:(TT, TTC, BU)
                 populations_schedules.sort(key=lambda each_populations: each_populations[0], reverse=True)
                 #except TypeError:
@@ -150,18 +187,18 @@ class Algorithms_Scheduling():
                 # Update graph data
                 each_eval_value, each_eval_variables, _ = populations_schedules[0]
                 self.tools.Update_GraphData(generation, (each_eval_value, each_eval_variables))
-                
+
                 populations = [each_population for _, _, each_population in populations_schedules]
                 
                 # Path planning process
                 new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(populations[0], AGVs_order)
-                new_paths = self.path_planning_algorithm.Update(new_schedule, length_only=True)
+                new_paths, _, _ = self.path_planning_algorithm.Update(new_schedule, length_only=True)
 
                 # Evaluation process
-                eval_value = self.evaluation_algorithm.Update(new_paths, length_only=True)
+                eval_value= self.evaluation_algorithm.Update(new_paths, length_only=True)
                 self.tools.PrintEvaluationData(eval_value, "Scheduling", order_num=generation)
 
-                if generation >= max_generation:
+                if generation >= self.max_generation:
                     break
 
                 new_populations = []
@@ -269,6 +306,8 @@ class Algorithms_Scheduling():
             new_paths = self.GeneticAlgorithm(_new_orders,
                                               self.MAX_EPOCH,
                                               self.CROSSOVER_RATE,
-                                              _order_independent)
+                                              _order_independent,
+                                              GPU_accelerating = self.GPU_accelerating,
+                                              GPU_accelerating_data = (self.n_AGV, self.population_size))
             
         return new_paths
