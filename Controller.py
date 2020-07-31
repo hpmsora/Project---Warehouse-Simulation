@@ -51,16 +51,24 @@ class Controller():
         self.tools_data = _tools_data
         self.graph_GUI = graph_GUI
 
-        self.SetSchedulingAlgorithm(scheduling_type, path_planning_type, evaluation_type)
+        self.SetSchedulingAlgorithm(scheduling_type,
+                                    path_planning_type,
+                                    evaluation_type,
+                                    tools_data = self.tools_data)
 
     # Set scheduling algorithm
-    def SetSchedulingAlgorithm(self, _scheduling_type, _path_planning_type, _evaluation_type):
+    def SetSchedulingAlgorithm(self,
+                               _scheduling_type,
+                               _path_planning_type,
+                               _evaluation_type,
+                               tools_data = None):
         self.scheduling_algorithm = AlgSch.Algorithms_Scheduling(self.AGVs,
                                                                  self.shelves,
                                                                  self.tools,
                                                                  _scheduling_type,
                                                                  _path_planning_type,
                                                                  _evaluation_type,
+                                                                 tools_data = tools_data,
                                                                  graph_GUI = self.graph_GUI)
   
     # Shelf update

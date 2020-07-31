@@ -27,11 +27,9 @@ class Tools_Data():
 
     # Loading the order data if exist
     def OrderDataLoading(self, _order_file_name):
-        file_name = self.data_order_directory_name + _order_file_name
+        file_name = self.CreateFile(self.data_order_directory_name,
+                                    file_name = _order_file_name)
         orders = []
-
-        if not os.path.exists(self.data_order_directory_name):
-            os.makedirs(self.data_order_directory_name)
 
         if os.path.isfile(file_name):
             new_file = open(file_name, 'r')
@@ -40,10 +38,7 @@ class Tools_Data():
                 orders.append((int(each_row[0]),
                                [int(x) for x in each_row[1:]]))
             new_file.close()
-        else:
-            new_file = open(file_name, 'w', newline='')
-            new_file_writer = csv.writer(new_file)
-            new_file.close()
+
         return orders
 
     # Overwrite the order data upon file name
@@ -56,26 +51,41 @@ class Tools_Data():
                 each_order_data = [each_order_data[0]] + each_order_data[1]
                 new_file_writer.writerow(each_order_data)
 
-    def PathDataSaving(self, _path_data, _path_file_name):
-
-        print(_path_data)
+    # Loading the path data if exist
+    def PathDataLoading(self):
+        pass
+    
+    # Overwrite the path data upon file name
+    def PathDataSaving(self, _path_data, path_file_name="Default.csv"):
+        file_name = self.CreateFile(self.data_path_directory_name,
+                                    path_file_name)
 
         with open(file_name, 'a', newline='') as new_file:
             new_file_writer = csv.writer(new_file)
+            for each_path_ID, each_path_data in _path_data.items():
+                each_path_length, each_path_list = each_path_data
+                each_path_data = [each_path_ID] + [each_path_length] + each_path_list
+                new_file_writer.writerow(each_path_data)
 
-    # Write the result
+    # Overwrite the result upon file name
     def ResultsSaving(self, _results, _results_file_name):
-        file_name = self.results_directory_name + _results_file_name
-
-        if not os.path.exists(self.results_directory_name):
-            os.makedirs(self.results_directory_name)
-
-        if not os.path.isfile(file_name):
-            new_file = open(file_name, 'w', newline='')
-            new_file_writer = csv.writer(new_file)
-            new_file.close()
+        file_name = self.CreateFile(self.results_directory_name,
+                                    file_name = _results_file_name)
 
         with open(file_name, 'a', newline='') as new_file:
             new_file_writer = csv.writer(new_file)
             for each_results in _results:
                 new_file_writer.writerow(each_results)
+
+    # File creation method
+    def CreateFile(self, _directory_name, file_name = None):
+        file_name = _directory_name + file_name
+        if not os.path.exists(_directory_name):
+            os.makedirs(_directory_name)
+        if not file_name == None:
+            if not os.path.isfile(file_name):
+                new_file = open(file_name, 'w', newline='')
+                new_file_writer = csv.writer(new_file)
+                new_file.close()
+        
+        return file_name
