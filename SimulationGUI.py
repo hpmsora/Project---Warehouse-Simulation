@@ -263,7 +263,7 @@ class SimulationBoard(tk.Frame):
                     for each_depth in range(depth):
                         depot_pos += [(int(self.grid_width * (2 * each_depot_ID + 1) / (n_depot * 2)), self.grid_active_height - 2 - above - each_depth)]
                     self.depot_area += depot_pos
-                    self.tools.SetDepots(depot_pos, each_depot_ID)
+                    self.tools.SetDepots(depot_pos, each_depot_ID + 400)
                 
                 
         for each_depot in self.depot_area:
@@ -316,7 +316,8 @@ class SimulationBoard(tk.Frame):
     def SetController(self,
                       controller_type='Default',
                       evaluation_type = 'General_n_Balance',
-                      order_independent=False,
+                      order_threshold = 10,
+                      order_independent = False,
                       graph_GUI_show = False):
         if graph_GUI_show:
             self.SetGraphGUI()
@@ -327,6 +328,7 @@ class SimulationBoard(tk.Frame):
                                          self.tools_data,
                                          evaluation_type = evaluation_type,
                                          time_threshold = self.tools.GetRescheduleTimeThreshold(),
+                                         order_threshold = order_threshold,
                                          order_independent = order_independent,
                                          graph_GUI = self.graph_GUI)
         self.tools.SetAGVs(self.AGVs)

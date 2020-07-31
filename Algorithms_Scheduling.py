@@ -108,7 +108,7 @@ class Algorithms_Scheduling():
             _new_orders = new_orders
 
         # Add depot place to new orders
-        depot_type_ID = 421  # One depot place for Version 1.0
+        depot_type_ID = 403  # One depot place for Version 1.0
         for index, each_new_orders in enumerate(_new_orders):
             order_num, orders = each_new_orders
             _new_orders[index] = (order_num, orders, depot_type_ID)
