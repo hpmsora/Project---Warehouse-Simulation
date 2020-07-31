@@ -54,8 +54,8 @@ class Algorithms_Scheduling():
 
         self.tools = _tools
         self.graph_GUI = graph_GUI
-        self.max_generation = 200
-        self.population_size = 5000
+        self.max_generation = 500
+        self.population_size = 100
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
         self.SetPathPlanningAlgorithm(_path_planning_type)
@@ -142,38 +142,39 @@ class Algorithms_Scheduling():
 
             while True:
 
-                new_path_lengths_list = []
-                new_populations_list = []
-                
-                total_t = 0 ##########
-                ss = t.time() ##########
-                
+                populations_schedules = []
+                T_matrix_list = []
+                S_matrix_list = []
+
                 for each_populations in populations:
                     each_new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(each_populations,
                                                                                        AGVs_order)
-                    each_new_path_lengths = self.path_planning_algorithm.Update(each_new_schedule,
-                                                                                length_only = True,
-                                                                                count = generation)
+                    each_new_path_lengths, T_matrix, S_matrix = self.path_planning_algorithm.Update(each_new_schedule,
+                                                                                                    length_only = True,
+                                                                                                    count = generation,
+                                                                                                    GPU_accelerating = GPU_accelerating)
                     
                     if GPU_accelerating:
-                        new_path_lengths_list.append(each_new_path_lengths)
-                        new_populations_list.append(each_populations)
+                        T_matrix_list.append(T_matrix)
+                        S_matrix_list.append(S_matrix)
+                        
                     else:
-                        s = t.time() ##############
                         each_eval_value, each_eval_variables = self.evaluation_algorithm.Update(each_new_path_lengths,
                                                                                             length_only = True)
                         populations_schedules.append((each_eval_value, each_eval_variables, each_populations))
-                        e = t.time() ##############
-                        total_t += e-s ##############
                         
                 if GPU_accelerating:
-                    populations_schedules = self.evaluation_algorithm.Update(new_path_lengths_list,
-                                                                             length_only = True,
-                                                                             GPU_accelerating = GPU_accelerating,
-                                                                             GPU_accelerating_data = GPU_accelerating_data)
-                    populations_schedules = np.column_stack((populations_schedules, new_populations_list))
-
-                print(total_t)
+                    eval_value_matrix, eval_variables_matrix = self.evaluation_algorithm.Update([],
+                                                                                                length_only = True,
+                                                                                                GPU_accelerating = GPU_accelerating,
+                                                                                                GPU_accelerating_data = GPU_accelerating_data,
+                                                                                                matrix_data = (T_matrix_list, S_matrix_list))
+                    for index, each_populations in enumerate(populations):
+                        eval_variables = []
+                        for each_eval_variables_matrix in eval_variables_matrix:
+                            eval_variables.append(each_eval_variables_matrix[index])
+                        populations_schedules.append((eval_value_matrix[index], eval_variables, each_populations))
+                
                 #try:(TT, TTC, BU)
                 populations_schedules.sort(key=lambda each_populations: each_populations[0], reverse=True)
                 #except TypeError:
@@ -191,10 +192,10 @@ class Algorithms_Scheduling():
                 
                 # Path planning process
                 new_schedule = self.GeneticAlgorithm_PopulationToNewSchedules(populations[0], AGVs_order)
-                new_paths = self.path_planning_algorithm.Update(new_schedule, length_only=True)
+                new_paths, _, _ = self.path_planning_algorithm.Update(new_schedule, length_only=True)
 
                 # Evaluation process
-                eval_value = self.evaluation_algorithm.Update(new_paths, length_only=True)
+                eval_value= self.evaluation_algorithm.Update(new_paths, length_only=True)
                 self.tools.PrintEvaluationData(eval_value, "Scheduling", order_num=generation)
 
                 if generation >= self.max_generation:
@@ -219,10 +220,6 @@ class Algorithms_Scheduling():
                 populations = new_populations
             
                 generation += 1
-
-                ee = t.time() #############
-
-                print(ee-ss) ##############
 
             new_schedules = self.GeneticAlgorithm_PopulationToNewSchedules(populations[0], AGVs_order)
         else:
