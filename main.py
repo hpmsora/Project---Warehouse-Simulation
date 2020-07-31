@@ -4,6 +4,7 @@
 #
 # Won Yong Ha
 #
+# V.2.0 - Collision test
 # V.1.0 - Genetic Algorithm
 #
 ###############################

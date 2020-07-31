@@ -58,6 +58,8 @@ class Tools_Data():
 
     def PathDataSaving(self, _path_data, _path_file_name):
 
+        print(_path_data)
+
         with open(file_name, 'a', newline='') as new_file:
             new_file_writer = csv.writer(new_file)
 
