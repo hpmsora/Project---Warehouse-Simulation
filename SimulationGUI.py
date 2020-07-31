@@ -4,6 +4,7 @@
 #
 # Won Yong Ha
 #
+# V.2.2 - Depot central even added
 # V.2.1 - Collision detector
 # V.2.0 - Basic simulation
 # V.1.2 - Added multi AGVs
@@ -204,7 +205,7 @@ class SimulationBoard(tk.Frame):
             outline="black", fill=color, tag=_tag)
                         
     # Deposit area building function
-    def DepotBuilding(self, depot_type=['BottomCenter2'], custom_depot=[], above=1, depth = 2):
+    def DepotBuilding(self, depot_type=['BottomCenter2'], custom_depot=[], above=1, depth = 1):
         for each_depot_type in depot_type:
             if each_depot_type == 'LeftCorner':
                 depot_ID = 1
@@ -255,6 +256,15 @@ class SimulationBoard(tk.Frame):
                                  (int(self.grid_width*3/4-2), self.grid_active_height - 2 - above - each_depth)]
                     self.depot_area += depot_pos
                     self.tools.SetDepots(depot_pos, depot_ID)
+            elif each_depot_type == 'Equal_Above':
+                n_depot = custom_depot[0]
+                for each_depot_ID in range(n_depot):
+                    depot_pos = []
+                    for each_depth in range(depth):
+                        depot_pos += [(int(self.grid_width * (2 * each_depot_ID + 1) / (n_depot * 2)), self.grid_active_height - 2 - above - each_depth)]
+                    self.depot_area += depot_pos
+                    self.tools.SetDepots(depot_pos, each_depot_ID)
+                
                 
         for each_depot in self.depot_area:
             name = self.tools.CellNaming(each_depot[0], each_depot[1])

@@ -19,7 +19,9 @@ NUM_AISLE = 12           # Default 6 aisle
 NUM_ROWS  = 24           # Default 12 rows each aisle
 SQUARE_SIZE = 20         # Default 20 per each square
 
-DEPOT_TYPE = ['BottomCenter1_Above', 'BottomLeftQ4_Above', 'BottomRightQ4_Above']
+DEPOT_TYPE = ['Equal_Above']
+DEPOT_NUM = [8]
+
 EVALUATION_TYPES = ['General_n_Balance', 'General_n_Balance_n_Collision']
 
 ORDER_PER_BATCH = 1     # Default average number of batch per order is 10
@@ -43,14 +45,25 @@ def Display_SimulationBoard():
                                  square_size=SQUARE_SIZE,
                                  movement_speed=MOVEMENT_SPEED)
     Board.GridBuilding(warehouse_type = WAREHOUSE_TYPE)
-    Board.DepotBuilding(depot_type = DEPOT_TYPE, above=0, depth=1)
+    Board.DepotBuilding(depot_type = DEPOT_TYPE,
+                        custom_depot = DEPOT_NUM,
+                        above=0,
+                        depth=1)
     Board.AGVDepotBuilding(AGV_size = NUM_AGVs)
 
     Board.AddAGV(num = NUM_AGVs)
-    Board.SetController(evaluation_type = EVALUATION_TYPES[1], order_independent = True, graph_GUI_show = True)
-    Board.SetOrder(order_type='basic', order_per_batch=ORDER_PER_BATCH, num_order=NUM_ORDER)
+    Board.SetController(evaluation_type = EVALUATION_TYPES[1],
+                        order_independent = True,
+                        graph_GUI_show = True)
+    Board.SetOrder(order_type='basic',
+                   order_per_batch=ORDER_PER_BATCH,
+                   num_order=NUM_ORDER)
     
-    Board.pack(side='top', fill='both', expand='true', padx=PADDING_SIZE, pady=PADDING_SIZE)
+    Board.pack(side='top',
+               fill='both',
+               expand='true',
+               padx=PADDING_SIZE,
+               pady=PADDING_SIZE)
     Board.Update()
     
     root.mainloop()
