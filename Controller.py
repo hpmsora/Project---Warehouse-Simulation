@@ -80,7 +80,7 @@ class Controller():
             total_remaining_time += len(each_AGV_Object.GetSchedule())
             
         # Re-Scheduling
-        if len(self.new_orders) >= 20: # total_remaining_time < self.time_threshold:
+        if len(self.new_orders) >= 80: # total_remaining_time < self.time_threshold:
             
             for each_new_orders in self.new_orders:
                 self.ShelfUpdate(each_new_orders)

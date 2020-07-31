@@ -53,7 +53,7 @@ class Algorithms_PlathPlanning():
     def Q_Learning(self,
                    _new_schedules,
                    length_only = False,
-                   num_episodes = 2000,
+                   num_episodes = 40000,
                    discount_factor = 1.0,
                    alpha = 0.6,
                    epsilon = 0.1,
@@ -194,24 +194,41 @@ class Algorithms_PlathPlanning():
                 path.reverse()
             else:
                 # Episodes
+                count = 0
+                N_count = 0
+                O_count = 0
                 for each_episodes in range(_num_episodes):
+                    state_list = set()
+                                    
                     w_map = cp.deepcopy(_reset_w_map)
                     state = starting_state
 
+                    fail = False
+
                     for t in itt.count():
+                        
                         action_probs = each_each_policy(state)
+                        
                         action = np.random.choice(np.arange(len(action_probs)), p = action_probs)
                         
-                        next_state, reward, done = self.tools.Step_Action(state, action, w_map, target)
+                        next_state, reward, done= self.tools.Step_Action(state, action, w_map, target)
+                        if next_state in state_list:
+                            reward = -50
+                            done = True
+                        #print(state_list)
                         
                         next_action = self.tools.Arg_Maximum(each_each_Q_table[next_state])
                         td_target = reward + _discount_factor * each_each_Q_table[next_state][next_action]
                         td_delta = td_target - each_each_Q_table[state][action]
                         each_each_Q_table[state][action] += _alpha * td_delta
+
+                        posX, posY, *order = state
+                        state_list.add((posX, posY))
                         
                         if done:
                             break
                         state = next_state
+                        
                 path = self.tools.GetPathByQTable(each_each_Q_table,
                                                   starting_state,
                                                   target,

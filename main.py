@@ -47,7 +47,7 @@ def Display_SimulationBoard():
     Board.AGVDepotBuilding(AGV_size = NUM_AGVs)
 
     Board.AddAGV(num = NUM_AGVs)
-    Board.SetController(evaluation_type = EVALUATION_TYPES[0], order_independent = True, graph_GUI_show = True)
+    Board.SetController(evaluation_type = EVALUATION_TYPES[1], order_independent = True, graph_GUI_show = True)
     Board.SetOrder(order_type='basic', order_per_batch=ORDER_PER_BATCH, num_order=NUM_ORDER)
     
     Board.pack(side='top', fill='both', expand='true', padx=PADDING_SIZE, pady=PADDING_SIZE)
