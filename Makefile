@@ -1,13 +1,13 @@
 PY3 = python3
 G = git
-m = Update
+c = Update
 
 run:
 	$(PY3) main.py
 
 update: clean
 	$(G) add .
-	$(G) commit -m "$m"
+	$(G) commit -m "$c"
 	$(G) push
 
 rupdate: clean
