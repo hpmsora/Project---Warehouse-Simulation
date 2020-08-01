@@ -37,7 +37,6 @@ class Controller():
                  evaluation_type = "General_n_Balance",
                  time_threshold = 10,
                  order_threshold = 10,
-                 results_file_name="Result.csv",
                  order_independent = False,
                  graph_GUI = None):
         self.AGVs = _AGVs
@@ -45,24 +44,35 @@ class Controller():
         self.order_independent = order_independent
         self.time_threshold = time_threshold
         self.order_threshold = order_threshold
-        self.results_file_name = results_file_name
         
         self.tools = _tools
         self.tools_data = _tools_data
         self.graph_GUI = graph_GUI
 
-        self.SetSchedulingAlgorithm(scheduling_type, path_planning_type, evaluation_type)
+        self.SetSchedulingAlgorithm(scheduling_type,
+                                    path_planning_type,
+                                    evaluation_type,
+                                    tools_data = self.tools_data)
 
     # Set scheduling algorithm
-    def SetSchedulingAlgorithm(self, _scheduling_type, _path_planning_type, _evaluation_type):
+    def SetSchedulingAlgorithm(self,
+                               _scheduling_type,
+                               _path_planning_type,
+                               _evaluation_type,
+                               tools_data = None):
         self.scheduling_algorithm = AlgSch.Algorithms_Scheduling(self.AGVs,
                                                                  self.shelves,
                                                                  self.tools,
                                                                  _scheduling_type,
                                                                  _path_planning_type,
                                                                  _evaluation_type,
+                                                                 tools_data = tools_data,
                                                                  graph_GUI = self.graph_GUI)
-  
+
+    # Set reserve paths
+    def SetReservePaths(self, _paths):
+        self.scheduling_algorithm.SetReservePaths(_paths)
+
     # Shelf update
     def ShelfUpdate(self, _new_order):
         new_order_ID = _new_order[0]
@@ -94,7 +104,7 @@ class Controller():
             print("Collosions: " + str(strict_collision))
 
             results = [strict_collision, eval_value_total] + list(eval_value_compositions)
-            self.tools_data.ResultsSaving([results], self.results_file_name)
+            self.tools_data.ResultsSaving([results])
 
             for each_AGV_ID in new_paths.keys():
                 self.AGVs[each_AGV_ID].AddSchedule(new_paths[each_AGV_ID])

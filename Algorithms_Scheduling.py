@@ -47,29 +47,32 @@ class Algorithms_Scheduling():
                  _scheduling_type,
                  _path_planning_type,
                  _evaluation_type,
+                 tools_data = None,
                  graph_GUI = None):
         self.AGVs = _AGVs
         self.shelves = _shelves
         self.scheduling_type = _scheduling_type
 
         self.tools = _tools
+        self.tools_data = tools_data
         self.graph_GUI = graph_GUI
         self.max_generation = 500
         self.population_size = 100
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
-        self.SetPathPlanningAlgorithm(_path_planning_type)
+        self.SetPathPlanningAlgorithm(_path_planning_type, tools_data = self.tools_data)
         self.SetEvaluationAlgorithm(_evaluation_type)
 
         self.tools.SetGraphVariablesType(self.evaluation_algorithm.GetVariablesType())
         self.graph_GUI.BuildGraph()
 
     # Set path planning algorithm
-    def SetPathPlanningAlgorithm(self, _path_planning_type):
+    def SetPathPlanningAlgorithm(self, _path_planning_type, tools_data = None):
         self.path_planning_algorithm = AlgPath.Algorithms_PlathPlanning(self.AGVs,
                                                                         self.shelves,
                                                                         self.tools,
-                                                                        _path_planning_type)
+                                                                        _path_planning_type,
+                                                                        tools_data = tools_data)
 
     # Set evaluation algorithm
     def SetEvaluationAlgorithm(self, _evaluation_type):
@@ -80,6 +83,10 @@ class Algorithms_Scheduling():
         if _evaluation_type == "General_n_Balance_n_Collision":
             self.GPU_accelerating = True
             self.n_AGV = len(self.AGVs)
+
+    # Set reserve paths
+    def SetReservePaths(self, _paths):
+        self.path_planning_algorithm.SetReservePaths(_paths)
 
     #--------------------------------------------------
     

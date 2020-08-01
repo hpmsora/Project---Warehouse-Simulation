@@ -60,12 +60,14 @@ def Display_SimulationBoard():
     Board.SetOrder(order_type='basic',
                    order_per_batch=ORDER_PER_BATCH,
                    num_order=NUM_ORDER)
+    Board.SetFinal()
     
     Board.pack(side='top',
                fill='both',
                expand='true',
                padx=PADDING_SIZE,
                pady=PADDING_SIZE)
+
     Board.Update()
     
     root.mainloop()

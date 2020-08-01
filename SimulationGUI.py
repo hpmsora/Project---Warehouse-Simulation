@@ -27,6 +27,9 @@ import SimulationGUI_GraphGUI as ggui
 class SimulationBoard(tk.Frame):
 
     # Custom Variables
+    warehouse_type = None
+    depot_type = None
+    
     num_aisles = None
     num_rows = None
 
@@ -128,7 +131,8 @@ class SimulationBoard(tk.Frame):
         
     # Basic grid building with shelves function
     def GridBuilding(self, warehouse_type='basic'):
-        if warehouse_type == 'basic':
+        self.warehouse_type = warehouse_type
+        if self.warehouse_type == 'basic':
             self.grid_width = 3*self.num_aisles
             self.grid_height = self.num_rows+2
 
@@ -158,7 +162,7 @@ class SimulationBoard(tk.Frame):
                                           each_index_rows,
                                           color='white')
                         
-        elif warehouse_type == 'basic_island_wide':
+        elif self.warehouse_type == 'basic_island_wide':
             print("[Map]\tBasic island wide map")
             road_width = 2
             island_height = 3
@@ -206,7 +210,8 @@ class SimulationBoard(tk.Frame):
                         
     # Deposit area building function
     def DepotBuilding(self, depot_type=['BottomCenter2'], custom_depot=[], above=1, depth = 1):
-        for each_depot_type in depot_type:
+        self.depot_type = depot_type
+        for each_depot_type in self.depot_type:
             if each_depot_type == 'LeftCorner':
                 depot_ID = 1
                 depot_pos = [(2, self.grid_active_height - 2)]
@@ -340,10 +345,7 @@ class SimulationBoard(tk.Frame):
                                         order_type = order_type,
                                         order_per_batch = order_per_batch,
                                         num_order = num_order,
-                                        order_gap = 5,
-                                        order_file_name = "Default.csv")
-        
-        self.order_list += self.order_generator.SavedOrder()
+                                        order_gap = 5)
 
     # Add order to list of order function
     def AddOrder(self, _order):
@@ -352,6 +354,24 @@ class SimulationBoard(tk.Frame):
     # Build a graph
     def SetGraphGUI(self):
         self.graph_GUI = ggui.SimulationGUI_GraphGUI(self.tools)
+
+    # Set final
+    def SetFinal(self):
+
+        # File name creating
+        w_t = "[" + self.warehouse_type + "-" + str(self.num_aisles) + "_" + str(self.num_rows) + "]"
+        d_t = "[" + str(self.depot_type) + "-" + str(len(self.tools.GetDepots())) + "]"
+        a_t = "[" + str(len(self.AGVs)) + "]"
+        sim_name = w_t + "_" + d_t + "_" + a_t
+
+        self.tools_data.SetStandardFileName(sim_name)
+
+        # Order loading
+        self.order_list += self.order_generator.SavedOrder()
+
+        # Path loading
+        saved_paths = self.tools_data.PathDataLoading()
+        self.controller.SetReservePaths(saved_paths)
 
     # Update
     def Update(self):

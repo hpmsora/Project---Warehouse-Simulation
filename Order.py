@@ -37,15 +37,12 @@ class Order():
                  order_type="basic",
                  order_per_batch=1,
                  num_order = 100,
-                 order_gap = 1,
-                 order_file_name = "Defualt.csv"):
+                 order_gap = 1):
         self.shelves = _shelves
         self.order_type = order_type
         self.order_per_batch = order_per_batch
         self.num_order = num_order
         self.order_gap = order_gap
-
-        self.order_file_name = order_file_name
 
         self.tools_data = _tools_data
         
@@ -57,7 +54,7 @@ class Order():
 
     # Get saved order
     def SavedOrder(self):
-        saved_order = self.tools_data.OrderDataLoading(self.order_file_name)
+        saved_order = self.tools_data.OrderDataLoading()
         self.order_ID_count = len(saved_order)
         
         return saved_order

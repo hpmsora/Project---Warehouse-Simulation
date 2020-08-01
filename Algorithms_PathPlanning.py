@@ -27,16 +27,28 @@ class Algorithms_PlathPlanning():
     
     # Internal Variables
     tools = None
+    tools_data = None
     reserve_paths = {} # Key: (pos(START), pos(END))  Value: (length, [Path])
 
     # Constructor
-    def __init__(self, _AGVs, _shelves, _tools, _path_planning_type):
+    def __init__(self,
+                 _AGVs,
+                 _shelves,
+                 _tools,
+                 _path_planning_type,
+                 tools_data = tools_data):
         self.AGVs = _AGVs
         self.shelves = _shelves
         self.path_planning_type = _path_planning_type
         
         self.tools = _tools
+        self.tools_data = tools_data
         self.reserve_paths = {}
+
+    # Set reserve paths
+    def SetReservePaths(self, _paths):
+        if not _paths == None:
+            self.reserve_paths.update(_paths)
 
     # Determine reserve path is full
     def Is_Reserve_Full(self):
@@ -53,7 +65,7 @@ class Algorithms_PlathPlanning():
     def Q_Learning(self,
                    _new_schedules,
                    length_only = False,
-                   num_episodes = 80000,
+                   num_episodes = 4000,
                    discount_factor = 1.0,
                    alpha = 0.6,
                    epsilon = 0.1,
@@ -215,7 +227,6 @@ class Algorithms_PlathPlanning():
                         if next_state in state_list:
                             reward = -50
                             done = True
-                        #print(state_list)
                         
                         next_action = self.tools.Arg_Maximum(each_each_Q_table[next_state])
                         td_target = reward + _discount_factor * each_each_Q_table[next_state][next_action]
@@ -336,6 +347,7 @@ class Algorithms_PlathPlanning():
     def Q_Learning_Length_Only(self, _new_schedules, count = 0, GPU_accelerating = False):
 
         new_paths_length = None # Dictionary format
+        new_paths = {}
         T_matrix = [] # List format
         S_matrix = [] # List format
 
@@ -390,10 +402,6 @@ class Algorithms_PlathPlanning():
                 for each_jobs in jobs:
                     each_jobs.join()
             #-------Multiprocessing-End
-
-            # Update global reserve paths
-            if not len(new_paths) == 0:
-                self.reserve_paths.update(new_paths)
                 
             new_paths_length = dict(new_paths_length)
 
@@ -406,7 +414,7 @@ class Algorithms_PlathPlanning():
                     self.Q_Learning_Length_Only_AGV(each_AGV_ID,
                                                     each_AGV_schedule,
                                                     new_paths_length,
-                                                    {},
+                                                    new_paths,
                                                     GPU_accelerating,
                                                     T_matrix,
                                                     S_matrix)
@@ -415,10 +423,16 @@ class Algorithms_PlathPlanning():
                     self.Q_Learning_Length_Only_AGV(each_AGV_ID,
                                                     each_AGV_schedule,
                                                     new_paths_length,
-                                                    {},
+                                                    new_paths,
                                                     GPU_accelerating,
                                                     None,
                                                     None)
+        # Update global reserve paths
+        if not len(new_paths) == 0:
+            self.reserve_paths.update(new_paths)
+            if not self.tools_data == None:
+                self.tools_data.PathDataSaving(new_paths)
+            
 
         return (new_paths_length, T_matrix, S_matrix)
                     

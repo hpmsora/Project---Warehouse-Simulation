@@ -124,6 +124,11 @@ class Tools():
     def GetDepotsByID(self, _depot_ID):
         return self.depots[_depot_ID]
 
+    # Get depots
+    def GetDepots(self):
+        return self.depots
+    
+    # Set depots
     def SetDepots(self, _depot_pos, _depot_ID):
         self.depots[_depot_ID] = _depot_pos
 
