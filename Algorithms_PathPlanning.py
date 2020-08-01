@@ -65,7 +65,7 @@ class Algorithms_PlathPlanning():
     def Q_Learning(self,
                    _new_schedules,
                    length_only = False,
-                   num_episodes = 4000,
+                   num_episodes = 3000,
                    discount_factor = 1.0,
                    alpha = 0.6,
                    epsilon = 0.1,
@@ -108,6 +108,13 @@ class Algorithms_PlathPlanning():
                     Q_table = col.defaultdict(lambda: np.zeros(num_actions))
                     policy  = self.Q_Learning_Epsilon_Greedy_Policy(Q_table, epsilon, num_actions)
                     Q_tables.append((('Depot', _each_each_depot),
+                                     policy,
+                                     Q_table))
+
+                    # Return to target
+                    Q_table = col.defaultdict(lambda: np.zeros(num_actions))
+                    policy  = self.Q_Learning_Epsilon_Greedy_Policy(Q_table, epsilon, num_actions)
+                    Q_tables.append(((each_each_new_schedules_ID, each_each_each_new_schedules),
                                      policy,
                                      Q_table))
             
@@ -204,11 +211,11 @@ class Algorithms_PlathPlanning():
             elif path_key_reverse in _reserve_paths:
                 _, path = _reserve_paths[path_key_reverse]
                 path.reverse()
+            elif starting_state_pos == target_pos:
+                path = []
+                _new_paths[path_key] = (len(path), path)
             else:
                 # Episodes
-                count = 0
-                N_count = 0
-                O_count = 0
                 for each_episodes in range(_num_episodes):
                     state_list = set()
                                     
@@ -239,24 +246,27 @@ class Algorithms_PlathPlanning():
                         if done:
                             break
                         state = next_state
-                        
+
+                print(path_key)
                 path = self.tools.GetPathByQTable(each_each_Q_table,
                                                   starting_state,
                                                   target,
                                                   each_target)
+                print("Finished Episodes!")
 
                 _new_paths[path_key] = (len(path), path)
 
-            if not target_order == 'Depot':
+            if not target_order == 'Depot' and not len(path) == 0:
                 posX, posY, *order = path[-1]
                 path[-1] = (posX, posY, each_target)
 
-            starting_state = path[-1]
+            if not len(path) == 0:
+                starting_state = path[-1]
             AGV_path += path
             
             each_each_Q_table.clear() # Clear memory
 
-        #print("[Path Planning]\t Planning AGV - " + str(_each_AGVs_ID) + " Finished!")
+        #print("[Path Planning]\tPlanning AGV - " + str(_each_AGVs_ID) + " Finished!")
 
         _AGVs_paths[_each_AGVs_ID] = AGV_path
 
@@ -271,8 +281,9 @@ class Algorithms_PlathPlanning():
         each_AGV_path_length = 0
         each_AGV_order_num = 0
         each_AGV_order_list = [] # (Time, pox X, pos Y)
-        
-        last_position = self.AGVs[_each_AGV_ID].GetLastScheduledPos()
+
+        last_position_posX, last_position_posY, *order = self.AGVs[_each_AGV_ID].GetLastScheduledPos()
+        last_position = (last_position_posX, last_position_posY)
         time_step = self.AGVs[_each_AGV_ID].GetRemainedScheduleLength()
         
         for order_ID, shelf_IDs, depot_ID in _each_AGV_schedule:
@@ -336,6 +347,35 @@ class Algorithms_PlathPlanning():
                 each_AGV_order_list.append([time_step, each_depot_pos_X, each_depot_pos_Y])
             
                 last_position = each_depot_pos
+
+                # Return to the shelf
+                each_shelf_pos = self.tools.GetShelvesDepotsPosByID(each_shelf_IDs)[0]
+                path_key = (last_position, each_shelf_pos)
+                reverse_path_key = (each_shelf_pos, last_position)
+
+                if path_key in self.reserve_paths:
+                    each_path_length = self.reserve_paths[path_key][0]
+                elif reverse_path_key in self.reserve_paths:
+                    each_path_length = self.reserve_paths[reverse_path_key][0]
+                elif path_key in _new_paths:
+                    each_path_length = _new_paths[path_key][0]
+                elif reverse_path_key in _new_paths:
+                    each_path_length = _new_paths[reverse_path_key][0]
+                else:
+                    last_positions = col.defaultdict(lambda: ())
+                    last_positions[_each_AGV_ID] = last_position
+                    _new_paths.update(self.Q_Learning([(_each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
+                                                      length_only=True,
+                                                      last_positions=last_positions))
+                    each_path_length = self.reserve_paths[path_key][0]
+                    
+                each_AGV_path_length += each_path_length
+
+                (each_shelf_pos_X, each_shelf_pos_Y) = each_shelf_pos
+                time_step += each_path_length
+                each_AGV_order_list.append([time_step, each_shelf_pos_X, each_shelf_pos_Y])
+                
+                last_position = each_shelf_pos
 
         if _GPU_accelerating:
             _T_matrix.append([each_AGV_path_length, each_AGV_order_num])

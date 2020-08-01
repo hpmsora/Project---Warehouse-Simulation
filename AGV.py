@@ -74,14 +74,18 @@ class AGV:
     # AGV move
     def Move(self):
         if not self.schedule == []:
+            #print(self.schedule)
             current_schedule = self.schedule.pop(0)
+            
             posX, posY, *order = current_schedule
 
             if len(self.schedule) == 0:
                 self.schedule.append(current_schedule)
             
             self.current_pos = (posX, posY)
+
             if order:
                 for each_order in order:
                     self.order.remove(each_order)
+
             self.tools.MoveObject(self.ID, self.current_pos)
