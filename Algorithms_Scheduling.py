@@ -84,6 +84,10 @@ class Algorithms_Scheduling():
             self.GPU_accelerating = True
             self.n_AGV = len(self.AGVs)
 
+    # Set reserve paths
+    def SetReservePaths(self, _paths):
+        self.path_planning_algorithm.SetReservePaths(_paths)
+
     #--------------------------------------------------
     
     # Genetic Algorithm

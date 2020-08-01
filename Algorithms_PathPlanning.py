@@ -45,6 +45,11 @@ class Algorithms_PlathPlanning():
         self.tools_data = tools_data
         self.reserve_paths = {}
 
+    # Set reserve paths
+    def SetReservePaths(self, _paths):
+        if not _paths == None:
+            self.reserve_paths.update(_paths)
+
     # Determine reserve path is full
     def Is_Reserve_Full(self):
         num_shelves = len(self.shelves)
@@ -60,7 +65,7 @@ class Algorithms_PlathPlanning():
     def Q_Learning(self,
                    _new_schedules,
                    length_only = False,
-                   num_episodes = 2000,
+                   num_episodes = 4000,
                    discount_factor = 1.0,
                    alpha = 0.6,
                    epsilon = 0.1,
