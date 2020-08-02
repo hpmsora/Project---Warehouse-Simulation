@@ -100,21 +100,21 @@ class Algorithms_PlathPlanning():
                     # Heading to target
                     Q_table = col.defaultdict(lambda: np.zeros(num_actions))
                     policy  = self.Q_Learning_Epsilon_Greedy_Policy(Q_table, epsilon, num_actions)
-                    Q_tables.append(((each_each_new_schedules_ID, each_each_each_new_schedules),
+                    Q_tables.append(((each_each_new_schedules_ID, 'Shelf-Picking', each_each_each_new_schedules),
                                      policy,
                                      Q_table))
                     
                     # Heading to depot
                     Q_table = col.defaultdict(lambda: np.zeros(num_actions))
                     policy  = self.Q_Learning_Epsilon_Greedy_Policy(Q_table, epsilon, num_actions)
-                    Q_tables.append((('Depot', _each_each_depot),
+                    Q_tables.append(((each_each_new_schedules_ID, 'Depot', _each_each_depot),
                                      policy,
                                      Q_table))
 
                     # Return to target
                     Q_table = col.defaultdict(lambda: np.zeros(num_actions))
                     policy  = self.Q_Learning_Epsilon_Greedy_Policy(Q_table, epsilon, num_actions)
-                    Q_tables.append(((each_each_new_schedules_ID, each_each_each_new_schedules),
+                    Q_tables.append(((each_each_new_schedules_ID, 'Shelf-Returning', each_each_each_new_schedules),
                                      policy,
                                      Q_table))
             
@@ -192,11 +192,13 @@ class Algorithms_PlathPlanning():
             
         for each_target, each_each_policy, each_each_Q_table in each_Q_table:
             target = []
-            target_order, target_ID = each_target
+            target_order_ID, target_order, target_ID = each_target
             
             if target_order == "Depot":
                 target += self.tools.GetDepotsByID(target_ID)
-            else:
+            if target_order == "Shelf-Picking":
+                target += self.tools.GetShelvesDepotsPosByID(target_ID)
+            if target_order == "Shelf-Returning":
                 target += self.tools.GetShelvesDepotsPosByID(target_ID)
     
             starting_state_posX, starting_state_posY, *order = starting_state
@@ -211,6 +213,11 @@ class Algorithms_PlathPlanning():
             elif path_key_reverse in _reserve_paths:
                 _, path = _reserve_paths[path_key_reverse]
                 path.reverse()
+            elif path_key in _new_paths:
+                _, path = _new_paths[path_key]
+            elif path_key_reverse in _new_paths:
+                _, path = _new_paths[path_key_reverse]
+                path.reverse()
             elif starting_state_pos == target_pos:
                 path = []
                 _new_paths[path_key] = (len(path), path)
@@ -221,8 +228,6 @@ class Algorithms_PlathPlanning():
                                     
                     w_map = cp.deepcopy(_reset_w_map)
                     state = starting_state
-
-                    fail = False
 
                     for t in itt.count():
                         
@@ -256,12 +261,15 @@ class Algorithms_PlathPlanning():
 
                 _new_paths[path_key] = (len(path), path)
 
-            if not target_order == 'Depot' and not len(path) == 0:
-                posX, posY, *order = path[-1]
-                path[-1] = (posX, posY, each_target)
-
             if not len(path) == 0:
+                posX, posY, *order = path[-1]
+                
+                if target_order == 'Depot':
+                    path[-1] = (posX, posY, each_target)
+                else:
+                    path[-1] = (posX, posY, each_target)
                 starting_state = path[-1]
+                
             AGV_path += path
             
             each_each_Q_table.clear() # Clear memory

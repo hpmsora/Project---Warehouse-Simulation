@@ -264,7 +264,7 @@ class Tools():
 
     # Get path by q-table
     def GetPathByQTable(self, _q_table, _start_point, _end_point, _order):
-        path = []
+        path = [_start_point]
 
         action = np.argmax(_q_table[_start_point])
         state = self.Next_Action(_start_point, action)
