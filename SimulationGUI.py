@@ -60,8 +60,13 @@ class SimulationBoard(tk.Frame):
     tools = None
     tools_data = None
 
-    color_AGV_occupied = None
-    color_AGV_nonoccupied = None
+    AGV_moving_without_shelf = None
+    AGV_moving_with_shelf = None
+    AGV_collision = None
+
+    shelf_nothing = None
+    shelf_waiting = None
+    shelf_moving = None
 
     #@property
     #def canvas_size(self):
@@ -85,8 +90,13 @@ class SimulationBoard(tk.Frame):
         self.tools_data = None
         self.graph_GUI = None
 
-        self.color_AGV_occupied ='yellow'
-        self.color_AGV_nonoccupied = 'green'
+        self.AGV_moving_without_shelf = "green"
+        self.AGV_moving_with_shelf = "yellow"
+        self.AGV_collision = "red"
+
+        self.shelf_nothing = "gray"
+        self.shelf_waiting = "green"
+        self.shelf_moving = "white"
         
     # Grid initialize with border cells function
     def GridInit(self):
@@ -111,7 +121,14 @@ class SimulationBoard(tk.Frame):
                              self.square_size,
                              self.grid_active_width,
                              self.grid_active_height,
-                             reschedule_time_threshold = 50)
+                             reschedule_time_threshold = 50,
+                             AGV_moving_without_shelf = self.AGV_moving_without_shelf,
+                             AGV_moving_with_shelf = self.AGV_moving_with_shelf,
+                             AGV_collision = self.AGV_collision,
+                             shelf_nothing = self.shelf_nothing,
+                             shelf_waiting = self.shelf_waiting,
+                             shelf_moving = self.shelf_moving)
+        
         self.tools_data = t_d.Tools_Data()
 
         # Borders
@@ -195,7 +212,7 @@ class SimulationBoard(tk.Frame):
                         shelf_ID = self.CellBuilding(tag,
                                                      each_index_aisles,
                                                      each_index_rows,
-                                                     color='gray')
+                                                     color=self.tools.GetShelfNothing_Color())
                         self.shelves[shelf_ID] = shf.Shelf(shelf_ID,
                                                            (each_index_aisles, each_index_rows),
                                                            self.tools)
@@ -319,7 +336,7 @@ class SimulationBoard(tk.Frame):
             newAGV_ID = self.AGVBuilding("AGV",
                                          init_posX,
                                          init_posY,
-                                         color = self.color_AGV_nonoccupied)
+                                         color = self.tools.GetAGVMovingWithoutShelf_Color())
             self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID, pos, self.tools)
         return len(self.AGVs)
 

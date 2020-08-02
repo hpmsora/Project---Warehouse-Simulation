@@ -7,6 +7,8 @@
 #
 ###############################
 
+import collections as col
+
 import Algorithms_Scheduling as AlgSch
 
 class Controller():
@@ -113,9 +115,11 @@ class Controller():
         
         # Movement --------------------------------------------------
         # AGV updates
+        shelf_occupancy = col.defaultdict(lambda: ())
         for each_AGV_ID, each_AGV_Object in self.AGVs.items():
-            each_AGV_Object.Move()
+            each_shelf_occupancy = each_AGV_Object.Move()
+            shelf_occupancy.update(each_shelf_occupancy)
 
         # Shelves update
         for each_shelf_ID, each_shelf_Object in self.shelves.items():
-            each_shelf_Object.update()
+            each_shelf_Object.update(shelf_occupancy[each_shelf_ID])
