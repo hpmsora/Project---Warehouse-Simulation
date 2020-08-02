@@ -60,6 +60,14 @@ class SimulationBoard(tk.Frame):
     tools = None
     tools_data = None
 
+    AGV_moving_without_shelf = None
+    AGV_moving_with_shelf = None
+    AGV_collision = None
+
+    shelf_nothing = None
+    shelf_waiting = None
+    shelf_moving = None
+
     #@property
     #def canvas_size(self):
     #    return (self.num_aisles * self.square_size, self.num_rows * self.square_size)
@@ -81,6 +89,14 @@ class SimulationBoard(tk.Frame):
         self.tools = None
         self.tools_data = None
         self.graph_GUI = None
+
+        self.AGV_moving_without_shelf = "green"
+        self.AGV_moving_with_shelf = "yellow"
+        self.AGV_collision = "red"
+
+        self.shelf_nothing = "gray"
+        self.shelf_waiting = "green"
+        self.shelf_moving = "white"
         
     # Grid initialize with border cells function
     def GridInit(self):
@@ -105,7 +121,14 @@ class SimulationBoard(tk.Frame):
                              self.square_size,
                              self.grid_active_width,
                              self.grid_active_height,
-                             reschedule_time_threshold = 50)
+                             reschedule_time_threshold = 50,
+                             AGV_moving_without_shelf = self.AGV_moving_without_shelf,
+                             AGV_moving_with_shelf = self.AGV_moving_with_shelf,
+                             AGV_collision = self.AGV_collision,
+                             shelf_nothing = self.shelf_nothing,
+                             shelf_waiting = self.shelf_waiting,
+                             shelf_moving = self.shelf_moving)
+        
         self.tools_data = t_d.Tools_Data()
 
         # Borders
@@ -189,7 +212,7 @@ class SimulationBoard(tk.Frame):
                         shelf_ID = self.CellBuilding(tag,
                                                      each_index_aisles,
                                                      each_index_rows,
-                                                     color='gray')
+                                                     color=self.tools.GetShelfNothing_Color())
                         self.shelves[shelf_ID] = shf.Shelf(shelf_ID,
                                                            (each_index_aisles, each_index_rows),
                                                            self.tools)
@@ -289,7 +312,7 @@ class SimulationBoard(tk.Frame):
 
         for each_AGV_depot in self.AGV_depot_area:
             name = self.tools.CellNaming(each_AGV_depot[0], each_AGV_depot[1])
-            self.tools.ChangeColorObject(name, color='red')
+            self.tools.ChangeColorObject(name, color='white')
             self.tools.UpdateAbsWMap('AGVDepot', each_AGV_depot)
 
     # AGV building function
@@ -313,7 +336,7 @@ class SimulationBoard(tk.Frame):
             newAGV_ID = self.AGVBuilding("AGV",
                                          init_posX,
                                          init_posY,
-                                         color = 'yellow')
+                                         color = self.tools.GetAGVMovingWithoutShelf_Color())
             self.AGVs[newAGV_ID] = AGV.AGV(newAGV_ID, pos, self.tools)
         return len(self.AGVs)
 
@@ -323,9 +346,11 @@ class SimulationBoard(tk.Frame):
                       evaluation_type = 'General_n_Balance',
                       order_threshold = 10,
                       order_independent = False,
-                      graph_GUI_show = False):
+                      graph_GUI_show = False,
+                      padx = 0,
+                      pady = 0):
         if graph_GUI_show:
-            self.SetGraphGUI()
+            self.SetGraphGUI(padx = padx, pady = pady)
 
         self.controller = ctr.Controller(self.AGVs,
                                          self.shelves,
@@ -352,8 +377,10 @@ class SimulationBoard(tk.Frame):
         self.order_list += self.order_generator.OrderGenerator()
 
     # Build a graph
-    def SetGraphGUI(self):
-        self.graph_GUI = ggui.SimulationGUI_GraphGUI(self.tools)
+    def SetGraphGUI(self, padx = 0, pady = 0):
+        self.graph_GUI = ggui.SimulationGUI_GraphGUI(self.tools,
+                                                     padx = padx,
+                                                     pady = pady)
 
     # Set final
     def SetFinal(self):

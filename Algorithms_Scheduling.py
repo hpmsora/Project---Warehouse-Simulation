@@ -203,7 +203,10 @@ class Algorithms_Scheduling():
 
                 # Evaluation process
                 eval_value= self.evaluation_algorithm.Update(new_paths, length_only=True)
-                self.tools.PrintEvaluationData(eval_value, "Scheduling", order_num=generation)
+
+                # Console print
+                if generation % 100 == 0:
+                    self.tools.PrintEvaluationData(eval_value, "Scheduling", order_num=generation)
 
                 if generation >= self.max_generation:
                     break

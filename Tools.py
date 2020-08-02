@@ -54,6 +54,14 @@ class Tools():
     graph_variables_type = None
     graph_variables_type_list = None
 
+    AGV_moving_without_shelf = None
+    AGV_moving_with_shelf = None
+    AGV_collision = None
+
+    shelf_nothing = None
+    shelf_waiting = None
+    shelf_moving = None
+
     # Constructor
     def __init__(self,
                  _parent,
@@ -62,7 +70,13 @@ class Tools():
                  _width,
                  _height,
                  order_limit_threshold = 15,
-                 reschedule_time_threshold = 50):
+                 reschedule_time_threshold = 50,
+                 AGV_moving_without_shelf = "green",
+                 AGV_moving_with_shelf = "yellow",
+                 AGV_collision = "red",
+                 shelf_nothing = "gray",
+                 shelf_waiting = "green",
+                 shelf_moving = "white"):
         self.parent = _parent
         self.canvas = _canvas
         self.square_size = _square_size
@@ -75,6 +89,14 @@ class Tools():
 
         self.order_limit_threshold = order_limit_threshold
         self.reschedule_time_threshold = reschedule_time_threshold
+
+        self.AGV_moving_without_shelf = AGV_moving_without_shelf
+        self.AGV_moving_with_shelf = AGV_moving_with_shelf
+        self.AGV_collision = AGV_collision
+
+        self.shelf_nothing = shelf_nothing
+        self.shelf_waiting = shelf_waiting
+        self.shelf_moving = shelf_moving
 
         self.graph_data = {}
         self.graph_variables_type = ()
@@ -159,6 +181,30 @@ class Tools():
     # Get graph data
     def GetGraphData(self):
         return self.graph_data
+
+    # Get AGV moving without shelf color
+    def GetAGVMovingWithoutShelf_Color(self):
+        return self.AGV_moving_without_shelf
+
+    # Get AGV moving with shelf color
+    def GetAGVMovingWithShelf_Color(self):
+        return self.AGV_moving_with_shelf
+
+    # Get AGV collision color
+    def GetAGVCollision_Color(self):
+        return self.AGV_collision
+
+    # Get shelf waiting color
+    def GetShelfNothing_Color(self):
+        return self.shelf_nothing
+
+    # Get shelf waiting color
+    def GetShelfWaiting_Color(self):
+        return self.shelf_waiting
+
+    # Get shelf moving color
+    def GetShelfMoving_Color(self):
+        return self.shelf_moving
 
     # Update absolute w_map
     def UpdateAbsWMap(self, _type, _pos):
@@ -264,7 +310,7 @@ class Tools():
 
     # Get path by q-table
     def GetPathByQTable(self, _q_table, _start_point, _end_point, _order):
-        path = []
+        path = [_start_point]
 
         action = np.argmax(_q_table[_start_point])
         state = self.Next_Action(_start_point, action)

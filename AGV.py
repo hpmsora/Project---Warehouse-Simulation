@@ -73,15 +73,33 @@ class AGV:
     
     # AGV move
     def Move(self):
+        shelf_occupancy = {}
+        
         if not self.schedule == []:
             current_schedule = self.schedule.pop(0)
+            
             posX, posY, *order = current_schedule
+
+            if not order == []:
+                target_order_ID, target_order, target_ID = order[0]
+                if target_order == 'Depot':
+                    pass
+                elif target_order == 'Shelf-Picking':
+                    self.tools.ChangeColorObject(self.ID, self.tools.GetAGVMovingWithShelf_Color())
+                    shelf_occupancy[target_ID] = (self.ID, True, target_order_ID)
+                elif target_order == 'Shelf-Returning':
+                    self.tools.ChangeColorObject(self.ID, self.tools.GetAGVMovingWithoutShelf_Color())
+                    shelf_occupancy[target_ID] = (self.ID, False, target_order_ID)
 
             if len(self.schedule) == 0:
                 self.schedule.append(current_schedule)
             
             self.current_pos = (posX, posY)
+
             if order:
                 for each_order in order:
                     self.order.remove(each_order)
+
             self.tools.MoveObject(self.ID, self.current_pos)
+
+        return shelf_occupancy

@@ -30,7 +30,7 @@ NUM_ORDER = 30          # Default number of order at once is 100
 
 NUM_AGVs = 5             # Default 5 AGVs (Goal:30)
 
-MOVEMENT_SPEED = 80
+MOVEMENT_SPEED = 80    # 80
 
 # Fixed Variable
 PADDING_SIZE = 10
@@ -56,17 +56,19 @@ def Display_SimulationBoard():
     Board.SetController(evaluation_type = EVALUATION_TYPES[1],
                         order_threshold = 10,
                         order_independent = True,
-                        graph_GUI_show = True)
+                        graph_GUI_show = True,
+                        padx = PADDING_SIZE,
+                        pady = PADDING_SIZE)
     Board.SetOrder(order_type='basic',
                    order_per_batch=ORDER_PER_BATCH,
                    num_order=NUM_ORDER)
     Board.SetFinal()
     
-    Board.pack(side='top',
-               fill='both',
-               expand='true',
-               padx=PADDING_SIZE,
-               pady=PADDING_SIZE)
+    Board.pack(side = 'top',
+               fill = 'both',
+               expand = True,
+               padx = PADDING_SIZE,
+               pady = PADDING_SIZE)
 
     Board.Update()
     
