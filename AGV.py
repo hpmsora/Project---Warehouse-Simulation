@@ -86,10 +86,10 @@ class AGV:
                     pass
                 elif target_order == 'Shelf-Picking':
                     self.tools.ChangeColorObject(self.ID, self.tools.GetAGVMovingWithShelf_Color())
-                    shelf_occupancy[target_ID] = (self.ID, True)
+                    shelf_occupancy[target_ID] = (self.ID, True, target_order_ID)
                 elif target_order == 'Shelf-Returning':
                     self.tools.ChangeColorObject(self.ID, self.tools.GetAGVMovingWithoutShelf_Color())
-                    shelf_occupancy[target_ID] = (self.ID, False)
+                    shelf_occupancy[target_ID] = (self.ID, False, target_order_ID)
 
             if len(self.schedule) == 0:
                 self.schedule.append(current_schedule)

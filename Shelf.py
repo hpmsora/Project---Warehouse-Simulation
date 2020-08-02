@@ -39,11 +39,12 @@ class Shelf():
     # Update on AGV status
     def UpdateAGVStatus(self, _each_shelf_occupancy):
         if not _each_shelf_occupancy == ():
-            AGV_ID, is_on_AGV = _each_shelf_occupancy
+            AGV_ID, is_on_AGV, order_ID = _each_shelf_occupancy
             if is_on_AGV:
                 self.on_AGV = AGV_ID
             else:
                 self.on_AGV = None
+                self.orders.remove(order_ID)
 
     # Coloring the shelf
     def UpdateColoring(self):

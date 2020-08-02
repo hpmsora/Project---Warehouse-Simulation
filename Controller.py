@@ -116,6 +116,7 @@ class Controller():
         # Movement --------------------------------------------------
         # AGV updates
         shelf_occupancy = col.defaultdict(lambda: ())
+        
         for each_AGV_ID, each_AGV_Object in self.AGVs.items():
             each_shelf_occupancy = each_AGV_Object.Move()
             shelf_occupancy.update(each_shelf_occupancy)
