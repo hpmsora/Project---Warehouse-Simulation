@@ -114,8 +114,8 @@ class Algorithms_Scheduling():
                     new_orders.append((each_orders_num, [each_each_orders]))
             _new_orders = new_orders
 
-        # Add depot place to new orders
-        depot_type_ID = 403  # One depot place for Version 1.0
+        # Add defualt depot place to new orders
+        depot_type_ID = None  # One depot place for Version 1.0
         for index, each_new_orders in enumerate(_new_orders):
             order_num, orders = each_new_orders
             _new_orders[index] = (order_num, orders, depot_type_ID)
@@ -127,12 +127,15 @@ class Algorithms_Scheduling():
             populations = []
             populations_schedules = []
             generation = 0
+            
             AGVs_order = []
-
             AGVs_cuts = []
+
+            print(self.tools.GetDepots())
             for each_AGVs in self.AGVs:
-                AGVs_cuts.append(("AGV", [], each_AGVs))
-                AGVs_order.append(each_AGVs)
+                for each_depot_ID in self.tools.GetDepots():
+                    AGVs_cuts.append(("AGV", [], None))
+                    AGVs_order.append((each_AGVs, each_depot_ID))
             genes += _new_orders + AGVs_cuts[:-1]
 
             genes_size = len(genes)
@@ -289,16 +292,28 @@ class Algorithms_Scheduling():
     def GeneticAlgorithm_PopulationToNewSchedules(self, _population, _AGVs_order):
         new_schedules = []
         AGVs_order_count = 0
-        each_AGV_schedule = (_AGVs_order[AGVs_order_count], [])
+        each_AGV_ID, each_depot_ID = _AGVs_order[AGVs_order_count]
+        
+        each_AGV_schedule = (each_AGV_ID, [])
         for each_population in _population:
             p_ID, p_object, *p_depot = each_population
             if p_ID == "AGV":
-                new_schedules.append(each_AGV_schedule)
-                AGVs_order_count += 1
-                each_AGV_schedule = (_AGVs_order[AGVs_order_count], [])
+                each_next_AGV_ID, each_next_depot_ID =  _AGVs_order[AGVs_order_count + 1]
+                if each_AGV_ID == each_next_AGV_ID:
+                    AGVs_order_count += 1
+                    each_AGV_ID = each_next_AGV_ID
+                    each_depot_ID = each_next_depot_ID
+                else:
+                    new_schedules.append(each_AGV_schedule)
+                    AGVs_order_count += 1
+                    each_AGV_ID = each_next_AGV_ID
+                    each_depot_ID = each_next_depot_ID
+                    each_AGV_schedule = (each_AGV_ID, [])
             else:
-                each_AGV_schedule[1].append(each_population)
+                order_ID, shelf_IDs, _ = each_population
+                each_AGV_schedule[1].append((order_ID, shelf_IDs, each_depot_ID))
         new_schedules.append(each_AGV_schedule)
+        
         return new_schedules
 
     # Genetic algorithm - helper function (schedule to gene format)
