@@ -26,7 +26,7 @@ class Algorithms_Scheduling():
 
     # Fixed Variable
     MAX_EPOCH = 100
-    CROSSOVER_RATE = 0.80
+    CROSSOVER_RATE = 0.60
     
     # Internal Variables
     tools = None
@@ -39,6 +39,8 @@ class Algorithms_Scheduling():
     GPU_accelerating = None
     n_AGV = None
 
+    depot_distribution_type = None
+
     # Constructor
     def __init__(self,
                  _AGVs,
@@ -48,7 +50,8 @@ class Algorithms_Scheduling():
                  _path_planning_type,
                  _evaluation_type,
                  tools_data = None,
-                 graph_GUI = None):
+                 graph_GUI = None,
+                 depot_distribution_type = "Default"): # Defualt: Randomly preassidned
         self.AGVs = _AGVs
         self.shelves = _shelves
         self.scheduling_type = _scheduling_type
@@ -56,7 +59,10 @@ class Algorithms_Scheduling():
         self.tools = _tools
         self.tools_data = tools_data
         self.graph_GUI = graph_GUI
-        self.max_generation = 500
+        self.depot_distribution_type = depot_distribution_type
+
+        
+        self.max_generation = 10000
         self.population_size = 100
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
@@ -115,10 +121,15 @@ class Algorithms_Scheduling():
             _new_orders = new_orders
 
         # Add defualt depot place to new orders
-        depot_type_ID = None  # One depot place for Version 1.0
-        for index, each_new_orders in enumerate(_new_orders):
-            order_num, orders = each_new_orders
-            _new_orders[index] = (order_num, orders, depot_type_ID)
+        if self.depot_distribution_type == 'Genetic':
+            for index, each_new_orders in enumerate(_new_orders):
+                order_num, orders = each_new_orders
+                _new_orders[index] = (order_num, orders, None)
+        else:
+            depots_list = list(self.tools.GetDepots().keys())
+            for index, each_new_orders in enumerate(_new_orders):
+                order_num, orders = each_new_orders
+                _new_orders[index] = (order_num, orders, rd.choice(depots_list))
 
         # Genetic algorithm start
         if True: #self.path_planning_algorithm.Is_Reserve_Full():
@@ -131,11 +142,15 @@ class Algorithms_Scheduling():
             AGVs_order = []
             AGVs_cuts = []
 
-            print(self.tools.GetDepots())
-            for each_AGVs in self.AGVs:
-                for each_depot_ID in self.tools.GetDepots():
+            if self.depot_distribution_type == 'Genetic':
+                for each_AGVs in self.AGVs:
+                    for each_depot_ID in self.tools.GetDepots():
+                        AGVs_cuts.append(("AGV", [], None))
+                        AGVs_order.append((each_AGVs, each_depot_ID))
+            else:
+                for each_AGVs in self.AGVs:
                     AGVs_cuts.append(("AGV", [], None))
-                    AGVs_order.append((each_AGVs, each_depot_ID))
+                    AGVs_order.append((each_AGVs, None))
             genes += _new_orders + AGVs_cuts[:-1]
 
             genes_size = len(genes)
@@ -145,6 +160,7 @@ class Algorithms_Scheduling():
             half_size = int(50*self.population_size/100)
             crossover_num = int(genes_size*_crossover_rate)
             non_crossover_num = genes_size - crossover_num
+            mutation_prob = 0.1
 
             # Initial population
             for _ in range(self.population_size):
@@ -218,6 +234,9 @@ class Algorithms_Scheduling():
                 
                 new_populations.extend(populations[:elite_size])
 
+                if generation >= 500:
+                    mutataion_prob = 0.8
+
                 for _ in range(non_elite_size):
                     parent_1 = rd.choice(populations[:half_size])
                     parent_2 = rd.choice(populations[:half_size])
@@ -227,7 +246,7 @@ class Algorithms_Scheduling():
                                                                 crossover_num,
                                                                 non_crossover_num,
                                                                 AGVs_order,
-                                                                mutation_prob = 0.1)
+                                                                mutation_prob = mutation_prob)
                     new_populations.append(child)
 
                 populations = new_populations
@@ -279,13 +298,14 @@ class Algorithms_Scheduling():
         child += _parent_2
         
         if rd.random() <= mutation_prob:
-            mutation_gene_1, mutation_gene_2 = rd.choices(child, k=2)
-            mutation_gene_1_index = child.index(mutation_gene_1)
-            mutation_gene_2_index = child.index(mutation_gene_2)
-
-            child[mutation_gene_1_index] = mutation_gene_2
-            child[mutation_gene_2_index] = mutation_gene_1
-            
+            for _ in range(5):
+                mutation_gene_1, mutation_gene_2 = rd.choices(child, k=2)
+                mutation_gene_1_index = child.index(mutation_gene_1)
+                mutation_gene_2_index = child.index(mutation_gene_2)
+                
+                child[mutation_gene_1_index] = mutation_gene_2
+                child[mutation_gene_2_index] = mutation_gene_1
+                
         return child
 
     # Genetic algorithm - helper function (population to schedule format)
@@ -295,33 +315,38 @@ class Algorithms_Scheduling():
         each_AGV_ID, each_depot_ID = _AGVs_order[AGVs_order_count]
         
         each_AGV_schedule = (each_AGV_ID, [])
-        for each_population in _population:
-            p_ID, p_object, *p_depot = each_population
-            if p_ID == "AGV":
-                each_next_AGV_ID, each_next_depot_ID =  _AGVs_order[AGVs_order_count + 1]
-                if each_AGV_ID == each_next_AGV_ID:
-                    AGVs_order_count += 1
-                    each_AGV_ID = each_next_AGV_ID
-                    each_depot_ID = each_next_depot_ID
+        if self.depot_distribution_type == 'Genetic':
+            for each_population in _population:
+                p_ID, p_object, *p_depot = each_population
+                if p_ID == "AGV":
+                    each_next_AGV_ID, each_next_depot_ID =  _AGVs_order[AGVs_order_count + 1]
+                    if each_AGV_ID == each_next_AGV_ID:
+                        AGVs_order_count += 1
+                        each_AGV_ID = each_next_AGV_ID
+                        each_depot_ID = each_next_depot_ID
+                    else:
+                        new_schedules.append(each_AGV_schedule)
+                        AGVs_order_count += 1
+                        each_AGV_ID = each_next_AGV_ID
+                        each_depot_ID = each_next_depot_ID
+                        each_AGV_schedule = (each_AGV_ID, [])
                 else:
-                    new_schedules.append(each_AGV_schedule)
-                    AGVs_order_count += 1
-                    each_AGV_ID = each_next_AGV_ID
-                    each_depot_ID = each_next_depot_ID
-                    each_AGV_schedule = (each_AGV_ID, [])
-            else:
-                order_ID, shelf_IDs, _ = each_population
-                each_AGV_schedule[1].append((order_ID, shelf_IDs, each_depot_ID))
-        new_schedules.append(each_AGV_schedule)
+                    order_ID, shelf_IDs, _ = each_population
+                    each_AGV_schedule[1].append((order_ID, shelf_IDs, each_depot_ID))
+            new_schedules.append(each_AGV_schedule)
+        else:
+            for each_population in _population:
+                p_ID, p_object, *p_depot = each_population
+                if p_ID == "AGV":
+                        new_schedules.append(each_AGV_schedule)
+                        AGVs_order_count += 1
+                        each_AGV_ID, _ = _AGVs_order[AGVs_order_count]
+                        each_AGV_schedule = (each_AGV_ID, [])
+                else:
+                    each_AGV_schedule[1].append(each_population)
+            new_schedules.append(each_AGV_schedule)
         
         return new_schedules
-
-    # Genetic algorithm - helper function (schedule to gene format)
-    def GeneticAlgorithm_NewScheduleToGenes(self, _new_schedule, _a):
-        genes = []
-        for each_AGV_ID, each_new_schedule in _new_schedule:
-            genes += each_new_schedule + [("AGV", [], each_AGV_ID)]
-        return genes[:-1]
 
     #--------------------------------------------------
             
