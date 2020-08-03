@@ -27,6 +27,7 @@ class Controller():
     graph_GUI = None
     scheduling_algorithm = None
     new_orders = []
+    scheduling_depot_dist_type = ['Random', 'Genetic']
 
     # Constructor
     def __init__(self,
@@ -51,17 +52,21 @@ class Controller():
         self.tools_data = _tools_data
         self.graph_GUI = graph_GUI
 
+        self.scheduling_depot_dist_type = self.scheduling_depot_dist_type[1]
+
         self.SetSchedulingAlgorithm(scheduling_type,
                                     path_planning_type,
                                     evaluation_type,
-                                    tools_data = self.tools_data)
+                                    tools_data = self.tools_data,
+                                    scheduling_depot_dist_type = self.scheduling_depot_dist_type)
 
     # Set scheduling algorithm
     def SetSchedulingAlgorithm(self,
                                _scheduling_type,
                                _path_planning_type,
                                _evaluation_type,
-                               tools_data = None):
+                               tools_data = None,
+                               scheduling_depot_dist_type = None):
         self.scheduling_algorithm = AlgSch.Algorithms_Scheduling(self.AGVs,
                                                                  self.shelves,
                                                                  self.tools,
@@ -69,7 +74,8 @@ class Controller():
                                                                  _path_planning_type,
                                                                  _evaluation_type,
                                                                  tools_data = tools_data,
-                                                                 graph_GUI = self.graph_GUI)
+                                                                 graph_GUI = self.graph_GUI,
+                                                                 depot_distribution_type = scheduling_depot_dist_type)
 
     # Set reserve paths
     def SetReservePaths(self, _paths):

@@ -265,7 +265,7 @@ class Tools():
         if not order_num == "":
             print("[" + _level  + "]\t" + str(order_num) + "\tT: " \
                   + str(round(total_value, decimals)) + "\t" + print_str)
-        elif comment == "":
+        elif not comment == "":
             print("[" + _level  + "]\t" + comment + "\tT: " \
                   + str(round(total_value, decimals)) + "\t" + print_str)
         else:

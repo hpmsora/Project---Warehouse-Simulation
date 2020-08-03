@@ -90,7 +90,7 @@ class Algorithms_Evaluation():
         BU = min_ITC / max_ITC
 
         value = max_order/TT + total_order/TTC + BU
-        return (value, (max_order/TT, total_order/TTC, BU))
+        return (value, (TT, TTC, BU))
 
     # Balance and collision include
     def General_n_Balance_n_Collision(self,
@@ -154,7 +154,7 @@ class Algorithms_Evaluation():
             
             cp.cuda.Stream.null.synchronize()
 
-            return (list(E_matrix), (list(G1), list(G2), list(BU), list(CI)))
+            return (list(E_matrix), (list(max_ITC_matrix), list(TC_matrix), list(BU), list(CI)))
 
         # Non-Paralleization
         else:
@@ -196,7 +196,7 @@ class Algorithms_Evaluation():
             G2 = total_order/TTC
             
             value = G1 + G2 + BU + CI
-            return (value, (G1, G2, BU, CI))
+            return (value, (TT, TTC, BU, CI))
 
     #--------------------------------------------------
 
