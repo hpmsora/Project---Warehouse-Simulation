@@ -105,7 +105,8 @@ class AGV:
 
             if order:
                 for each_order in order:
-                    self.order.remove(each_order)
+                    if each_order in self.order:
+                        self.order.remove(each_order)
 
             self.tools.MoveObject(self.ID, self.current_pos)
 

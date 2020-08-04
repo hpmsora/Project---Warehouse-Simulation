@@ -12,6 +12,7 @@
 ###############################
 
 import sys
+import numpy as np
 import cupy as cp
 import Algorithms_Evaluation_Collision as AlgEvalColl
 
@@ -224,7 +225,7 @@ class Algorithms_Evaluation():
             T_matrix, S_matrix = matrix_data
 
             T_matrix = cp.array(T_matrix)
-            S_matrix = cp.array(S_matrix)
+            S_matrix = cp.array(np.array(S_matrix).astype(float))
 
             ITC_matrix = cp.reshape(cp.dot(T_matrix, cp.array([[1],[1]])), (population_size, n_AGV))
             O_matrix = cp.reshape(cp.dot(T_matrix, cp.array([[0],[1]])), (population_size, n_AGV))
@@ -234,7 +235,7 @@ class Algorithms_Evaluation():
             max_ITC_matrix = cp.amax(ITC_matrix, axis=1)
             min_ITC_matrix = cp.amin(ITC_matrix, axis=1)
             max_order_matrix = cp.amax(O_matrix, axis=1)
-
+            
             _, n_order_points, _  = S_matrix.shape
             
             t_m = cp.reshape(cp.dot(S_matrix, cp.array([[[1],[0],[0],[0]]]*n_order_points)),
@@ -258,22 +259,21 @@ class Algorithms_Evaluation():
             
             m_diff_l_sign = (cp.logical_xor(cp.sign(m_diff_l) + 1, True))
 
-            m_diff_l_eff = cp.multiply(cp.absolute(m_diff), m_diff_l_sign)
-            
-            d_m = cp.sum(m_diff_l_eff,
-                         (1,2))
+            m_diff_l_eff = cp.multiply(m_diff, m_diff_l_sign)
 
-            #print(d_m)
+            m_diff_l_sign = cp.sign(m_diff_l_eff)
 
-            d_m_max = cp.multiply(cp.sqrt(cp.add(cp.square(cp.subtract(cp.amax(t_m, (1, 2)),
-                                                                       cp.amin(t_m, (1, 2)))),
-                                                 standard_index)),
-                                  (n_order_points**2))
+            m_diff_l_H = cp.multiply(cp.multiply(cp.reciprocal(m_diff_l_eff + m_diff_l_sign - 1), m_diff_l_sign),
+                                     cp.log10(m_diff_l_eff + cp.absolute(m_diff_l_sign - 1)))
             
+            d_m = cp.reciprocal(cp.sum(m_diff_l_H,
+                                       (1,2)))
+
             G1 = max_order_matrix/max_ITC_matrix
             G2 = TO_matrix/TC_matrix
             BU = min_ITC_matrix/max_ITC_matrix
-            CI = cp.multiply(d_m/d_m_max, BU)
+            CI = d_m * 0.1 # cp.multiply(d_m*0.1, BU) # d_m * 0.1
+            #print(CI)
             
             E_matrix = G1 + G2 + BU + CI
             

@@ -63,7 +63,7 @@ class Algorithms_Scheduling():
         self.depot_distribution_type = depot_distribution_type
 
         
-        self.max_generation = 300
+        self.max_generation = 1000
         self.population_size = 100
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
@@ -249,7 +249,7 @@ class Algorithms_Scheduling():
 
                 if generation >= 500:
                     mutataion_prob = 0.8
-                    mutation_num *=5
+                    mutation_num =5
 
                 for _ in range(non_elite_size):
                     parent_1 = rd.choice(populations[:half_size])
