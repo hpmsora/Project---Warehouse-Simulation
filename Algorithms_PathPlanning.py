@@ -322,8 +322,8 @@ class Algorithms_PlathPlanning():
                 each_AGV_path_length += each_path_length
 
                 (each_shelf_pos_X, each_shelf_pos_Y) = each_shelf_pos
+                each_AGV_order_list.append([time_step, each_shelf_pos_X, each_shelf_pos_Y, each_path_length])
                 time_step += each_path_length
-                each_AGV_order_list.append([time_step, each_shelf_pos_X, each_shelf_pos_Y])
                 
                 last_position = each_shelf_pos
                 
@@ -351,8 +351,8 @@ class Algorithms_PlathPlanning():
                 each_AGV_path_length += each_path_length
                 
                 (each_depot_pos_X, each_depot_pos_Y) = each_depot_pos
+                each_AGV_order_list.append([time_step, each_depot_pos_X, each_depot_pos_Y, each_path_length])
                 time_step += each_path_length
-                each_AGV_order_list.append([time_step, each_depot_pos_X, each_depot_pos_Y])
             
                 last_position = each_depot_pos
 
@@ -380,8 +380,8 @@ class Algorithms_PlathPlanning():
                 each_AGV_path_length += each_path_length
 
                 (each_shelf_pos_X, each_shelf_pos_Y) = each_shelf_pos
+                each_AGV_order_list.append([time_step, each_shelf_pos_X, each_shelf_pos_Y, each_path_length])
                 time_step += each_path_length
-                each_AGV_order_list.append([time_step, each_shelf_pos_X, each_shelf_pos_Y])
                 
                 last_position = each_shelf_pos
 

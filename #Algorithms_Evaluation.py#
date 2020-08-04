@@ -258,7 +258,7 @@ class Algorithms_Evaluation():
             
             m_diff_l_sign = (cp.logical_xor(cp.sign(m_diff_l) + 1, True))
 
-            m_diff_l_eff = cp.multiply(cp.absolute(m_diff), m_diff_l_sign)
+            m_diff_l_eff = cp.multiply(m_diff, m_diff_l_sign)
             
             d_m = cp.sum(m_diff_l_eff,
                          (1,2))

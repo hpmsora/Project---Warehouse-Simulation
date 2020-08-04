@@ -28,6 +28,7 @@ class Controller():
     scheduling_algorithm = None
     new_orders = []
     scheduling_depot_dist_type = ['Random', 'Genetic']
+    strict_test_type = ['Include Before', 'New Path Only']
 
     # Constructor
     def __init__(self,
@@ -53,6 +54,7 @@ class Controller():
         self.graph_GUI = graph_GUI
 
         self.scheduling_depot_dist_type = self.scheduling_depot_dist_type[1]
+        self.strict_test_type = self.strict_test_type[1]
 
         self.SetSchedulingAlgorithm(scheduling_type,
                                     path_planning_type,
@@ -108,7 +110,7 @@ class Controller():
             (new_paths, eval_values) = self.scheduling_algorithm.Update(self.new_orders, self.order_independent)
             eval_value_total, eval_value_compositions = eval_values
             
-            strict_collision = self.tools.CollisionTest_Strict(new_paths)
+            strict_collision = self.tools.CollisionTest_Strict(new_paths, test_type = self.strict_test_type)
             print("Collosions: " + str(strict_collision))
 
             results = [strict_collision, eval_value_total] + list(eval_value_compositions)
@@ -118,6 +120,9 @@ class Controller():
                 self.AGVs[each_AGV_ID].AddSchedule(new_paths[each_AGV_ID])
 
             self.new_orders = []
+
+            # Save on file
+            self.tools_data.ResultsPathSaving(self.tools.TotalPathHistory())
         
         # Movement --------------------------------------------------
         # AGV updates

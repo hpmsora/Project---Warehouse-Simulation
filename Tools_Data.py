@@ -16,6 +16,7 @@ class Tools_Data():
     data_order_directory_name = None
     data_path_directory_name = None
     results_directory_name = None
+    results_path_directory_name = None
 
     # Internal Variables
     standard_file_name = None
@@ -24,10 +25,12 @@ class Tools_Data():
     def __init__(self,
                  data_order_directory_name="../Values_OrderData/",
                  data_path_directory_name="../Values_PathData/",
-                 results_directory_name="../Values_Results/"):
+                 results_directory_name="../Values_Results/",
+                 results_path_directory_name="../Values_ResultsPath/"):
         self.data_order_directory_name = data_order_directory_name
         self.data_path_directory_name = data_path_directory_name
         self.results_directory_name = results_directory_name
+        self.results_path_directory_name = results_path_directory_name
 
         self.standard_file_name = "Default.csv"
 
@@ -99,6 +102,19 @@ class Tools_Data():
             new_file_writer = csv.writer(new_file)
             for each_results in _results:
                 new_file_writer.writerow(each_results)
+
+    # Clear and overwrite the result path upon file name
+    def ResultsPathSaving(self, _results_path, results_path_file_name=None):
+        file_name = self.CreateFile(self.results_path_directory_name,
+                                    file_name = results_path_file_name)
+
+        with open(file_name, 'w', newline='') as new_file:
+            new_file_writer = csv.writer(new_file)
+            for each_results in _results_path:
+                each_results_list = []
+                for each_pos in each_results:
+                    each_results_list.append(each_pos)
+                new_file_writer.writerow(each_results_list)
 
     # File creation method
     def CreateFile(self, _directory_name, file_name = None):
