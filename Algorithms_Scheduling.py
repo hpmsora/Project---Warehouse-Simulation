@@ -16,6 +16,7 @@ import copy as cp
 import cupy as cpy
 import random as rd
 import collections as col
+import operator as op
 
 import time as t
 
@@ -63,7 +64,7 @@ class Algorithms_Scheduling():
         self.depot_distribution_type = depot_distribution_type
 
         
-        self.max_generation = 1000
+        self.max_generation = 3000
         self.population_size = 100
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
@@ -129,11 +130,29 @@ class Algorithms_Scheduling():
             for index, each_new_orders in enumerate(_new_orders):
                 order_num, orders = each_new_orders
                 _new_orders[index] = (order_num, orders, None)
-        else:
-            depots_list = list(self.tools.GetDepots().keys())
+        elif self.depot_distribution_type == 'Min':
+            depots_key_list = list(self.tools.GetDepots().keys())
+            depots_list = self.tools.GetDepots()
+            
             for index, each_new_orders in enumerate(_new_orders):
                 order_num, orders = each_new_orders
-                _new_orders[index] = (order_num, orders, rd.choice(depots_list))
+                depots_distance_list = []
+                for each_depots_key in depots_key_list:
+                    each_depots_distance = 0
+                    num_depots = 0
+                    for each_orders in orders:
+                        each_orders_posX, each_orders_posY = self.tools.GetShelvesDepotsPosByID(each_orders)[0]
+                        for each_depots_posX, each_depots_posY in depots_list[each_depots_key]:
+                            each_depots_distance += abs(each_orders_posX - each_depots_posX) + abs(each_orders_posY - each_depots_posY)
+                            num_depots += 1
+                    depots_distance_list.append((each_depots_distance, each_depots_key))
+                depots_place = min(depots_distance_list, key=op.itemgetter(0))
+                _new_orders[index] = (order_num, orders, depots_place[1])
+        else:
+            depots_key_list = list(self.tools.GetDepots().keys())
+            for index, each_new_orders in enumerate(_new_orders):
+                order_num, orders = each_new_orders
+                _new_orders[index] = (order_num, orders, rd.choice(depots_key_list))
 
         # Genetic algorithm start
         if True: #self.path_planning_algorithm.Is_Reserve_Full():
@@ -249,7 +268,7 @@ class Algorithms_Scheduling():
 
                 if generation >= 500:
                     mutataion_prob = 0.8
-                    mutation_num =5
+                    mutation_num =1
 
                 for _ in range(non_elite_size):
                     parent_1 = rd.choice(populations[:half_size])
@@ -331,6 +350,8 @@ class Algorithms_Scheduling():
         each_AGV_ID, each_depot_ID = _AGVs_order[AGVs_order_count]
         
         each_AGV_schedule = (each_AGV_ID, [])
+
+        # Depot distribution type
         if self.depot_distribution_type == 'Genetic':
             for each_population in _population:
                 p_ID, p_object, *p_depot = each_population

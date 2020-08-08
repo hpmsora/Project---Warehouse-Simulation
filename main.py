@@ -21,7 +21,7 @@ NUM_ROWS  = 12           # Default 12 rows each aisle (Goal: 24)
 SQUARE_SIZE = 20         # Default 20 per each square
 
 DEPOT_TYPE = ['Equal_Above']
-DEPOT_NUM = [8]
+DEPOT_NUM = [4]
 
 EVALUATION_TYPES = ['General_n_Balance',
                     'General_n_Balance_n_Collision',
@@ -55,7 +55,7 @@ def Display_SimulationBoard():
     Board.AGVDepotBuilding(AGV_size = NUM_AGVs)
 
     Board.AddAGV(num = NUM_AGVs)
-    Board.SetController(evaluation_type = EVALUATION_TYPES[0],
+    Board.SetController(evaluation_type = EVALUATION_TYPES[1],
                         order_threshold = 20,
                         order_independent = True,
                         graph_GUI_show = True,

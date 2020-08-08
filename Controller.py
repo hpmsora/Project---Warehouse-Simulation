@@ -27,7 +27,7 @@ class Controller():
     graph_GUI = None
     scheduling_algorithm = None
     new_orders = []
-    scheduling_depot_dist_type = ['Random', 'Genetic']
+    scheduling_depot_dist_type = ['Random', 'Genetic', 'Min']
     strict_test_type = ['Include Before', 'New Path Only']
 
     # Constructor
