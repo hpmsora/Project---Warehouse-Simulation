@@ -16,8 +16,6 @@ import numpy as np
 import cupy as cp
 import Algorithms_Evaluation_Collision as AlgEvalColl
 
-import time as t ###########
-
 class Algorithms_Evaluation():
 
     AGVs = None
@@ -255,7 +253,7 @@ class Algorithms_Evaluation():
 
             m_diff = cp.absolute(t_m_diff) + cp.absolute(x_m_diff) + cp.absolute(y_m_diff)
             
-            m_diff_l = m_diff - l_m
+            m_diff_l = m_diff - l_m * 2
             
             m_diff_l_sign = (cp.logical_xor(cp.sign(m_diff_l) + 1, True))
 
