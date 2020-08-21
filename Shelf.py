@@ -44,7 +44,8 @@ class Shelf():
                 self.on_AGV = AGV_ID
             else:
                 self.on_AGV = None
-                self.orders.remove(order_ID)
+                if order_ID in self.orders:
+                    self.orders.remove(order_ID)
 
     # Coloring the shelf
     def UpdateColoring(self):

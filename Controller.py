@@ -27,7 +27,8 @@ class Controller():
     graph_GUI = None
     scheduling_algorithm = None
     new_orders = []
-    scheduling_depot_dist_type = ['Random', 'Genetic']
+    scheduling_depot_dist_type = ['Random', 'Genetic', 'Min']
+    strict_test_type = ['Include Before', 'New Path Only']
 
     # Constructor
     def __init__(self,
@@ -53,6 +54,7 @@ class Controller():
         self.graph_GUI = graph_GUI
 
         self.scheduling_depot_dist_type = self.scheduling_depot_dist_type[1]
+        self.strict_test_type = self.strict_test_type[1]
 
         self.SetSchedulingAlgorithm(scheduling_type,
                                     path_planning_type,
@@ -108,23 +110,29 @@ class Controller():
             (new_paths, eval_values) = self.scheduling_algorithm.Update(self.new_orders, self.order_independent)
             eval_value_total, eval_value_compositions = eval_values
             
-            strict_collision = self.tools.CollisionTest_Strict(new_paths)
-            print("Collosions: " + str(strict_collision))
+            strict_collision, entropy = self.tools.CollisionTest_Strict(new_paths, test_type = self.strict_test_type)
+            print("[Result]\tCollosions:\t" + str(strict_collision))
+            print("[Result]\tEntropy:\t" + str(entropy))
 
-            results = [strict_collision, eval_value_total] + list(eval_value_compositions)
+            results = [strict_collision, entropy, eval_value_total] + list(eval_value_compositions)
             self.tools_data.ResultsSaving([results])
 
             for each_AGV_ID in new_paths.keys():
                 self.AGVs[each_AGV_ID].AddSchedule(new_paths[each_AGV_ID])
 
             self.new_orders = []
+
+            # Save on file
+            self.tools_data.ResultsPathSaving(self.tools.TotalPathHistory())
         
         # Movement --------------------------------------------------
         # AGV updates
         shelf_occupancy = col.defaultdict(lambda: ())
+        AGV_pos = []
         
         for each_AGV_ID, each_AGV_Object in self.AGVs.items():
-            each_shelf_occupancy = each_AGV_Object.Move()
+            each_AGV_pos, each_shelf_occupancy = each_AGV_Object.Move()
+            AGV_pos.append(each_AGV_pos)
             shelf_occupancy.update(each_shelf_occupancy)
 
         # Shelves update

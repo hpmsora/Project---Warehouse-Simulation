@@ -387,9 +387,7 @@ class SimulationBoard(tk.Frame):
 
         # File name creating
         w_t = "[" + self.warehouse_type + "-" + str(self.num_aisles) + "_" + str(self.num_rows) + "]"
-        d_t = "[" + str(self.depot_type) + "-" + str(len(self.tools.GetDepots())) + "]"
-        a_t = "[" + str(len(self.AGVs)) + "]"
-        sim_name = w_t + "_" + d_t + "_" + a_t
+        sim_name = w_t
 
         self.tools_data.SetStandardFileName(sim_name)
 

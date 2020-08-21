@@ -13,8 +13,10 @@ import Algorithms_Evaluation as AlgEval
 
 import numpy as np
 import copy as cp
+import cupy as cpy
 import random as rd
 import collections as col
+import operator as op
 
 import time as t
 
@@ -62,7 +64,7 @@ class Algorithms_Scheduling():
         self.depot_distribution_type = depot_distribution_type
 
         
-        self.max_generation = 10000
+        self.max_generation = 3000
         self.population_size = 100
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
@@ -89,6 +91,9 @@ class Algorithms_Scheduling():
         if _evaluation_type == "General_n_Balance_n_Collision":
             self.GPU_accelerating = True
             self.n_AGV = len(self.AGVs)
+        if _evaluation_type == "General_n_Balance_n_Collision_Eff":
+            self.GPU_accelerating = True
+            self.n_AGV = len(self.AGVs)
 
     # Set reserve paths
     def SetReservePaths(self, _paths):
@@ -112,24 +117,42 @@ class Algorithms_Scheduling():
         num_AGVs = 0
         eval_value = (0, (0)) # Initial eval data
 
-        # Order independent
-        if _order_independent:
-            new_orders = []
-            for each_orders_num, each_orders in _new_orders:
-                for each_each_orders in each_orders:
-                    new_orders.append((each_orders_num, [each_each_orders]))
-            _new_orders = new_orders
-
         # Add defualt depot place to new orders
         if self.depot_distribution_type == 'Genetic':
             for index, each_new_orders in enumerate(_new_orders):
                 order_num, orders = each_new_orders
                 _new_orders[index] = (order_num, orders, None)
-        else:
-            depots_list = list(self.tools.GetDepots().keys())
+        elif self.depot_distribution_type == 'Min':
+            depots_key_list = list(self.tools.GetDepots().keys())
+            depots_list = self.tools.GetDepots()
+            
             for index, each_new_orders in enumerate(_new_orders):
                 order_num, orders = each_new_orders
-                _new_orders[index] = (order_num, orders, rd.choice(depots_list))
+                depots_distance_list = []
+                for each_depots_key in depots_key_list:
+                    each_depots_distance = 0
+                    num_depots = 0
+                    for each_orders in orders:
+                        each_orders_posX, each_orders_posY = self.tools.GetShelvesDepotsPosByID(each_orders)[0]
+                        for each_depots_posX, each_depots_posY in depots_list[each_depots_key]:
+                            each_depots_distance += abs(each_orders_posX - each_depots_posX) + abs(each_orders_posY - each_depots_posY)
+                            num_depots += 1
+                    depots_distance_list.append((each_depots_distance, each_depots_key))
+                depots_place = min(depots_distance_list, key=op.itemgetter(0))
+                _new_orders[index] = (order_num, orders, depots_place[1])
+        else:
+            depots_key_list = list(self.tools.GetDepots().keys())
+            for index, each_new_orders in enumerate(_new_orders):
+                order_num, orders = each_new_orders
+                _new_orders[index] = (order_num, orders, rd.choice(depots_key_list))
+
+        # Order independent
+        if _order_independent:
+            new_orders = []
+            for each_orders_num, each_orders, each_depot_ID in _new_orders:
+                for each_each_orders in each_orders:
+                    new_orders.append((each_orders_num, [each_each_orders], each_depot_ID))
+            _new_orders = new_orders
 
         # Genetic algorithm start
         if True: #self.path_planning_algorithm.Is_Reserve_Full():
@@ -161,6 +184,7 @@ class Algorithms_Scheduling():
             crossover_num = int(genes_size*_crossover_rate)
             non_crossover_num = genes_size - crossover_num
             mutation_prob = 0.1
+            mutation_num = 1
 
             # Initial population
             for _ in range(self.population_size):
@@ -212,6 +236,13 @@ class Algorithms_Scheduling():
 
                 # Update graph data
                 each_eval_value, each_eval_variables, _ = populations_schedules[0]
+                if type(each_eval_value) == type(cpy.array([])):
+                    each_eval_value = float(cpy.asnumpy(each_eval_value))
+                    each_eval_variables_list = []
+                    for each_each_eval_variables in  each_eval_variables:
+                        each_eval_variables_list.append(float(cpy.asnumpy(each_each_eval_variables)))
+                    each_eval_variables = each_eval_variables_list
+                    
                 self.tools.Update_GraphData(generation, (each_eval_value, each_eval_variables))
 
                 populations = [each_population for _, _, each_population in populations_schedules]
@@ -221,7 +252,8 @@ class Algorithms_Scheduling():
                 new_paths, _, _ = self.path_planning_algorithm.Update(new_schedule, length_only=True)
 
                 # Evaluation process
-                eval_value= self.evaluation_algorithm.Update(new_paths, length_only=True)
+                #eval_value= self.evaluation_algorithm.Update(new_paths, length_only=True)
+                eval_value = (each_eval_value, each_eval_variables)
 
                 # Console print
                 if generation % 100 == 0:
@@ -236,6 +268,7 @@ class Algorithms_Scheduling():
 
                 if generation >= 500:
                     mutataion_prob = 0.8
+                    mutation_num =1
 
                 for _ in range(non_elite_size):
                     parent_1 = rd.choice(populations[:half_size])
@@ -246,7 +279,8 @@ class Algorithms_Scheduling():
                                                                 crossover_num,
                                                                 non_crossover_num,
                                                                 AGVs_order,
-                                                                mutation_prob = mutation_prob)
+                                                                mutation_prob = mutation_prob,
+                                                                mutation_num = mutation_num)
                     new_populations.append(child)
 
                 populations = new_populations
@@ -281,7 +315,8 @@ class Algorithms_Scheduling():
                                        _crossover_num,
                                        _non_crossover_num,
                                        _AGVs_order,
-                                       mutation_prob = 0):
+                                       mutation_prob = 0,
+                                       mutation_num = 5):
         child = []
 
         _parent_2 = cp.deepcopy(_parent_2)
@@ -298,7 +333,7 @@ class Algorithms_Scheduling():
         child += _parent_2
         
         if rd.random() <= mutation_prob:
-            for _ in range(5):
+            for _ in range(mutation_num):
                 mutation_gene_1, mutation_gene_2 = rd.choices(child, k=2)
                 mutation_gene_1_index = child.index(mutation_gene_1)
                 mutation_gene_2_index = child.index(mutation_gene_2)
@@ -315,6 +350,8 @@ class Algorithms_Scheduling():
         each_AGV_ID, each_depot_ID = _AGVs_order[AGVs_order_count]
         
         each_AGV_schedule = (each_AGV_ID, [])
+
+        # Depot distribution type
         if self.depot_distribution_type == 'Genetic':
             for each_population in _population:
                 p_ID, p_object, *p_depot = each_population

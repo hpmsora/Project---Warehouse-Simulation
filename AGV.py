@@ -17,9 +17,10 @@ class AGV:
 
     # Internal Variables
     schedule = []
+    schedule_history = []
     #
     # [(_, _)...]    Xpos, Ypos
-    # [(_, _, (_, _))...] Xpos, Ypos, (orderID, shelf_ID)
+    # [(_, _, (_, _))...] -> (Xpos, Ypos, (orderID, shelf_ID)) ...
     #
     order = []
     tools = None
@@ -32,6 +33,7 @@ class AGV:
         self.previous_schedule = self.current_pos
 
         self.schedule = []
+        self.schedule_history = []
         self.order = []
 
         self.AddSchedule([_pos])
@@ -64,12 +66,17 @@ class AGV:
     def AddSchedule(self, _add_schedule):
         for each_add_schedule in _add_schedule:
             self.schedule.append(each_add_schedule)
+            self.schedule_history.append(each_add_schedule)
             if len(each_add_schedule) == 3:
                 self.order.append(each_add_schedule[-1])
 
     # Get Order
     def GetOrder(self):
         return self.order
+
+    # Get schedule history
+    def GetScheduleHistory(self):
+        return cp.deepcopy(self.schedule_history)
     
     # AGV move
     def Move(self):
@@ -98,8 +105,9 @@ class AGV:
 
             if order:
                 for each_order in order:
-                    self.order.remove(each_order)
+                    if each_order in self.order:
+                        self.order.remove(each_order)
 
             self.tools.MoveObject(self.ID, self.current_pos)
 
-        return shelf_occupancy
+        return (self.current_pos, shelf_occupancy)

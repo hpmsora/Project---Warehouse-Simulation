@@ -1,3 +1,4 @@
+
 ###############################
 #
 # Tools
@@ -16,6 +17,7 @@ import random as rnd
 import copy as cp
 import collections as col
 import bisect as bit
+import math
 
 import sys
 
@@ -328,17 +330,38 @@ class Tools():
     # Collision test
 
     # Strict collision test
-    def CollisionTest_Strict(self, _AGVs_paths):
+    def CollisionTest_Strict(self, _AGVs_paths, test_type = 'Include Before'):
         paths = []
         paths_length = []
         AGVs_IDs = list(self.AGVs.keys())
         collision = 0
-        
-        for each_AGVs_ID in AGVs_IDs:
-            each_AGVs_path = self.AGVs[each_AGVs_ID].GetSchedule()
-            each_AGVs_path += _AGVs_paths[each_AGVs_ID]
-            paths_length.append(len(each_AGVs_path))
-            paths.append(each_AGVs_path)
+        entropy = 0
+
+        if test_type == 'Include Before':
+            for each_AGVs_ID in AGVs_IDs:
+                each_AGVs_path = self.AGVs[each_AGVs_ID].GetSchedule()
+                each_AGVs_path += _AGVs_paths[each_AGVs_ID]
+                paths_length.append(len(each_AGVs_path))
+                paths.append(each_AGVs_path)
+                
+        if test_type == 'New Path Only':
+            remained_AGVs_path = {}
+            remained_AGVs_path_length = []
+            for each_AGVs_ID in AGVs_IDs:
+                remained_each_AGVs_path = self.AGVs[each_AGVs_ID].GetSchedule()
+                remained_AGVs_path[each_AGVs_ID] = remained_each_AGVs_path
+                remained_AGVs_path_length.append(len(remained_each_AGVs_path))
+
+            remained_AGVs_path_length_min = min(remained_AGVs_path_length)
+
+            if remained_AGVs_path_length_min <= 0:
+                return collision
+            
+            for each_AGVs_ID in AGVs_IDs:
+                each_AGVs_path = remained_AGVs_path[each_AGVs_ID][remained_AGVs_path_length_min:]
+                each_AGVs_path += _AGVs_paths[each_AGVs_ID]
+                paths_length.append(len(each_AGVs_path))
+                paths.append(each_AGVs_path)
 
         paths_length_min = min(paths_length)
         if paths_length_min <=0:
@@ -353,8 +376,25 @@ class Tools():
 
         for each_paths_time in paths_time[1:]:
             for index, (each_pos, each_pos_before) in enumerate(zip(each_paths_time, each_paths_time_before)):
-                for each_other_pos, each_other_pos_before in zip(each_paths_time[index+1:], each_paths_time_before[index+1:]):
+                each_posX, each_posY, *each_order = each_pos
+                each_posX_before, each_posY_before, *each_order_before = each_pos_before
 
+                each_pos = (each_posX, each_posY)
+                each_pos_before = (each_posX_before, each_posY_before)
+                
+                for each_other_pos, each_other_pos_before in zip(each_paths_time[index+1:], each_paths_time_before[index+1:]):
+                    each_other_posX, each_other_posY, *each_other_order = each_other_pos
+                    each_other_posX_before, each_other_posY_before, *each_other_order_before = each_other_pos_before
+
+                    each_other_pos = (each_other_posX, each_other_posY)
+                    each_other_pos_before = (each_other_posX_before, each_other_posY_before)
+
+                    p = abs(each_posX - each_other_posX) + abs(each_posY - each_other_posY)
+                    if p == 0 or p == 1:
+                        entropy += math.log10(2)/2
+                    else:
+                        entropy += 1/p * math.log10(p)
+                    
                     # Heading same position collision
                     if each_pos == each_other_pos:
                         collision += 1
@@ -374,8 +414,8 @@ class Tools():
 
             each_paths_time_before = each_paths_time
 
-        return collision
-
+        return (collision, entropy)
+    
     
     #--------------------------------------------------
     # Graph Tools
@@ -529,3 +569,19 @@ class Tools():
                 adjacency_matrix[m_i, m_j] = each_length
 
         return adjacency_matrix
+
+    # AGVs path returning with matrix
+    def TotalPathHistory(self):
+        AGVs_path_history = []
+        AGVs_path_history_t = []
+        
+        for each_AGVs in self.AGVs:
+            each_AGVs_path = []
+            for each_posX, each_posY, *order in self.AGVs[each_AGVs].GetScheduleHistory():
+                each_AGVs_path.append((each_posX, each_posY))
+            AGVs_path_history_t.append(each_AGVs_path)
+
+        for each_AGVs_path in zip(*AGVs_path_history_t):
+            AGVs_path_history.append(each_AGVs_path)
+            
+        return AGVs_path_history
