@@ -157,6 +157,7 @@ class SimulationBoard(tk.Frame):
     # Basic grid building with shelves function
     def GridBuilding(self, warehouse_type='basic'):
         self.warehouse_type = warehouse_type
+        
         if self.warehouse_type == 'basic':
             self.grid_width = 3*self.num_aisles
             self.grid_height = self.num_rows+2
@@ -188,7 +189,7 @@ class SimulationBoard(tk.Frame):
                                           color='white')
                         
         elif self.warehouse_type == 'basic_island_wide':
-            print("[Map]\tBasic island wide map")
+            print("[Map]\t\tBasic island wide map")
             road_width = 2
             island_height = 3
             upper_road_height = 3
@@ -402,6 +403,7 @@ class SimulationBoard(tk.Frame):
 
     # Rerun
     def SetReRun(self):
+        print("[Running]\tRe-Running")
         
         self.re_run = True
 

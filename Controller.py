@@ -146,8 +146,11 @@ class Controller():
         # Collision Checking
         collision_AGVs, collision = self.tools.CollisionTest_Strict_Moving(self.AGV_pos_pre,
                                                                            self.AGV_pos_curr)
-        print(collision_AGVs)
-        print(collision)
+        for each_AGV_ID in self.AGVs:
+            if each_AGV_ID in collision_AGVs:
+                self.AGVs[each_AGV_ID].ColorUpdate(collision=True)
+            else:
+                self.AGVs[each_AGV_ID].ColorUpdate()
         self.AGV_pos_pre = self.AGV_pos_curr
 
         # Shelves update

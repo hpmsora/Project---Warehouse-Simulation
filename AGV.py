@@ -16,6 +16,7 @@ class AGV:
     canvas = None
 
     # Internal Variables
+    status = None # {'Moving', 'MovingWithShelf'}
     schedule = []
     schedule_history = []
     #
@@ -32,6 +33,7 @@ class AGV:
         self.tools = _tools
         self.previous_schedule = self.current_pos
 
+        self.status = 'Moving'
         self.schedule = []
         self.schedule_history = []
         self.order = []
@@ -77,6 +79,19 @@ class AGV:
     # Get schedule history
     def GetScheduleHistory(self):
         return cp.deepcopy(self.schedule_history)
+
+    # Color update
+    def ColorUpdate(self, collision=False):
+        if collision:
+            self.tools.ChangeColorObject(self.ID, self.tools.GetAGVCollision_Color())
+        else:
+            if self.status == 'Moving':
+                self.tools.ChangeColorObject(self.ID, self.tools.GetAGVMovingWithoutShelf_Color())
+            elif self.status == 'MovingWithShelf':
+                self.tools.ChangeColorObject(self.ID, self.tools.GetAGVMovingWithShelf_Color())
+            else:
+                print("Error")
+                self.tools.ChangeColorObject(self.ID, self.tools.GetAGVMovingWithoutShelf_Color())
     
     # AGV move
     def Move(self):
@@ -90,11 +105,13 @@ class AGV:
             if not order == []:
                 target_order_ID, target_order, target_ID = order[0]
                 if target_order == 'Depot':
-                    pass
+                    self.status = 'MovingWithShelf'
                 elif target_order == 'Shelf-Picking':
+                    self.status = 'MovingWithShelf'
                     self.tools.ChangeColorObject(self.ID, self.tools.GetAGVMovingWithShelf_Color())
                     shelf_occupancy[target_ID] = (self.ID, True, target_order_ID)
                 elif target_order == 'Shelf-Returning':
+                    self.status = 'Moving'
                     self.tools.ChangeColorObject(self.ID, self.tools.GetAGVMovingWithoutShelf_Color())
                     shelf_occupancy[target_ID] = (self.ID, False, target_order_ID)
 
