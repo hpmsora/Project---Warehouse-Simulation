@@ -328,7 +328,7 @@ class Tools():
 
     #--------------------------------------------------
     # Collision test
-
+    
     # Strict collision test
     def CollisionTest_Strict(self, _AGVs_paths, test_type = 'Include Before'):
         paths = []
@@ -415,6 +415,11 @@ class Tools():
             each_paths_time_before = each_paths_time
 
         return (collision, entropy)
+    
+    # Strict collision test - Moving
+    def CollisionTest_Strict_Moving(self, _AGV_pos_pre, _AGV_pos_curr):
+        print(_AGV_pos_pre)
+        print(_AGV_pos_curr)
     
     
     #--------------------------------------------------
@@ -577,8 +582,8 @@ class Tools():
         
         for each_AGVs in self.AGVs:
             each_AGVs_path = []
-            for each_posX, each_posY, *order in self.AGVs[each_AGVs].GetScheduleHistory():
-                each_AGVs_path.append((each_posX, each_posY))
+            for each_pos in self.AGVs[each_AGVs].GetScheduleHistory():
+                each_AGVs_path.append(each_pos)
             AGVs_path_history_t.append(each_AGVs_path)
 
         for each_AGVs_path in zip(*AGVs_path_history_t):

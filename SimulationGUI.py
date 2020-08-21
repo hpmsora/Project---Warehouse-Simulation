@@ -59,6 +59,7 @@ class SimulationBoard(tk.Frame):
     graph_GUI = None
     tools = None
     tools_data = None
+    re_run = None
 
     AGV_moving_without_shelf = None
     AGV_moving_with_shelf = None
@@ -88,6 +89,7 @@ class SimulationBoard(tk.Frame):
         self.canvas  = None
         self.tools = None
         self.tools_data = None
+        self.re_run = False
         self.graph_GUI = None
 
         self.AGV_moving_without_shelf = "green"
@@ -400,15 +402,22 @@ class SimulationBoard(tk.Frame):
 
     # Rerun
     def SetReRun(self):
-        print("rerun")
+        
+        self.re_run = True
+
+        paths = self.tools_data.ResultsPathLoading()
+        for index, each_AGVs_ID in enumerate(self.AGVs):
+            self.AGVs[each_AGVs_ID].SetSchedule(paths[index])
 
     # Update
     def Update(self):
-        if len(self.order_list) <= self.tools.GetOrderLimitThreshold():
-            self.AddOrder(self.order_generator)
 
-        self.new_order = self.order_list.pop(0)
+        if not self.re_run:
+            if len(self.order_list) <= self.tools.GetOrderLimitThreshold():
+                self.AddOrder(self.order_generator)
+
+            self.new_order = self.order_list.pop(0)
         
-        self.controller.Update(self.new_order)
+        self.controller.Update(self.new_order, self.re_run)
         self.canvas.after(self.movement_speed, self.Update)
         

@@ -10,6 +10,7 @@
 
 import csv
 import os
+import collections as col
 
 class Tools_Data():
 
@@ -103,6 +104,23 @@ class Tools_Data():
             for each_results in _results:
                 new_file_writer.writerow(each_results)
 
+    # Loading the result path data if exist
+    def ResultsPathLoading(self, results_path_file_name=None):
+        file_name = self.CreateFile(self.results_path_directory_name,
+                                    file_name = results_path_file_name)
+
+        path = col.defaultdict(list)
+
+        if os.path.isfile(file_name):
+            new_file = open(file_name, 'r')
+            new_file_reader = csv.reader(new_file)
+            for each_row in new_file_reader:
+                for index, each_pos in enumerate(each_row):
+                    path[index].append(eval(each_pos))
+        
+        return path
+                    
+                
     # Clear and overwrite the result path upon file name
     def ResultsPathSaving(self, _results_path, results_path_file_name=None):
         file_name = self.CreateFile(self.results_path_directory_name,
