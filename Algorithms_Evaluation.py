@@ -236,22 +236,26 @@ class Algorithms_Evaluation():
             
             _, n_order_points, _  = S_matrix.shape
             
-            t_m = cp.reshape(cp.dot(S_matrix, cp.array([[[1],[0],[0],[0]]]*n_order_points)),
+            t_m = cp.reshape(cp.dot(S_matrix, cp.array([[[1],[0],[0],[0],[0]]]*n_order_points)),
                              (population_size, n_order_points, n_order_points))
-            x_m = cp.reshape(cp.dot(S_matrix, cp.array([[[0],[1],[0],[0]]]*n_order_points)),
+            x_m = cp.reshape(cp.dot(S_matrix, cp.array([[[0],[1],[0],[0],[0]]]*n_order_points)),
                              (population_size, n_order_points, n_order_points))
-            y_m = cp.reshape(cp.dot(S_matrix, cp.array([[[0],[0],[1],[0]]]*n_order_points)),
+            y_m = cp.reshape(cp.dot(S_matrix, cp.array([[[0],[0],[1],[0],[0]]]*n_order_points)),
                              (population_size, n_order_points, n_order_points))
-            l_m = cp.reshape(cp.dot(S_matrix, cp.array([[[0],[0],[0],[1]]]*n_order_points)),
+            l_m = cp.reshape(cp.dot(S_matrix, cp.array([[[0],[0],[0],[1],[0]]]*n_order_points)),
                              (population_size, n_order_points, n_order_points))
-            t_m_l = cp.reshape(cp.dot(S_matrix, cp.array([[[1],[0],[0],[0]]])),
+            o_m = cp.reshape(cp.dot(S_matrix, cp.array([[[0],[0],[0],[0],[1]]]*n_order_points)),
+                             (population_size, n_order_points, n_order_points))
+            t_m_l = cp.reshape(cp.dot(S_matrix, cp.array([[[1],[0],[0],[0],[0]]])),
                                (population_size, n_order_points))
 
             t_m_diff = t_m - cp.transpose(t_m, (0, 2, 1))
             x_m_diff = x_m - cp.transpose(x_m, (0, 2, 1))
             y_m_diff = y_m - cp.transpose(y_m, (0, 2, 1))
 
-            m_diff = cp.absolute(t_m_diff) + cp.absolute(x_m_diff) + cp.absolute(y_m_diff)
+            m_xy_diff = cp.absolute(x_m_diff) + cp.absolute(y_m_diff)
+
+            m_diff = cp.absolute(t_m_diff) + m_xy_diff
             
             m_diff_l = m_diff - l_m * 2
             
@@ -267,6 +271,18 @@ class Algorithms_Evaluation():
             d_m = cp.reciprocal(cp.sum(m_diff_l_H,
                                        (1,2)))
 
+            # Occupancy test
+            """
+            t_m_o = t_m + o_m - 1
+            m_diff_o = cp.absolute(t_m_o - cp.transpose(t_m_o, (0, 2, 1))) - o_m - 1
+            m_occupancy = (cp.logical_xor(cp.sign(m_diff_o) + 1, True))
+            
+            m_idn = cp.identity(n_order_points)
+            OT = cp.prod(cp.logical_or(m_xy_diff,
+                                       cp.logical_not(m_occupancy - m_idn)),
+                         (1,2))
+            """
+            
             G1 = max_order_matrix/max_ITC_matrix
             G2 = TO_matrix/TC_matrix
             BU = min_ITC_matrix/max_ITC_matrix

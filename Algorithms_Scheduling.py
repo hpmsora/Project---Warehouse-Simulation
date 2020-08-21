@@ -117,14 +117,6 @@ class Algorithms_Scheduling():
         num_AGVs = 0
         eval_value = (0, (0)) # Initial eval data
 
-        # Order independent
-        if _order_independent:
-            new_orders = []
-            for each_orders_num, each_orders in _new_orders:
-                for each_each_orders in each_orders:
-                    new_orders.append((each_orders_num, [each_each_orders]))
-            _new_orders = new_orders
-
         # Add defualt depot place to new orders
         if self.depot_distribution_type == 'Genetic':
             for index, each_new_orders in enumerate(_new_orders):
@@ -153,6 +145,14 @@ class Algorithms_Scheduling():
             for index, each_new_orders in enumerate(_new_orders):
                 order_num, orders = each_new_orders
                 _new_orders[index] = (order_num, orders, rd.choice(depots_key_list))
+
+        # Order independent
+        if _order_independent:
+            new_orders = []
+            for each_orders_num, each_orders, each_depot_ID in _new_orders:
+                for each_each_orders in each_orders:
+                    new_orders.append((each_orders_num, [each_each_orders], each_depot_ID))
+            _new_orders = new_orders
 
         # Genetic algorithm start
         if True: #self.path_planning_algorithm.Is_Reserve_Full():

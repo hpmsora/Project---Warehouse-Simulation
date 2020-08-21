@@ -110,4 +110,4 @@ class AGV:
 
             self.tools.MoveObject(self.ID, self.current_pos)
 
-        return shelf_occupancy
+        return (self.current_pos, shelf_occupancy)

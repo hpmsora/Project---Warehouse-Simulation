@@ -17,6 +17,7 @@ import random as rnd
 import copy as cp
 import collections as col
 import bisect as bit
+import math
 
 import sys
 
@@ -334,7 +335,7 @@ class Tools():
         paths_length = []
         AGVs_IDs = list(self.AGVs.keys())
         collision = 0
-
+        entropy = 0
 
         if test_type == 'Include Before':
             for each_AGVs_ID in AGVs_IDs:
@@ -375,8 +376,25 @@ class Tools():
 
         for each_paths_time in paths_time[1:]:
             for index, (each_pos, each_pos_before) in enumerate(zip(each_paths_time, each_paths_time_before)):
-                for each_other_pos, each_other_pos_before in zip(each_paths_time[index+1:], each_paths_time_before[index+1:]):
+                each_posX, each_posY, *each_order = each_pos
+                each_posX_before, each_posY_before, *each_order_before = each_pos_before
 
+                each_pos = (each_posX, each_posY)
+                each_pos_before = (each_posX_before, each_posY_before)
+                
+                for each_other_pos, each_other_pos_before in zip(each_paths_time[index+1:], each_paths_time_before[index+1:]):
+                    each_other_posX, each_other_posY, *each_other_order = each_other_pos
+                    each_other_posX_before, each_other_posY_before, *each_other_order_before = each_other_pos_before
+
+                    each_other_pos = (each_other_posX, each_other_posY)
+                    each_other_pos_before = (each_other_posX_before, each_other_posY_before)
+
+                    p = abs(each_posX - each_other_posX) + abs(each_posY - each_other_posY)
+                    if p == 0 or p == 1:
+                        entropy += math.log10(2)/2
+                    else:
+                        entropy += 1/p * math.log10(p)
+                    
                     # Heading same position collision
                     if each_pos == each_other_pos:
                         collision += 1
@@ -396,7 +414,7 @@ class Tools():
 
             each_paths_time_before = each_paths_time
 
-        return collision
+        return (collision, entropy)
     
     
     #--------------------------------------------------
