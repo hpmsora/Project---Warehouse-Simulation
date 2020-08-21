@@ -398,6 +398,10 @@ class SimulationBoard(tk.Frame):
         saved_paths = self.tools_data.PathDataLoading()
         self.controller.SetReservePaths(saved_paths)
 
+    # Rerun
+    def SetReRun(self):
+        print("rerun")
+
     # Update
     def Update(self):
         if len(self.order_list) <= self.tools.GetOrderLimitThreshold():
