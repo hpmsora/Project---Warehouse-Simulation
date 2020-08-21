@@ -402,7 +402,7 @@ class Tools():
                     # Turning following position collosion
                     if each_pos_before == each_other_pos and \
                        not (each_pos == each_other_pos_before) and \
-                       not (each_other_pos, each_other_pos_before):
+                       not (each_other_pos == each_other_pos_before):
                         if not self.Tuple_Subtraction(each_other_pos, each_other_pos_before) == self.Tuple_Subtraction(each_pos, each_pos_before):
                             collision += 1
 
@@ -418,9 +418,40 @@ class Tools():
     
     # Strict collision test - Moving
     def CollisionTest_Strict_Moving(self, _AGV_pos_pre, _AGV_pos_curr):
-        print(_AGV_pos_pre)
-        print(_AGV_pos_curr)
-    
+
+        collision_AGVs = set()
+        collision = 0
+        
+        for each_AGV_pre_ID, each_AGV_pre_pos in _AGV_pos_pre.items():
+            each_AGV_curr_pos = _AGV_pos_curr[each_AGV_pre_ID]
+            
+            for each_other_AGV_curr_ID, each_other_AGV_curr_pos in _AGV_pos_curr.items():
+                each_other_AGV_pre_pos = _AGV_pos_pre[each_other_AGV_curr_ID]
+
+                # Heading same position collision
+                if not each_other_AGV_curr_ID == each_AGV_pre_ID:
+                    if each_AGV_curr_pos == each_other_AGV_curr_pos:
+                        collision_AGVs.add(each_AGV_pre_ID)
+                        collision_AGVs.add(each_other_AGV_curr_ID)
+                        collision += 1
+
+                # Turning following position collision
+                if each_AGV_pre_pos == each_other_AGV_curr_pos and \
+                   not (each_AGV_curr_pos == each_other_AGV_pre_pos) and \
+                   not (each_other_AGV_curr_pos == each_other_AGV_pre_pos):
+                    if not self.Tuple_Subtraction(each_other_AGV_curr_pos, each_other_AGV_pre_pos) == self.Tuple_Subtraction(each_AGV_curr_pos, each_AGV_pre_pos):
+                        collision_AGVs.add(each_AGV_pre_ID)
+                        collision_AGVs.add(each_other_AGV_curr_ID)
+                        collision += 1
+
+                # Crossover collision
+                if each_AGV_curr_pos == each_other_AGV_pre_pos and \
+                   each_other_AGV_curr_pos == each_AGV_pre_pos and \
+                   not (each_AGV_curr_pos == each_AGV_pre_pos and each_other_AGV_curr_pos == each_other_AGV_pre_pos):
+                    collision_AGVs.add(each_AGV_pre_ID)
+                    collision_AGVs.add(each_other_AGV_curr_ID)
+                    collision += 1
+        return (collision_AGVs, collision)
     
     #--------------------------------------------------
     # Graph Tools

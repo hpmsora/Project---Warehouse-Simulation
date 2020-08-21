@@ -144,7 +144,10 @@ class Controller():
             shelf_occupancy.update(each_shelf_occupancy)
 
         # Collision Checking
-        self.tools.CollisionTest_Strict_Moving(self.AGV_pos_pre, self.AGV_pos_curr)
+        collision_AGVs, collision = self.tools.CollisionTest_Strict_Moving(self.AGV_pos_pre,
+                                                                           self.AGV_pos_curr)
+        print(collision_AGVs)
+        print(collision)
         self.AGV_pos_pre = self.AGV_pos_curr
 
         # Shelves update
