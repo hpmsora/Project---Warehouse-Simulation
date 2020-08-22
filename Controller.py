@@ -178,4 +178,6 @@ class Controller():
             self.cum_collisions += collision_n
             self.cum_density += self.tools.Density_AGV(self.AGV_pos_curr)
             self.cum_comptasks += comptasks_AGVs
-            print(self.cum_comptasks)
+
+            time_step_result = [self.cum_collisions, self.cum_density, self.cum_comptasks]
+            self.tools_data.ResultReRunSaving(time_step_result)

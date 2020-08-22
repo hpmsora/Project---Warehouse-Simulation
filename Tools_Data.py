@@ -28,7 +28,7 @@ class Tools_Data():
                  data_order_directory_name="../Values_OrderData/",
                  data_path_directory_name="../Values_PathData/",
                  results_directory_name="../Values_Results/",
-                 results_rerun_directory_name="../Values_Results_Rerun/",
+                 results_rerun_directory_name="../Values_ResultsRerun/",
                  results_path_directory_name="../Values_ResultsPath/"):
         self.data_order_directory_name = data_order_directory_name
         self.data_path_directory_name = data_path_directory_name
@@ -107,15 +107,14 @@ class Tools_Data():
             for each_results in _results:
                 new_file_writer.writerow(each_results)
                 
-    # Overwrite the result upon file name
-    def ReRun_ResultsSaving(self, _results, results_rerun_file_name=None):
+    # Overwrite the result in each time step upon file name
+    def ResultReRunSaving(self, _result, results_rerun_file_name=None):
         file_name = self.CreateFile(self.results_rerun_directory_name,
-                                    file_name = results_file_name)
+                                    file_name = results_rerun_file_name)
 
         with open(file_name, 'a', newline='') as new_file:
             new_file_writer = csv.writer(new_file)
-            for each_results in _results:
-                new_file_writer.writerow(each_results)
+            new_file_writer.writerow(_result)
 
     # Loading the result path data if exist
     def ResultsPathLoading(self, results_path_file_name=None):
