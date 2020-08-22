@@ -1,9 +1,13 @@
 PY3 = python3
 G = git
 c = Update
+rr = "rerun"
 
 run:
 	$(PY3) main.py
+
+rerun:
+	$(PY3) main.py $(rr)
 
 update: clean
 	$(G) add .

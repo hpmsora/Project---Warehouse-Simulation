@@ -59,6 +59,7 @@ class SimulationBoard(tk.Frame):
     graph_GUI = None
     tools = None
     tools_data = None
+    re_run = None
 
     AGV_moving_without_shelf = None
     AGV_moving_with_shelf = None
@@ -88,6 +89,7 @@ class SimulationBoard(tk.Frame):
         self.canvas  = None
         self.tools = None
         self.tools_data = None
+        self.re_run = False
         self.graph_GUI = None
 
         self.AGV_moving_without_shelf = "green"
@@ -155,6 +157,7 @@ class SimulationBoard(tk.Frame):
     # Basic grid building with shelves function
     def GridBuilding(self, warehouse_type='basic'):
         self.warehouse_type = warehouse_type
+        
         if self.warehouse_type == 'basic':
             self.grid_width = 3*self.num_aisles
             self.grid_height = self.num_rows+2
@@ -186,7 +189,7 @@ class SimulationBoard(tk.Frame):
                                           color='white')
                         
         elif self.warehouse_type == 'basic_island_wide':
-            print("[Map]\tBasic island wide map")
+            print("[Map]\t\tBasic island wide map")
             road_width = 2
             island_height = 3
             upper_road_height = 3
@@ -398,13 +401,25 @@ class SimulationBoard(tk.Frame):
         saved_paths = self.tools_data.PathDataLoading()
         self.controller.SetReservePaths(saved_paths)
 
+    # Rerun
+    def SetReRun(self):
+        print("[Running]\tRe-Running")
+        
+        self.re_run = True
+
+        paths = self.tools_data.ResultsPathLoading()
+        for index, each_AGVs_ID in enumerate(self.AGVs):
+            self.AGVs[each_AGVs_ID].SetSchedule(paths[index])
+
     # Update
     def Update(self):
-        if len(self.order_list) <= self.tools.GetOrderLimitThreshold():
-            self.AddOrder(self.order_generator)
 
-        self.new_order = self.order_list.pop(0)
+        if not self.re_run:
+            if len(self.order_list) <= self.tools.GetOrderLimitThreshold():
+                self.AddOrder(self.order_generator)
+
+            self.new_order = self.order_list.pop(0)
         
-        self.controller.Update(self.new_order)
+        self.controller.Update(self.new_order, self.re_run)
         self.canvas.after(self.movement_speed, self.Update)
         

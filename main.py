@@ -9,6 +9,7 @@
 #
 ###############################
 
+import sys
 import SimulationGUI as sgui
 import tkinter as tk
 
@@ -32,13 +33,13 @@ NUM_ORDER = 30          # Default number of order at once is 100
 
 NUM_AGVs = 10             # Default 5 AGVs (Goal:30)
 
-MOVEMENT_SPEED = 80    # 80
+MOVEMENT_SPEED = 150    # 80
 
 # Fixed Variable
 PADDING_SIZE = 10
 
 # Display simulation
-def Display_SimulationBoard():
+def Display_SimulationBoard(run_type = None):
     root = tk.Tk()
     root.title("Warehouse Simulation")
     
@@ -65,6 +66,9 @@ def Display_SimulationBoard():
                    order_per_batch=ORDER_PER_BATCH,
                    num_order=NUM_ORDER)
     Board.SetFinal()
+
+    if run_type == "rerun":
+        Board.SetReRun()
     
     Board.pack(side = 'top',
                fill = 'both',
@@ -78,7 +82,11 @@ def Display_SimulationBoard():
 
 # Main method
 def main():
-    Display_SimulationBoard()
+    run_type = None
+    if not len(sys.argv) == 1:
+        run_type, *conditions = sys.argv[1:]
+    
+    Display_SimulationBoard(run_type = run_type)
 
 # Trigger
 if __name__ == "__main__":

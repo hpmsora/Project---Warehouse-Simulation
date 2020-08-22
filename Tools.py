@@ -328,7 +328,7 @@ class Tools():
 
     #--------------------------------------------------
     # Collision test
-
+    
     # Strict collision test
     def CollisionTest_Strict(self, _AGVs_paths, test_type = 'Include Before'):
         paths = []
@@ -402,7 +402,7 @@ class Tools():
                     # Turning following position collosion
                     if each_pos_before == each_other_pos and \
                        not (each_pos == each_other_pos_before) and \
-                       not (each_other_pos, each_other_pos_before):
+                       not (each_other_pos == each_other_pos_before):
                         if not self.Tuple_Subtraction(each_other_pos, each_other_pos_before) == self.Tuple_Subtraction(each_pos, each_pos_before):
                             collision += 1
 
@@ -416,6 +416,42 @@ class Tools():
 
         return (collision, entropy)
     
+    # Strict collision test - Moving
+    def CollisionTest_Strict_Moving(self, _AGV_pos_pre, _AGV_pos_curr):
+
+        collision_AGVs = set()
+        collision = 0
+        
+        for each_AGV_pre_ID, each_AGV_pre_pos in _AGV_pos_pre.items():
+            each_AGV_curr_pos = _AGV_pos_curr[each_AGV_pre_ID]
+            
+            for each_other_AGV_curr_ID, each_other_AGV_curr_pos in _AGV_pos_curr.items():
+                each_other_AGV_pre_pos = _AGV_pos_pre[each_other_AGV_curr_ID]
+
+                # Heading same position collision
+                if not each_other_AGV_curr_ID == each_AGV_pre_ID:
+                    if each_AGV_curr_pos == each_other_AGV_curr_pos:
+                        collision_AGVs.add(each_AGV_pre_ID)
+                        collision_AGVs.add(each_other_AGV_curr_ID)
+                        collision += 1
+
+                # Turning following position collision
+                if each_AGV_pre_pos == each_other_AGV_curr_pos and \
+                   not (each_AGV_curr_pos == each_other_AGV_pre_pos) and \
+                   not (each_other_AGV_curr_pos == each_other_AGV_pre_pos):
+                    if not self.Tuple_Subtraction(each_other_AGV_curr_pos, each_other_AGV_pre_pos) == self.Tuple_Subtraction(each_AGV_curr_pos, each_AGV_pre_pos):
+                        collision_AGVs.add(each_AGV_pre_ID)
+                        collision_AGVs.add(each_other_AGV_curr_ID)
+                        collision += 1
+
+                # Crossover collision
+                if each_AGV_curr_pos == each_other_AGV_pre_pos and \
+                   each_other_AGV_curr_pos == each_AGV_pre_pos and \
+                   not (each_AGV_curr_pos == each_AGV_pre_pos and each_other_AGV_curr_pos == each_other_AGV_pre_pos):
+                    collision_AGVs.add(each_AGV_pre_ID)
+                    collision_AGVs.add(each_other_AGV_curr_ID)
+                    collision += 1
+        return (collision_AGVs, collision)
     
     #--------------------------------------------------
     # Graph Tools
@@ -577,11 +613,29 @@ class Tools():
         
         for each_AGVs in self.AGVs:
             each_AGVs_path = []
-            for each_posX, each_posY, *order in self.AGVs[each_AGVs].GetScheduleHistory():
-                each_AGVs_path.append((each_posX, each_posY))
+            for each_pos in self.AGVs[each_AGVs].GetScheduleHistory():
+                each_AGVs_path.append(each_pos)
             AGVs_path_history_t.append(each_AGVs_path)
 
         for each_AGVs_path in zip(*AGVs_path_history_t):
             AGVs_path_history.append(each_AGVs_path)
             
         return AGVs_path_history
+
+    # AGVs each path density
+    def Density_AGV(self, _AGVs_pos, min_l = 5):
+        total_score = 0
+        each_distance = 0
+        num_AGV = 0
+        
+        for each_AGV_ID, each_AGV_pos in _AGVs_pos.items():
+            each_AGV_posX, each_AGV_posY, *order = each_AGV_pos
+            for each_other_AGV_ID, each_other_AGV_pos in _AGVs_pos.items():
+                each_other_AGV_posX, each_other_AGV_posY, *order = each_other_AGV_pos
+                if not each_AGV_ID == each_other_AGV_ID:
+                    each_distance = abs(each_AGV_posX - each_other_AGV_posX) + abs(each_AGV_posY - each_other_AGV_posY) + 1
+                    if each_distance <= min_l:
+                        total_score += 1/each_distance
+            num_AGV += 1
+        
+        return total_score/num_AGV

@@ -10,12 +10,14 @@
 
 import csv
 import os
+import collections as col
 
 class Tools_Data():
 
     data_order_directory_name = None
     data_path_directory_name = None
     results_directory_name = None
+    results_rerun_directory_name = None
     results_path_directory_name = None
 
     # Internal Variables
@@ -26,10 +28,12 @@ class Tools_Data():
                  data_order_directory_name="../Values_OrderData/",
                  data_path_directory_name="../Values_PathData/",
                  results_directory_name="../Values_Results/",
+                 results_rerun_directory_name="../Values_ResultsRerun/",
                  results_path_directory_name="../Values_ResultsPath/"):
         self.data_order_directory_name = data_order_directory_name
         self.data_path_directory_name = data_path_directory_name
         self.results_directory_name = results_directory_name
+        self.results_rerun_directory_name = results_rerun_directory_name
         self.results_path_directory_name = results_path_directory_name
 
         self.standard_file_name = "Default.csv"
@@ -102,7 +106,33 @@ class Tools_Data():
             new_file_writer = csv.writer(new_file)
             for each_results in _results:
                 new_file_writer.writerow(each_results)
+                
+    # Overwrite the result in each time step upon file name
+    def ResultReRunSaving(self, _result, results_rerun_file_name=None):
+        file_name = self.CreateFile(self.results_rerun_directory_name,
+                                    file_name = results_rerun_file_name)
 
+        with open(file_name, 'a', newline='') as new_file:
+            new_file_writer = csv.writer(new_file)
+            new_file_writer.writerow(_result)
+
+    # Loading the result path data if exist
+    def ResultsPathLoading(self, results_path_file_name=None):
+        file_name = self.CreateFile(self.results_path_directory_name,
+                                    file_name = results_path_file_name)
+
+        path = col.defaultdict(list)
+
+        if os.path.isfile(file_name):
+            new_file = open(file_name, 'r')
+            new_file_reader = csv.reader(new_file)
+            for each_row in new_file_reader:
+                for index, each_pos in enumerate(each_row):
+                    path[index].append(eval(each_pos))
+        
+        return path
+                    
+                
     # Clear and overwrite the result path upon file name
     def ResultsPathSaving(self, _results_path, results_path_file_name=None):
         file_name = self.CreateFile(self.results_path_directory_name,
