@@ -17,8 +17,8 @@ import tkinter as tk
 WAREHOUSE_TYPE = 'basic_island_wide' # Default warehouse type is basic
 ORDER_TYPE = 'basic'     # Default order type is basic stochastic
 
-NUM_AISLE = 6           # Default 6 aisle (Goal: 12)
-NUM_ROWS  = 12           # Default 12 rows each aisle (Goal: 24)
+NUM_AISLE = 12           # Default 6 aisle (Goal: 12)
+NUM_ROWS  = 24           # Default 12 rows each aisle (Goal: 24)
 SQUARE_SIZE = 20         # Default 20 per each square
 
 DEPOT_TYPE = ['Equal_Above']
@@ -33,7 +33,7 @@ NUM_ORDER = 30          # Default number of order at once is 100
 
 NUM_AGVs = 10             # Default 5 AGVs (Goal:30)
 
-MOVEMENT_SPEED = 150    # 80
+MOVEMENT_SPEED = 80    # 80
 
 # Fixed Variable
 PADDING_SIZE = 10
@@ -57,7 +57,7 @@ def Display_SimulationBoard(run_type = None):
 
     Board.AddAGV(num = NUM_AGVs)
     Board.SetController(evaluation_type = EVALUATION_TYPES[2],
-                        order_threshold = 20,
+                        order_threshold = 10,
                         order_independent = True,
                         graph_GUI_show = True,
                         padx = PADDING_SIZE,

@@ -65,7 +65,7 @@ class Algorithms_PlathPlanning():
     def Q_Learning(self,
                    _new_schedules,
                    length_only = False,
-                   num_episodes = 3000,
+                   num_episodes = 30000,
                    discount_factor = 1.0,
                    alpha = 0.6,
                    epsilon = 0.1,
@@ -257,9 +257,16 @@ class Algorithms_PlathPlanning():
                                                   starting_state,
                                                   target,
                                                   each_target)
-                print("Finished Episodes!")
+                print("[Path Planning]\tFinished Episodes!")
+                if not len(path) == 0:
+                    path_s_posX, path_s_posY, *order = path[0]
+                    
+                    reserve_new_path = cp.deepcopy(path)
+                    reserve_new_path[0] = (path_s_posX, path_s_posY)
 
-                _new_paths[path_key] = (len(path), path)
+                    _new_paths[path_key] = (len(path), reserve_new_path)
+                else:
+                    _new_paths[path_key] = (len(path), path)
 
             if not len(path) == 0:
                 posX, posY, *order = path[-1]
