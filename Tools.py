@@ -621,3 +621,21 @@ class Tools():
             AGVs_path_history.append(each_AGVs_path)
             
         return AGVs_path_history
+
+    # AGVs each path density
+    def Density_AGV(self, _AGVs_pos, min_l = 5):
+        total_score = 0
+        each_distance = 0
+        num_AGV = 0
+        
+        for each_AGV_ID, each_AGV_pos in _AGVs_pos.items():
+            each_AGV_posX, each_AGV_posY, *order = each_AGV_pos
+            for each_other_AGV_ID, each_other_AGV_pos in _AGVs_pos.items():
+                each_other_AGV_posX, each_other_AGV_posY, *order = each_other_AGV_pos
+                if not each_AGV_ID == each_other_AGV_ID:
+                    each_distance = abs(each_AGV_posX - each_other_AGV_posX) + abs(each_AGV_posY - each_other_AGV_posY) + 1
+                    if each_distance <= min_l:
+                        total_score += 1/each_distance
+            num_AGV += 1
+        
+        return total_score/num_AGV

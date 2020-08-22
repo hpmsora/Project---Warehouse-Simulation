@@ -17,6 +17,7 @@ class Tools_Data():
     data_order_directory_name = None
     data_path_directory_name = None
     results_directory_name = None
+    results_rerun_directory_name = None
     results_path_directory_name = None
 
     # Internal Variables
@@ -27,10 +28,12 @@ class Tools_Data():
                  data_order_directory_name="../Values_OrderData/",
                  data_path_directory_name="../Values_PathData/",
                  results_directory_name="../Values_Results/",
+                 results_rerun_directory_name="../Values_Results_Rerun/",
                  results_path_directory_name="../Values_ResultsPath/"):
         self.data_order_directory_name = data_order_directory_name
         self.data_path_directory_name = data_path_directory_name
         self.results_directory_name = results_directory_name
+        self.results_rerun_directory_name = results_rerun_directory_name
         self.results_path_directory_name = results_path_directory_name
 
         self.standard_file_name = "Default.csv"
@@ -97,6 +100,16 @@ class Tools_Data():
     # Overwrite the result upon file name
     def ResultsSaving(self, _results, results_file_name=None):
         file_name = self.CreateFile(self.results_directory_name,
+                                    file_name = results_file_name)
+
+        with open(file_name, 'a', newline='') as new_file:
+            new_file_writer = csv.writer(new_file)
+            for each_results in _results:
+                new_file_writer.writerow(each_results)
+                
+    # Overwrite the result upon file name
+    def ReRun_ResultsSaving(self, _results, results_rerun_file_name=None):
+        file_name = self.CreateFile(self.results_rerun_directory_name,
                                     file_name = results_file_name)
 
         with open(file_name, 'a', newline='') as new_file:

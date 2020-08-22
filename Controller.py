@@ -29,6 +29,11 @@ class Controller():
     new_orders = []
     AGV_pos_curr = None
     AGV_pos_pre = None
+
+    # Result Variables
+    cum_collisions = None
+    cum_density = None
+    cum_comptasks = None
     
     scheduling_depot_dist_type = ['Random', 'Genetic', 'Min']
     strict_test_type = ['Include Before', 'New Path Only']
@@ -58,6 +63,10 @@ class Controller():
 
         self.AGV_pos_curr = col.defaultdict(lambda: (0,0))
         self.AGV_pos_pre = col.defaultdict(lambda: (0,0))
+
+        self.cum_collisions = 0
+        self.cum_density = 0
+        self.cum_comptasks = 0
 
         self.scheduling_depot_dist_type = self.scheduling_depot_dist_type[1]
         self.strict_test_type = self.strict_test_type[1]
@@ -137,14 +146,21 @@ class Controller():
         # AGV updates
         shelf_occupancy = col.defaultdict(lambda: ())
         self.AGV_pos_curr = col.defaultdict(lambda: (0,0))
+        comptasks_AGVs = 0
         
         for each_AGV_ID, each_AGV_Object in self.AGVs.items():
             each_AGV_pos, each_shelf_occupancy = each_AGV_Object.Move()
             self.AGV_pos_curr[each_AGV_ID] = each_AGV_pos
             shelf_occupancy.update(each_shelf_occupancy)
 
-        # Collision Checking
-        collision_AGVs, collision = self.tools.CollisionTest_Strict_Moving(self.AGV_pos_pre,
+            # Counting number of task completion
+            for each_ID, each_value in each_shelf_occupancy.items():
+                isReturn = each_value[1]
+                if not isReturn:
+                    comptasks_AGVs += 1
+
+        # Collision checking
+        collision_AGVs, collision_n = self.tools.CollisionTest_Strict_Moving(self.AGV_pos_pre,
                                                                            self.AGV_pos_curr)
         for each_AGV_ID in self.AGVs:
             if each_AGV_ID in collision_AGVs:
@@ -156,3 +172,10 @@ class Controller():
         # Shelves update
         for each_shelf_ID, each_shelf_Object in self.shelves.items():
             each_shelf_Object.update(shelf_occupancy[each_shelf_ID])
+
+        # Saving rerun result
+        if _re_run:
+            self.cum_collisions += collision_n
+            self.cum_density += self.tools.Density_AGV(self.AGV_pos_curr)
+            self.cum_comptasks += comptasks_AGVs
+            print(self.cum_comptasks)
