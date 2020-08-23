@@ -286,8 +286,7 @@ class Algorithms_Evaluation():
             G1 = max_order_matrix/max_ITC_matrix
             G2 = TO_matrix/TC_matrix
             BU = min_ITC_matrix/max_ITC_matrix
-            CI = d_m * 0.1 # cp.multiply(d_m*0.1, BU) # d_m * 0.1
-            #print(CI)
+            CI = cp.multiply(d_m, BU) # d_m * 0.1
             
             E_matrix = G1 + G2 + BU + CI
             

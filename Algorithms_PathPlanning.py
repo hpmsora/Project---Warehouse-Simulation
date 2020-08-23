@@ -65,7 +65,7 @@ class Algorithms_PlathPlanning():
     def Q_Learning(self,
                    _new_schedules,
                    length_only = False,
-                   num_episodes = 3000,
+                   num_episodes = 5000,
                    discount_factor = 1.0,
                    alpha = 0.6,
                    epsilon = 0.1,
@@ -263,7 +263,7 @@ class Algorithms_PlathPlanning():
                         break
                     else:
                         redo_count += 1
-                        print("[Path Planning]\t" + str(path_key) + "\tfails - Re-do: " + str(redo_count))
+                        print("[Path Planning]\t" + str(path_key) + "\tRe-do: " + str(redo_count))
                     
                 print("[Path Planning]\t" + str(path_key) + "\tfinished")
                 if not len(path) == 0:

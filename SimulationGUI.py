@@ -92,8 +92,8 @@ class SimulationBoard(tk.Frame):
         self.re_run = False
         self.graph_GUI = None
 
-        self.AGV_moving_without_shelf = "green"
-        self.AGV_moving_with_shelf = "yellow"
+        self.AGV_moving_without_shelf = "yellow"
+        self.AGV_moving_with_shelf = "green"
         self.AGV_collision = "red"
 
         self.shelf_nothing = "gray"

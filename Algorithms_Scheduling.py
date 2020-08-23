@@ -131,13 +131,11 @@ class Algorithms_Scheduling():
                 depots_distance_list = []
                 for each_depots_key in depots_key_list:
                     each_depots_distance = 0
-                    num_depots = 0
                     for each_orders in orders:
                         each_orders_posX, each_orders_posY = self.tools.GetShelvesDepotsPosByID(each_orders)[0]
                         for each_depots_posX, each_depots_posY in depots_list[each_depots_key]:
                             each_depots_distance += abs(each_orders_posX - each_depots_posX) + abs(each_orders_posY - each_depots_posY)
-                            num_depots += 1
-                    depots_distance_list.append((each_depots_distance, each_depots_key))
+                    depots_distance_list.append((each_depots_distance/len(depots_list[each_depots_key]), each_depots_key))
                 depots_place = min(depots_distance_list, key=op.itemgetter(0))
                 _new_orders[index] = (order_num, orders, depots_place[1])
         else:

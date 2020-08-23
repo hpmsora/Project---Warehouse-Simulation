@@ -68,7 +68,7 @@ class Controller():
         self.cum_density = 0
         self.cum_comptasks = 0
 
-        self.scheduling_depot_dist_type = self.scheduling_depot_dist_type[1]
+        self.scheduling_depot_dist_type = self.scheduling_depot_dist_type[2]
         self.strict_test_type = self.strict_test_type[1]
 
         self.SetSchedulingAlgorithm(scheduling_type,

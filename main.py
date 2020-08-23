@@ -56,7 +56,7 @@ def Display_SimulationBoard(run_type = None):
     Board.AGVDepotBuilding(AGV_size = NUM_AGVs)
 
     Board.AddAGV(num = NUM_AGVs)
-    Board.SetController(evaluation_type = EVALUATION_TYPES[2],
+    Board.SetController(evaluation_type = EVALUATION_TYPES[0],
                         order_threshold = 40,
                         order_independent = True,
                         graph_GUI_show = True,
