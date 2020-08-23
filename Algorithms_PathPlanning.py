@@ -262,8 +262,8 @@ class Algorithms_PlathPlanning():
                     if is_path:
                         break
                     else:
-                        redo_count += 0
-                        print("[Path Planning]\t" + str(path_key) + "\t fails - Re-do: " + str(redo_count))
+                        redo_count += 1
+                        print("[Path Planning]\t" + str(path_key) + "\tfails - Re-do: " + str(redo_count))
                     
                 print("[Path Planning]\t" + str(path_key) + "\tfinished")
                 if not len(path) == 0:
