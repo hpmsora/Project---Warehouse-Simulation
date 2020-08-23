@@ -57,7 +57,7 @@ def Display_SimulationBoard(run_type = None):
 
     Board.AddAGV(num = NUM_AGVs)
     Board.SetController(evaluation_type = EVALUATION_TYPES[2],
-                        order_threshold = 10,
+                        order_threshold = 40,
                         order_independent = True,
                         graph_GUI_show = True,
                         padx = PADDING_SIZE,
