@@ -332,7 +332,7 @@ class Algorithms_PlathPlanning():
                     _new_paths.update(self.Q_Learning([(_each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
                                                       length_only=True,
                                                       last_positions=last_positions))
-                    each_path_length = self._new_paths[path_key][0]
+                    each_path_length = _new_paths[path_key][0]
                     
                 each_AGV_path_length += each_path_length
 
@@ -361,7 +361,7 @@ class Algorithms_PlathPlanning():
                     _new_paths.update(self.Q_Learning([(_each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
                                                       length_only=True,
                                                       last_positions=last_positions))
-                    each_path_length += self._new_paths[path_key][0]
+                    each_path_length += _new_paths[path_key][0]
                     
                 each_AGV_path_length += each_path_length
                 
@@ -390,7 +390,7 @@ class Algorithms_PlathPlanning():
                     _new_paths.update(self.Q_Learning([(_each_AGV_ID, [(order_ID, [each_shelf_IDs], depot_ID)])],
                                                       length_only=True,
                                                       last_positions=last_positions))
-                    each_path_length = self._new_paths[path_key][0]
+                    each_path_length = _new_paths[path_key][0]
                     
                 each_AGV_path_length += each_path_length
 
