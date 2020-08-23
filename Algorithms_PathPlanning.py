@@ -65,7 +65,7 @@ class Algorithms_PlathPlanning():
     def Q_Learning(self,
                    _new_schedules,
                    length_only = False,
-                   num_episodes = 5000,
+                   num_episodes = 3000,
                    discount_factor = 1.0,
                    alpha = 0.6,
                    epsilon = 0.1,
