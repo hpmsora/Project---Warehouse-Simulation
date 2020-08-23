@@ -65,7 +65,7 @@ class Algorithms_PlathPlanning():
     def Q_Learning(self,
                    _new_schedules,
                    length_only = False,
-                   num_episodes = 30000,
+                   num_episodes = 5000,
                    discount_factor = 1.0,
                    alpha = 0.6,
                    epsilon = 0.1,
@@ -222,42 +222,50 @@ class Algorithms_PlathPlanning():
                 path = []
                 _new_paths[path_key] = (len(path), path)
             else:
-                # Episodes
-                for each_episodes in range(_num_episodes):
-                    state_list = set()
+                redo_count = 0
+                
+                while True:
+                    # Episodes
+                    for each_episodes in range(_num_episodes):
+                        state_list = set()
                                     
-                    w_map = cp.deepcopy(_reset_w_map)
-                    state = starting_state
+                        w_map = cp.deepcopy(_reset_w_map)
+                        state = starting_state
 
-                    for t in itt.count():
+                        for t in itt.count():
                         
-                        action_probs = each_each_policy(state)
+                            action_probs = each_each_policy(state)
                         
-                        action = np.random.choice(np.arange(len(action_probs)), p = action_probs)
+                            action = np.random.choice(np.arange(len(action_probs)), p = action_probs)
                         
-                        next_state, reward, done= self.tools.Step_Action(state, action, w_map, target)
-                        if next_state in state_list:
-                            reward = -50
-                            done = True
+                            next_state, reward, done= self.tools.Step_Action(state, action, w_map, target)
+                            if next_state in state_list:
+                                reward = -50
+                                done = True
                         
-                        next_action = self.tools.Arg_Maximum(each_each_Q_table[next_state])
-                        td_target = reward + _discount_factor * each_each_Q_table[next_state][next_action]
-                        td_delta = td_target - each_each_Q_table[state][action]
-                        each_each_Q_table[state][action] += _alpha * td_delta
+                            next_action = self.tools.Arg_Maximum(each_each_Q_table[next_state])
+                            td_target = reward + _discount_factor * each_each_Q_table[next_state][next_action]
+                            td_delta = td_target - each_each_Q_table[state][action]
+                            each_each_Q_table[state][action] += _alpha * td_delta
 
-                        posX, posY, *order = state
-                        state_list.add((posX, posY))
+                            posX, posY, *order = state
+                            state_list.add((posX, posY))
                         
-                        if done:
-                            break
-                        state = next_state
+                            if done:
+                                break
+                            state = next_state
 
-                print(path_key)
-                path = self.tools.GetPathByQTable(each_each_Q_table,
-                                                  starting_state,
-                                                  target,
-                                                  each_target)
-                print("[Path Planning]\tFinished Episodes!")
+                    is_path, path = self.tools.GetPathByQTable(each_each_Q_table,
+                                                               starting_state,
+                                                               target,
+                                                               each_target)
+                    if is_path:
+                        break
+                    else:
+                        redo_count += 0
+                        print("[Path Planning]\t" + str(path_key) + "\t fails - Re-do: " + str(redo_count))
+                    
+                print("[Path Planning]\t" + str(path_key) + "\tfinished")
                 if not len(path) == 0:
                     path_s_posX, path_s_posY, *order = path[0]
                     

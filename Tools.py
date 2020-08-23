@@ -311,20 +311,29 @@ class Tools():
         return next_pos, reward, done
 
     # Get path by q-table
-    def GetPathByQTable(self, _q_table, _start_point, _end_point, _order):
+    def GetPathByQTable(self, _q_table, _start_point, _end_point, _order, max_count = 300):
         path = [_start_point]
 
         action = np.argmax(_q_table[_start_point])
         state = self.Next_Action(_start_point, action)
+
+        count = 0
+        is_path = True
         
         while not state in _end_point:
             path.append(state)
             action = np.argmax(_q_table[state])
             state = self.Next_Action(state, action)
+
+            count += 1
+
+            if count > 300:
+                is_path = False
+                break
             
         path.append(state)
 
-        return path
+        return (is_path, path)
 
     #--------------------------------------------------
     # Collision test

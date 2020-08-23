@@ -18,7 +18,7 @@ WAREHOUSE_TYPE = 'basic_island_wide' # Default warehouse type is basic
 ORDER_TYPE = 'basic'     # Default order type is basic stochastic
 
 NUM_AISLE = 12           # Default 6 aisle (Goal: 12)
-NUM_ROWS  = 24           # Default 12 rows each aisle (Goal: 24)
+NUM_ROWS  = 24          # Default 12 rows each aisle (Goal: 24)
 SQUARE_SIZE = 20         # Default 20 per each square
 
 DEPOT_TYPE = ['Equal_Above']
