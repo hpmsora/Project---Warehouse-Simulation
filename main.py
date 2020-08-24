@@ -14,26 +14,32 @@ import SimulationGUI as sgui
 import tkinter as tk
 
 # Global Variables
-WAREHOUSE_TYPE = 'basic_island_wide' # Default warehouse type is basic
-ORDER_TYPE = 'basic'     # Default order type is basic stochastic
+WAREHOUSE_TYPE = 'basic_island_wide'   # Default warehouse type is basic
+ORDER_TYPE = 'basic'                   # Default order type is basic stochastic
 
-NUM_AISLE = 12           # Default 6 aisle (Goal: 12)
-NUM_ROWS  = 24          # Default 12 rows each aisle (Goal: 24)
-SQUARE_SIZE = 20         # Default 20 per each square
+NUM_AISLE = 12                         # Default 6 aisle (Goal: 12)
+NUM_ROWS  = 24                         # Default 12 rows each aisle (Goal: 24)
+SQUARE_SIZE = 20                       # Default 20 per each square
 
 DEPOT_TYPE = ['Equal_Above']
 DEPOT_NUM = [4]
 
-EVALUATION_TYPES = ['General_n_Balance',
-                    'General_n_Balance_n_Collision',
-                    'General_n_Balance_n_Collision_Eff']
+SCHEDULING_TYPES_LIST = ['Random',
+                         'Genetic']
+SCHEDULING_TYPES = 1
 
-ORDER_PER_BATCH = 1     # Default average number of batch per order is 10
-NUM_ORDER = 30          # Default number of order at once is 100
+EVALUATION_TYPES_LIST = ['General_n_Balance',
+                         'General_n_Balance_n_Collision',
+                         'General_n_Balance_n_Collision_Eff']
+EVALUATION_TYPES = 2
 
-NUM_AGVs = 10             # Default 5 AGVs (Goal:30)
+ORDER_PER_BATCH = 1                    # Default average number of batch per order is 10
+NUM_ORDER = 30                         # Default number of order at once is 100
 
-MOVEMENT_SPEED = 80    # 80
+NUM_AGVs = 10                          # Default 5 AGVs (Goal: 30)
+ORDER_THRESHHOLD = 40                 # Default 80 orders per one time rescheduling (Goal: 200)
+
+MOVEMENT_SPEED = 50                    # Default: 80; Simulation: 50 (Lower is faster)
 
 # Fixed Variable
 PADDING_SIZE = 10
@@ -56,10 +62,11 @@ def Display_SimulationBoard(run_type = None):
     Board.AGVDepotBuilding(AGV_size = NUM_AGVs)
 
     Board.AddAGV(num = NUM_AGVs)
-    Board.SetController(evaluation_type = EVALUATION_TYPES[0],
-                        order_threshold = 40,
+    Board.SetController(scheduling_type = SCHEDULING_TYPES_LIST[SCHEDULING_TYPES],
+                        evaluation_type = EVALUATION_TYPES_LIST[EVALUATION_TYPES],
+                        order_threshold = ORDER_THRESHHOLD,
                         order_independent = True,
-                        graph_GUI_show = True,
+                        graph_GUI_show = False,
                         padx = PADDING_SIZE,
                         pady = PADDING_SIZE)
     Board.SetOrder(order_type='basic',

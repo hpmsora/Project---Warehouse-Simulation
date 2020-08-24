@@ -346,6 +346,7 @@ class SimulationBoard(tk.Frame):
     # Set controller and tools function
     def SetController(self,
                       controller_type='Default',
+                      scheduling_type = 'Genetic',
                       evaluation_type = 'General_n_Balance',
                       order_threshold = 10,
                       order_independent = False,
@@ -359,6 +360,7 @@ class SimulationBoard(tk.Frame):
                                          self.shelves,
                                          self.tools,
                                          self.tools_data,
+                                         scheduling_type = scheduling_type,
                                          evaluation_type = evaluation_type,
                                          time_threshold = self.tools.GetRescheduleTimeThreshold(),
                                          order_threshold = order_threshold,

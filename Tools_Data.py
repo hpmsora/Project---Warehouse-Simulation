@@ -28,7 +28,7 @@ class Tools_Data():
                  data_order_directory_name="../Values_OrderData/",
                  data_path_directory_name="../Values_PathData/",
                  results_directory_name="../Values_Results/",
-                 results_rerun_directory_name="../Values_ResultsRerun/",
+                 results_rerun_directory_name="../Values_ResultsReRun/",
                  results_path_directory_name="../Values_ResultsPath/"):
         self.data_order_directory_name = data_order_directory_name
         self.data_path_directory_name = data_path_directory_name

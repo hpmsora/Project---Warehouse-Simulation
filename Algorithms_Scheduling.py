@@ -64,7 +64,7 @@ class Algorithms_Scheduling():
         self.depot_distribution_type = depot_distribution_type
 
         
-        self.max_generation = 3000
+        self.max_generation = 10000
         self.population_size = 100
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None
@@ -72,7 +72,8 @@ class Algorithms_Scheduling():
         self.SetEvaluationAlgorithm(_evaluation_type)
 
         self.tools.SetGraphVariablesType(self.evaluation_algorithm.GetVariablesType())
-        self.graph_GUI.BuildGraph()
+        if not self.graph_GUI == None:
+            self.graph_GUI.BuildGraph()
 
     # Set path planning algorithm
     def SetPathPlanningAlgorithm(self, _path_planning_type, tools_data = None):
@@ -99,24 +100,8 @@ class Algorithms_Scheduling():
     def SetReservePaths(self, _paths):
         self.path_planning_algorithm.SetReservePaths(_paths)
 
-    #--------------------------------------------------
-    
-    # Genetic Algorithm
-    def GeneticAlgorithm(self,
-                         _new_orders,
-                         _max_generaion,
-                         _crossover_rate,
-                         _order_independent,
-                         GPU_accelerating = False,
-                         GPU_accelerating_data = None):
-        print("[Scheduling]\tNew orders for scheduling is: " + str(_new_orders))
-
-        self.tools.ResetGraphData()
-
-        new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
-        num_AGVs = 0
-        eval_value = (0, (0)) # Initial eval data
-
+    # Order independent check
+    def OrderIndependenctAndDepotDistribution(self, _new_orders, _order_independent):
         # Add defualt depot place to new orders
         if self.depot_distribution_type == 'Genetic':
             for index, each_new_orders in enumerate(_new_orders):
@@ -143,7 +128,7 @@ class Algorithms_Scheduling():
             for index, each_new_orders in enumerate(_new_orders):
                 order_num, orders = each_new_orders
                 _new_orders[index] = (order_num, orders, rd.choice(depots_key_list))
-
+        
         # Order independent
         if _order_independent:
             new_orders = []
@@ -152,6 +137,30 @@ class Algorithms_Scheduling():
                     new_orders.append((each_orders_num, [each_each_orders], each_depot_ID))
             _new_orders = new_orders
 
+        return _new_orders
+
+    #--------------------------------------------------
+    
+    # Genetic Algorithm
+    def GeneticAlgorithm(self,
+                         _new_orders,
+                         _max_generaion,
+                         _crossover_rate,
+                         _order_independent,
+                         GPU_accelerating = False,
+                         GPU_accelerating_data = None):
+        print("[Scheduling]\tGenetic algorithm")
+        print("[Scheduling]\tNew orders for scheduling is: " + str(_new_orders))
+
+        if not self.graph_GUI == None:
+            self.tools.ResetGraphData()
+
+        _new_orders = self.OrderIndependenctAndDepotDistribution(_new_orders, _order_independent)
+
+        new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
+        num_AGVs = 0
+        eval_value = (0, (0)) # Initial eval data
+        
         # Genetic algorithm start
         if True: #self.path_planning_algorithm.Is_Reserve_Full():
 
@@ -240,8 +249,9 @@ class Algorithms_Scheduling():
                     for each_each_eval_variables in  each_eval_variables:
                         each_eval_variables_list.append(float(cpy.asnumpy(each_each_eval_variables)))
                     each_eval_variables = each_eval_variables_list
-                    
-                self.tools.Update_GraphData(generation, (each_eval_value, each_eval_variables))
+
+                if not self.graph_GUI == None:
+                    self.tools.Update_GraphData(generation, (each_eval_value, each_eval_variables))
 
                 populations = [each_population for _, _, each_population in populations_schedules]
                 
@@ -254,7 +264,7 @@ class Algorithms_Scheduling():
                 eval_value = (each_eval_value, each_eval_variables)
 
                 # Console print
-                if generation % 100 == 0:
+                if generation % 500 == 0:
                     self.tools.PrintEvaluationData(eval_value, "Scheduling", order_num=generation)
 
                 if generation >= self.max_generation:
@@ -264,9 +274,12 @@ class Algorithms_Scheduling():
                 
                 new_populations.extend(populations[:elite_size])
 
-                if generation >= 500:
-                    mutataion_prob = 0.8
-                    mutation_num =1
+                if generation >= 5000:
+                    mutataion_prob = 0.3
+                    mutation_num = 1
+                elif generation >= 1000:
+                    mutataion_prob = 0.15
+                    mutation_num = 1
 
                 for _ in range(non_elite_size):
                     parent_1 = rd.choice(populations[:half_size])
@@ -380,7 +393,24 @@ class Algorithms_Scheduling():
                 else:
                     each_AGV_schedule[1].append(each_population)
             new_schedules.append(each_AGV_schedule)
-        
+
+        print(new_schedules)
+        return new_schedules
+    
+    # Random assigned algorithm
+    def RandomAlgorithm(self, _new_orders, _order_independent):
+        print("[Scheduling]\tRandom algorithm")
+        print("[Scheduling]\tNew orders for scheduling is: " + str(_new_orders))
+
+        if not self.graph_GUI == None:
+            self.tools.ResetGraphData()
+
+        _new_orders = self.OrderIndependenctAndDepotDistribution(_new_orders, _order_independent)
+
+        new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
+
+        print(_new_orders)
+
         return new_schedules
 
     #--------------------------------------------------
@@ -394,5 +424,7 @@ class Algorithms_Scheduling():
                                               _order_independent,
                                               GPU_accelerating = self.GPU_accelerating,
                                               GPU_accelerating_data = (self.n_AGV, self.population_size))
+        elif self.scheduling_type == "Random":
+            new_paths = self.RandomAlgorithm(_new_orders, _order_independent)
             
         return new_paths

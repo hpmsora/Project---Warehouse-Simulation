@@ -31,6 +31,8 @@ class Controller():
     AGV_pos_pre = None
 
     # Result Variables
+    initial_delay = None
+    time_step = None
     cum_collisions = None
     cum_density = None
     cum_comptasks = None
@@ -64,6 +66,8 @@ class Controller():
         self.AGV_pos_curr = col.defaultdict(lambda: (0,0))
         self.AGV_pos_pre = col.defaultdict(lambda: (0,0))
 
+        self.initial_delay = 300
+        self.time_step = 0
         self.cum_collisions = 0
         self.cum_density = 0
         self.cum_comptasks = 0
@@ -107,9 +111,16 @@ class Controller():
             
     # Updateing time
     def Update(self, _new_order, _re_run):
+
+        # Initial delay
+        if _re_run:
+            if self.initial_delay > 0:
+                self.initial_delay -= 1
+                return
         
         total_remaining_time = 0
 
+        # Scheduling
         if not _re_run:
             # Add orders
             if not len(_new_order[1]) == 0:
@@ -175,9 +186,10 @@ class Controller():
 
         # Saving rerun result
         if _re_run:
+            self.time_step += 1
             self.cum_collisions += collision_n
             self.cum_density += self.tools.Density_AGV(self.AGV_pos_curr)
             self.cum_comptasks += comptasks_AGVs
 
-            time_step_result = [self.cum_collisions, self.cum_density, self.cum_comptasks]
+            time_step_result = [self.time_step, self.cum_collisions, self.cum_density, self.cum_comptasks]
             self.tools_data.ResultReRunSaving(time_step_result)
