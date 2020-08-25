@@ -26,7 +26,7 @@ DEPOT_NUM = [4]
 
 SCHEDULING_TYPES_LIST = ['Random',
                          'Genetic']
-SCHEDULING_TYPES = 1
+SCHEDULING_TYPES = 0
 
 EVALUATION_TYPES_LIST = ['General_n_Balance',
                          'General_n_Balance_n_Collision',

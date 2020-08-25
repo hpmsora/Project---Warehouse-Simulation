@@ -144,9 +144,9 @@ class Algorithms_Scheduling():
     # Genetic Algorithm
     def GeneticAlgorithm(self,
                          _new_orders,
+                         _order_independent,
                          _max_generaion,
                          _crossover_rate,
-                         _order_independent,
                          GPU_accelerating = False,
                          GPU_accelerating_data = None):
         print("[Scheduling]\tGenetic algorithm")
@@ -158,8 +158,8 @@ class Algorithms_Scheduling():
         _new_orders = self.OrderIndependenctAndDepotDistribution(_new_orders, _order_independent)
 
         new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
-        num_AGVs = 0
         eval_value = (0, (0)) # Initial eval data
+        num_AGVs = 0
         
         # Genetic algorithm start
         if True: #self.path_planning_algorithm.Is_Reserve_Full():
@@ -394,11 +394,13 @@ class Algorithms_Scheduling():
                     each_AGV_schedule[1].append(each_population)
             new_schedules.append(each_AGV_schedule)
 
-        print(new_schedules)
         return new_schedules
     
     # Random assigned algorithm
-    def RandomAlgorithm(self, _new_orders, _order_independent):
+    def RandomAlgorithm(self,
+                        _new_orders,
+                        _order_independent,
+                        is_shuffle = False):
         print("[Scheduling]\tRandom algorithm")
         print("[Scheduling]\tNew orders for scheduling is: " + str(_new_orders))
 
@@ -408,10 +410,39 @@ class Algorithms_Scheduling():
         _new_orders = self.OrderIndependenctAndDepotDistribution(_new_orders, _order_independent)
 
         new_schedules = []  # [(AGV ID, [(order ID, [order, ...], depot ID), ...]), ...]
+        eval_value = (0, [0]) # Initial eval data
+        AGVs_list = list(self.AGVs.keys())
+        num_AGVs = len(AGVs_list)
 
-        print(_new_orders)
+        # Initialize the schedule
+        for each_AGVs_ID in AGVs_list:
+            new_schedules.append((each_AGVs_ID, []))
 
-        return new_schedules
+        # random shuffle
+        if is_shuffle:
+            rd.shuffle(_new_orders)
+
+        # Assigning by order
+        AGV_order = 0
+        for each_orders in _new_orders:
+            if AGV_order == num_AGVs:
+                AGV_order = 0
+                
+            AGV_ID, AGV_path = new_schedules[AGV_order]
+            AGV_path.append(each_orders)
+            new_schedules[AGV_order] = (AGV_ID, AGV_path)
+
+            AGV_order += 1
+
+        # Path planning process
+        new_paths = self.path_planning_algorithm.Update(new_schedules)
+
+        # Evaluation process
+        real_eval_value = eval_value
+        
+        print("[Scheduling]\tRandom algorithm scheduling done.")
+        
+        return (new_paths, real_eval_value)
 
     #--------------------------------------------------
             
@@ -419,12 +450,14 @@ class Algorithms_Scheduling():
     def Update(self, _new_orders, _order_independent):
         if self.scheduling_type == "Genetic":
             new_paths = self.GeneticAlgorithm(_new_orders,
+                                              _order_independent,
                                               self.MAX_EPOCH,
                                               self.CROSSOVER_RATE,
-                                              _order_independent,
                                               GPU_accelerating = self.GPU_accelerating,
                                               GPU_accelerating_data = (self.n_AGV, self.population_size))
         elif self.scheduling_type == "Random":
-            new_paths = self.RandomAlgorithm(_new_orders, _order_independent)
-            
+            new_paths = self.RandomAlgorithm(_new_orders,
+                                             _order_independent,
+                                             is_shuffle = True)
+
         return new_paths
