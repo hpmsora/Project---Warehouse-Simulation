@@ -29,6 +29,7 @@ class Controller():
     new_orders = []
     AGV_pos_curr = None
     AGV_pos_pre = None
+    saving_file_name = None
 
     # Result Variables
     initial_delay = None
@@ -52,7 +53,8 @@ class Controller():
                  time_threshold = 10,
                  order_threshold = 10,
                  order_independent = False,
-                 graph_GUI = None):
+                 graph_GUI = None,
+                 max_scheduling = None):
         self.AGVs = _AGVs
         self.shelves = _shelves
         self.order_independent = order_independent
@@ -63,8 +65,12 @@ class Controller():
         self.tools_data = _tools_data
         self.graph_GUI = graph_GUI
 
+        self.max_scheduling = max_scheduling
+
         self.AGV_pos_curr = col.defaultdict(lambda: (0,0))
         self.AGV_pos_pre = col.defaultdict(lambda: (0,0))
+
+        self.saving_file_name = None
 
         self.initial_delay = 300
         self.time_step = 0
@@ -101,6 +107,10 @@ class Controller():
     # Set reserve paths
     def SetReservePaths(self, _paths):
         self.scheduling_algorithm.SetReservePaths(_paths)
+
+    # Set saving file name
+    def SetSavingFileName(self, _file_name):
+        self.saving_file_name = _file_name
 
     # Shelf update
     def ShelfUpdate(self, _new_order):
@@ -151,7 +161,12 @@ class Controller():
                 self.new_orders = []
 
                 # Save on file
-                self.tools_data.ResultsPathSaving(self.tools.TotalPathHistory())
+                self.tools_data.ResultsPathSaving(self.tools.TotalPathHistory(),
+                                                  results_path_file_name=self.saving_file_name)
+
+                # Max scheduling check count
+                if not self.max_scheduling == None:
+                    self.max_scheduling -= 1
         
         # Movement --------------------------------------------------
         # AGV updates
@@ -192,4 +207,15 @@ class Controller():
             self.cum_comptasks += comptasks_AGVs
 
             time_step_result = [self.time_step, self.cum_collisions, self.cum_density, self.cum_comptasks]
-            self.tools_data.ResultReRunSaving(time_step_result)
+            self.tools_data.ResultReRunSaving(time_step_result,
+                                              results_rerun_file_name=self.saving_file_name)
+
+        # Re-run check
+        if self.tools.IsFinished() and _re_run:
+            return True
+
+        print("working")
+        # Max scheduling check escape
+        if self.max_scheduling == 0 and not _re_run:
+            return True
+        return False

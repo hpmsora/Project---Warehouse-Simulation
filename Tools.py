@@ -250,6 +250,35 @@ class Tools():
         pos = _name.split(':')
         return (int(pos[0]), int(pos[1]))
 
+    # Auto argument editting
+    def AutoArgments(self, _argv):
+        new_argv = []
+        f_m, cmd, sch_list, eval_list, c_num, n_num, status = _argv
+        c_num = int(c_num)
+        n_num = int(n_num)
+
+        if c_num >= n_num and status == 'r':
+            if len(sch_list) == 0 or len(eval_list) == 0:
+                new_argv = _argv
+                return (True, new_argv)
+            else:
+                sch_list = eval(sch_list)
+                eval_list = eval(eval_list)
+                sch_o = sch_list.pop()
+                eval_o = eval_list.pop()
+                new_argv = [f_m, cmd, str(sch_list), str(eval_list), str(1), str(n_num), 's']
+                return (False, new_argv)
+        elif status == 's':
+            new_argv = [f_m, cmd, str(sch_list), str(eval_list), str(c_num), str(n_num), 'r']
+            return (False, new_argv)
+        elif c_num < n_num and status == 'r':
+            c_num = str(c_num + 1)
+            new_argv = [f_m, cmd, str(sch_list), str(eval_list), str(c_num), str(n_num), 's']
+            return (False, new_argv)
+        else:
+            return (True, [])
+        
+
     #--------------------------------------------------
     # Console Printing Tools
 
@@ -630,6 +659,14 @@ class Tools():
             AGVs_path_history.append(each_AGVs_path)
             
         return AGVs_path_history
+
+    # AGVs path finished
+    def IsFinished(self):
+        total_path = 0
+        for each_AGVs in self.AGVs:
+            total_path += self.AGVs[each_AGVs].GetRemainedScheduleLength()
+
+        return total_path <= len(self.AGVs)
 
     # AGVs each path density
     def Density_AGV(self, _AGVs_pos, min_l = 5):

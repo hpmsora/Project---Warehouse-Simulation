@@ -14,6 +14,8 @@
 ###############################
 
 import tkinter as tk
+import sys
+import os
 
 import Controller as ctr
 import Order as od
@@ -352,7 +354,8 @@ class SimulationBoard(tk.Frame):
                       order_independent = False,
                       graph_GUI_show = False,
                       padx = 0,
-                      pady = 0):
+                      pady = 0,
+                      max_scheduling = None):
         if graph_GUI_show:
             self.SetGraphGUI(padx = padx, pady = pady)
 
@@ -365,7 +368,8 @@ class SimulationBoard(tk.Frame):
                                          time_threshold = self.tools.GetRescheduleTimeThreshold(),
                                          order_threshold = order_threshold,
                                          order_independent = order_independent,
-                                         graph_GUI = self.graph_GUI)
+                                         graph_GUI = self.graph_GUI,
+                                         max_scheduling = max_scheduling)
         self.tools.SetAGVs(self.AGVs)
 
     # Set order generator function
@@ -388,7 +392,7 @@ class SimulationBoard(tk.Frame):
                                                      pady = pady)
 
     # Set final
-    def SetFinal(self):
+    def SetFinal(self, file_name = None):
 
         # File name creating
         w_t = "[" + self.warehouse_type + "-" + str(self.num_aisles) + "_" + str(self.num_rows) + "]"
@@ -403,13 +407,16 @@ class SimulationBoard(tk.Frame):
         saved_paths = self.tools_data.PathDataLoading()
         self.controller.SetReservePaths(saved_paths)
 
+        if not file_name == None:
+            self.controller.SetSavingFileName(file_name)
+
     # Rerun
-    def SetReRun(self):
+    def SetReRun(self, file_name = None):
         print("[Running]\tRe-Running")
         
         self.re_run = True
 
-        paths = self.tools_data.ResultsPathLoading()
+        paths = self.tools_data.ResultsPathLoading(results_path_file_name=file_name)
         for index, each_AGVs_ID in enumerate(self.AGVs):
             self.AGVs[each_AGVs_ID].SetSchedule(paths[index])
 
@@ -422,6 +429,17 @@ class SimulationBoard(tk.Frame):
 
             self.new_order = self.order_list.pop(0)
         
-        self.controller.Update(self.new_order, self.re_run)
+        done = self.controller.Update(self.new_order, self.re_run)
+
+        if done:
+            all_done, new_argv = self.tools.AutoArgments(sys.argv)
+
+            if all_done:
+                sys.exit()
+            else:
+                python = sys.executable
+                print(new_argv)
+                os.execl(python, python, *new_argv)
+                    
         self.canvas.after(self.movement_speed, self.Update)
         

@@ -42,6 +42,23 @@ class Tools_Data():
     def SetStandardFileName(self, _file_name):
         self.standard_file_name = _file_name + ".csv"
         
+    # File creation method
+    def CreateFile(self, _directory_name, file_name = None):
+        if file_name == None:
+            file_name = _directory_name + self.standard_file_name
+        else:
+            file_name = _directory_name + file_name+ ".csv"
+            
+        if not os.path.exists(_directory_name):
+            os.makedirs(_directory_name)
+        if not file_name == None:
+            if not os.path.isfile(file_name):
+                new_file = open(file_name, 'w', newline='')
+                new_file_writer = csv.writer(new_file)
+                new_file.close()
+        
+        return file_name
+        
     # Loading the order data if exist
     def OrderDataLoading(self, order_file_name=None):
         file_name = self.CreateFile(self.data_order_directory_name,
@@ -116,6 +133,8 @@ class Tools_Data():
             new_file_writer = csv.writer(new_file)
             new_file_writer.writerow(_result)
 
+        print("[Saving]\tRe run result data saved!")
+
     # Loading the result path data if exist
     def ResultsPathLoading(self, results_path_file_name=None):
         file_name = self.CreateFile(self.results_path_directory_name,
@@ -146,18 +165,4 @@ class Tools_Data():
                     each_results_list.append(each_pos)
                 new_file_writer.writerow(each_results_list)
 
-    # File creation method
-    def CreateFile(self, _directory_name, file_name = None):
-        if file_name == None:
-            file_name = _directory_name + self.standard_file_name
-        else:
-            file_name = _directory_name + file_name
-        if not os.path.exists(_directory_name):
-            os.makedirs(_directory_name)
-        if not file_name == None:
-            if not os.path.isfile(file_name):
-                new_file = open(file_name, 'w', newline='')
-                new_file_writer = csv.writer(new_file)
-                new_file.close()
-        
-        return file_name
+        print("[Saving]\tResult path saved!")
