@@ -392,7 +392,7 @@ class SimulationBoard(tk.Frame):
                                                      pady = pady)
 
     # Set final
-    def SetFinal(self, file_name = None):
+    def SetFinal(self, run_type = None, file_name = None):
 
         # File name creating
         w_t = "[" + self.warehouse_type + "-" + str(self.num_aisles) + "_" + str(self.num_rows) + "]"
@@ -407,8 +407,17 @@ class SimulationBoard(tk.Frame):
         saved_paths = self.tools_data.PathDataLoading()
         self.controller.SetReservePaths(saved_paths)
 
+        # File name check
         if not file_name == None:
+            if run_type == "rerun":
+                done = self.tools_data.ResultFile_Existance(file_name, 'r')
+            else:
+                done = self.tools_data.ResultFile_Existance(file_name, 's')
+
+            if done:
+                self.AutoRun()
             self.controller.SetSavingFileName(file_name)
+            
 
     # Rerun
     def SetReRun(self, file_name = None):
@@ -419,6 +428,18 @@ class SimulationBoard(tk.Frame):
         paths = self.tools_data.ResultsPathLoading(results_path_file_name=file_name)
         for index, each_AGVs_ID in enumerate(self.AGVs):
             self.AGVs[each_AGVs_ID].SetSchedule(paths[index])
+
+    # Auto running system
+    def AutoRun(self):
+        all_done, new_argv = self.tools.AutoArgments(sys.argv)
+        print(sys.argv)
+        print("[Running]\tAlready finished")
+
+        if all_done:
+            sys.exit()
+        else:
+            python = sys.executable
+            os.execl(python, python, *new_argv)
 
     # Update
     def Update(self):
@@ -432,14 +453,7 @@ class SimulationBoard(tk.Frame):
         done = self.controller.Update(self.new_order, self.re_run)
 
         if done:
-            all_done, new_argv = self.tools.AutoArgments(sys.argv)
-
-            if all_done:
-                sys.exit()
-            else:
-                python = sys.executable
-                print(new_argv)
-                os.execl(python, python, *new_argv)
+            self.AutoRun()
                     
         self.canvas.after(self.movement_speed, self.Update)
         

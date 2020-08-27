@@ -5,8 +5,8 @@ c = Update
 rr = "rerun"
 
 at = "auto"
-at_sch = "[0,1,1]"
-at_eval = "[0,0,2]"
+at_sch = "[1]"
+at_eval = "[2]"
 at_c = "1"
 at_n = "30"
 at_s = "s"

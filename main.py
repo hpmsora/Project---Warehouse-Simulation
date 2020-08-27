@@ -70,7 +70,8 @@ def Display_SimulationBoard(_root, run_type = None, max_scheduling = None, file_
     Board.SetOrder(order_type='basic',
                    order_per_batch=ORDER_PER_BATCH,
                    num_order=NUM_ORDER)
-    Board.SetFinal(file_name = file_name)
+    Board.SetFinal(run_type = run_type,
+                   file_name = file_name)
 
     if run_type == "rerun":
         Board.SetReRun(file_name = file_name)
@@ -121,6 +122,8 @@ def main():
 
     root = tk.Tk()
     root.title("Automated Warehouse Simulation")
+
+    print("[Running]\t" + str(sys.argv))
     
     if not len(sys.argv) == 1:
         run_type, *conditions = sys.argv[1:]

@@ -38,6 +38,25 @@ class Tools_Data():
 
         self.standard_file_name = "Default.csv"
 
+    # Get file existance
+    def ResultFile_Existance(self, _file_name, _status):
+        if _status == 'r':
+            directory_name = self.results_rerun_directory_name
+            if not os.path.exists(directory_name):
+                return False
+            
+            _file_name = directory_name + _file_name + ".csv"
+            return os.path.isfile(_file_name)
+        elif _status == 's':
+            directory_name = self.results_path_directory_name
+            if not os.path.exists(directory_name):
+                return False
+            
+            _file_name = directory_name + _file_name + ".csv"
+            return os.path.isfile(_file_name)
+        else:
+            return False
+
     # Set standard file name
     def SetStandardFileName(self, _file_name):
         self.standard_file_name = _file_name + ".csv"
