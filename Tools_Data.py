@@ -133,8 +133,6 @@ class Tools_Data():
             new_file_writer = csv.writer(new_file)
             new_file_writer.writerow(_result)
 
-        print("[Saving]\tRe run result data saved!")
-
     # Loading the result path data if exist
     def ResultsPathLoading(self, results_path_file_name=None):
         file_name = self.CreateFile(self.results_path_directory_name,
@@ -164,5 +162,3 @@ class Tools_Data():
                 for each_pos in each_results:
                     each_results_list.append(each_pos)
                 new_file_writer.writerow(each_results_list)
-
-        print("[Saving]\tResult path saved!")

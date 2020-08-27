@@ -86,7 +86,7 @@ def Display_SimulationBoard(_root, run_type = None, max_scheduling = None, file_
     _root.mainloop()
 
 # Auto run
-def Auto_Run(_root, _conditions, max_scheduling = 1):
+def Auto_Run(_root, _conditions, max_scheduling = 3):
     re_run, file_name = Auto_FileNaming(_conditions)
     Display_SimulationBoard(_root,
                             run_type = re_run,
@@ -96,6 +96,9 @@ def Auto_Run(_root, _conditions, max_scheduling = 1):
 # Auto file naming
 def Auto_FileNaming(_args):
     sch_list, eval_list, c_exp, n_exp, status = _args
+    if len(sch_list) == 0 or len(eval_list) == 0:
+        sys.exit()
+    
     sch_o = eval(sch_list).pop()
     eval_o = eval(eval_list).pop()
 

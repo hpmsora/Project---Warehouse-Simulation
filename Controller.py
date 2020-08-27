@@ -214,7 +214,6 @@ class Controller():
         if self.tools.IsFinished() and _re_run:
             return True
 
-        print("working")
         # Max scheduling check escape
         if self.max_scheduling == 0 and not _re_run:
             return True

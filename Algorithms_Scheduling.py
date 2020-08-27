@@ -64,7 +64,7 @@ class Algorithms_Scheduling():
         self.depot_distribution_type = depot_distribution_type
 
         
-        self.max_generation = 5#10000
+        self.max_generation = 20000
         self.population_size = 100
         self.path_planning_algorithm = None
         self.evaluation_algorithm = None

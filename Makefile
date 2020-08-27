@@ -8,7 +8,7 @@ at = "auto"
 at_sch = "[0,1,1]"
 at_eval = "[0,0,2]"
 at_c = "1"
-at_n = "2"
+at_n = "30"
 at_s = "s"
 
 run:
